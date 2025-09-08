@@ -1,0 +1,199 @@
+<div [@routerTransition]>
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-3">
+                    <h1> Sales Invoice Create </h1>
+                </div>
+                <div class="col-9">
+
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-12 col-md-6 col-lg-6">
+                            <form class="form-horizontal" autocomplete="off" #salesEntryForm="ngForm"
+                                (ngSubmit)="save()" id="salesEntryForm">
+                                <div class="form-group row required">
+                                    <label class="col-md-3 col-form-label" for="date">Date</label>
+                                    <div class="col-md-9">
+                                        <p-datepicker [(ngModel)]="date" [showIcon]="true" inputId="buttondisplay"
+                                            [showOnFocus]="false" dateFormat="dd-M-yy"
+                                            [ngModelOptions]="{standalone: true}" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group row required">
+                                    <label class="col-md-3 col-form-label" for="invoice">Invoice Number</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" name="invoice" id="invoice" required
+                                            [(ngModel)]="model.invoiceNumber" #invoiceModel="ngModel" #invoiceEl />
+                                        <abp-validation-summary [control]="invoiceModel"
+                                            [controlEl]="invoiceEl"></abp-validation-summary>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row required">
+                                    <label class="col-md-3 col-form-label" for="customer"> Customer Name </label>
+                                    <div class="col-md-9">
+                                        <select class="form-select form-control" name="customer" id="customer"
+                                            #customerModel="ngModel" #customerEl [(ngModel)]="model.customerId" (ngModelChange)="onCustomerChanged()">
+                                            <option *ngFor="let s of customers" [value]="s.value">{{s.displayText}}
+                                            </option>
+                                        </select>
+                                        <abp-validation-summary [control]="customerModel"
+                                            [controlEl]="customerEl"></abp-validation-summary>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row required">
+                                    <label class="col-md-3 col-form-label" for="stockPoint"> Stock Point </label>
+                                    <div class="col-md-9">
+                                        <select class="form-select form-control" name="stockPoint" id="stockPoint" [disabled]="!!id"
+                                            #stockPointModel="ngModel" #stockPointEl [(ngModel)]="model.stockPointId" (ngModelChange)="stockPointChanged()">
+                                            <option *ngFor="let s of stockPoints" [value]="s.value">{{s.displayText}}
+                                            </option>
+                                        </select>
+                                        <abp-validation-summary [control]="stockPointModel"
+                                            [controlEl]="stockPointEl"></abp-validation-summary>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row required">
+                                    <label class="col-md-3 col-form-label" for="paymentStatus"> Payment Status </label>
+                                    <div class="col-md-9">
+                                        <select class="form-select form-control" name="paymentStatus" id="paymentStatus"
+                                            #paymentStatusModel="ngModel" #paymentStatusEl
+                                            [(ngModel)]="model.paymentStatus">
+                                            <option *ngFor="let ps of paymentStatuses" [value]="ps.value">
+                                                {{ps.displayText}}
+                                            </option>
+                                        </select>
+                                        <abp-validation-summary [control]="paymentStatusModel"
+                                            [controlEl]="paymentStatusEl"></abp-validation-summary>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row required">
+                                    <label class="col-md-3 col-form-label" for="salesBy">Sales By</label>
+                                    <div class="col-md-9">
+                                        <input type="text" class="form-control" name="salesBy" id="salesBy" required
+                                            [(ngModel)]="model.salesBy" #salesByModel="ngModel" #salesByEl />
+                                        <abp-validation-summary [control]="salesByModel"
+                                            [controlEl]="salesByEl"></abp-validation-summary>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-md-3 col-form-label" for="remarks">Remarks</label>
+                                    <div class="col-md-9">
+                                        <textarea class="form-control" name="remarks" id="remarks"
+                                            [(ngModel)]="model.remarks" rows="3"></textarea>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-sm-12 col-md-6 col-lg-6">
+                            <h2>Choose Products</h2>
+                            <table class="table table-responsive table-bordered table-striped" *ngIf="!loading">
+                                <thead>
+                                    <tr>
+                                        <th><p-checkbox [(ngModel)]="checkedAll" [binary]="true"
+                                                (change)="checkedAllChanged()"
+                                                [indeterminate]="checkedAllIndeterminate" /></th>
+                                        <th style="width: 150px;">Name</th>
+                                        <th>Type</th>
+                                        <th style="min-width:55px;">Size</th>
+                                        <th style="min-width:85px;">Unit Price</th>
+                                        <th>Quantity</th>
+                                        <th>Stock</th>
+                                        <th style="min-width:85px;">Total Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let p of products">
+                                        <td><p-checkbox [(ngModel)]="p.selected" [binary]="true"
+                                                (change)="checkedChanged(p)" /></td>
+                                        <td>{{p.name}}</td>
+                                        <td>{{p.typeText}}</td>
+                                        <td>{{p.size}}</td>
+                                        <td [ngClass]="{'invalid_cell': (p.salesPrice < 0) }">
+                                            <input type="number" selectOnFocus class="form-control text-right"
+                                                [(ngModel)]="p.salesPrice" (ngModelChange)="updateTotalPrice(p)"
+                                                (blur)="unitPriceChanged(p)" [disabled]="p.salesPriceDisabled" />
+                                        </td>
+                                        <td [ngClass]="{'invalid_cell': (p.quantity < 0 || p.quantity > p.stock) }">
+                                            <input type="number" selectOnFocus class="form-control text-right"
+                                                [(ngModel)]="p.quantity" (ngModelChange)="updateTotalPrice(p)"
+                                                (blur)="quantityChanged(p)" [disabled]="p.qtyDisabled" />
+                                        </td>
+                                        <td [ngClass]="{'invalid_cell': (p.stock < 0) }" class="text-right">
+                                            {{p.stock ?? 0 }}
+                                        </td>
+                                        <td><input type="number" class="form-control text-right"
+                                                [(ngModel)]="p.totalPrice" disabled /></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" class="text-right text-bold">Grand Total</td>
+                                        <td class="text-right"><span class="text-bold">{{model.totalAmount | number:
+                                                '1.2-2'}}</span></td>
+                                    </tr>
+                                    <tr style="background-color: rgb(250, 248, 227);">
+                                        <td colspan="7" class="text-right text-bold">Discount</td>
+                                        <td *ngIf="!discountEditMode" class="text-right"
+                                            (dblclick)="discountEditMode = true">
+                                            <span>{{model.discount | number: '1.2-2'}}</span>
+                                        </td>
+                                        <td *ngIf="discountEditMode"
+                                            [ngClass]="{'invalid_cell': (model.discount < 0) }">
+                                            <input type="number" class="form-control text-right"
+                                                [(ngModel)]="model.discount" (blur)="totalDiscountChanged()"
+                                                [autofocus]="discountEditMode" name="discount" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" class="text-right text-bold">Net Total</td>
+                                        <td class="text-right"><span class="text-bold">{{model.netAmount| number:
+                                                '1.2-2'}}</span></td>
+                                    </tr>
+                                    <tr style="background-color: rgb(250, 248, 227);">
+                                        <td colspan="7" class="text-right text-bold">Total Paid</td>
+                                        <td *ngIf="!totalPaidEditMode" class="text-right"
+                                            (dblclick)="!id ? totalPaidEditMode = true : totalPaidEditMode = false">
+                                            <span>{{model.paidAmount | number: '1.2-2'}}</span>
+                                        </td>
+                                        <td *ngIf="totalPaidEditMode"
+                                            [ngClass]="{'invalid_cell': (model.paidAmount < 0) }"><input type="number"
+                                                class="form-control text-right" [(ngModel)]="model.paidAmount"
+                                                (blur)="totalPaidChanged()" [autofocus]="totalPaidEditMode" /></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="7" class="text-right text-bold">Due</td>
+                                        <td class="text-right"><span class="text-bold">{{model.dueAmount | number:
+                                                '1.2-2'}}</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div style="display: flex;" class="justify-content-between">
+                        <button type="button" class="btn btn-default" (click)="cancel()">
+                            Cancel
+                        </button>
+                        <button type="submit" form="salesEntryForm" class="btn btn-primary"
+                            [disabled]="!salesEntryForm.form.valid || invalid">
+                            {{id ? 'Update' : 'Save'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

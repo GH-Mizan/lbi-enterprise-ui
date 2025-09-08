@@ -1,0 +1,89 @@
+<form class="form-horizontal" autocomplete="off" #dueReceivedEntryModal="ngForm" (ngSubmit)="save()">
+    <abp-modal-header title="Make Payment Receive" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-6">
+                <div class="form-group row">
+                    <label class="col-md-4 col-form-label" for="date">Invoice Date</label>
+                    <div class="col-md-8">
+                        <p-datepicker [(ngModel)]="invoiceDate" [showIcon]="true" inputId="buttondisplay"
+                            [showOnFocus]="false" dateFormat="dd-M-yy" [ngModelOptions]="{standalone: true}" disabled />
+                    </div>
+                </div>
+
+                <div class="form-group row required">
+                    <label class="col-md-4 col-form-label" for="date">Receive Date</label>
+                    <div class="col-md-8">
+                        <p-datepicker [(ngModel)]="receiveDate" [showIcon]="true" inputId="buttondisplay"
+                            [showOnFocus]="false" dateFormat="dd-M-yy" [ngModelOptions]="{standalone: true}" />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-md-4 col-form-label">Invoice Number</label>
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" name="invoice" [(ngModel)]="dueReceived.invoiceNumber"
+                            disabled />
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label class="col-md-4 col-form-label" for="remarks">Remarks</label>
+                    <div class="col-md-8">
+                        <textarea class="form-control" name="remarks" id="remarks" [(ngModel)]="dueReceived.remarks"
+                            rows="3"></textarea>
+                    </div>
+                </div>
+
+            </div>
+            <div class="offset-md-1 col-4">
+                <div class="form-group row">
+                    <table class="table table-responsive table-bordered table-striped">
+                        <tr>
+                            <th class="text-right" style="min-width: 160px;">Grand Total</th>
+                            <td class="text-right" style="width:100%">{{dueReceived.grandTotal | number: '1.2-2'}}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right" style="min-width: 160px;">Previous Discount</th>
+                            <td class="text-right" style="width:100%">{{dueReceived.prevDiscount | number: '1.2-2'}}
+                            </td>
+                        </tr>
+                        <tr style="background-color: rgb(250, 248, 227);" [ngClass]="{'invalid_cell': (dueReceived.discount < 0) }">
+                            <th class="text-right" style="min-width: 160px;">Current Discount</th>
+                            <td *ngIf="!discountEditMode" class="text-right" style="width:100%"
+                                (dblclick)="discountEditMode = true"> {{dueReceived.discount | number: '1.2-2'}}</td>
+                            <input *ngIf="discountEditMode" type="number" class="form-control text-right"
+                                [(ngModel)]="dueReceived.discount" (blur)="totalDiscountChanged()"
+                                [autofocus]="discountEditMode" name="discount" />
+                        </tr>
+                        <tr>
+                            <th class="text-right" style="min-width: 160px;">Net Total</th>
+                            <td class="text-right" style="width:100%">{{dueReceived.netTotal | number: '1.2-2'}}</td>
+                        </tr>
+                        <tr>
+                            <th class="text-right" style="min-width: 160px;">Previous Paid</th>
+                            <td class="text-right" style="width:100%">{{dueReceived.prevTotalPaid | number: '1.2-2'}}
+                            </td>
+                        </tr>
+                        <tr style="background-color: rgb(250, 248, 227);" [ngClass]="{'invalid_cell': (dueReceived.totalPaid < 0) }">
+                            <th class="text-right" style="min-width: 160px;">Current Paid</th>
+                            <td *ngIf="!paidEditMode" class="text-right" style="width:100%"
+                                (dblclick)="paidEditMode = true"> {{dueReceived.totalPaid | number: '1.2-2'}}</td>
+                            <input *ngIf="paidEditMode" type="number" class="form-control text-right"
+                                [(ngModel)]="dueReceived.totalPaid" (blur)="totalPaidChanged()" [autofocus]="paidEditMode"
+                                name="totalPaid" />
+                        </tr>
+                        <tr>
+                            <th class="text-right" style="min-width: 160px;">Due</th>
+                            <td class="text-right" style="width:100%">{{dueReceived.due | number: '1.2-2'}}</td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <abp-modal-footer [cancelDisabled]="saving" [saveDisabled]="!dueReceivedEntryModal.form.valid || saving || invalid || dueReceived.totalPaid == 0"
+        (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
+</form>

@@ -1,0 +1,122 @@
+<div [@routerTransition]>
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-2">
+                    <p-datepicker [(ngModel)]="date" [disabled]="editMode" (ngModelChange)="onDateChanged()" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false" dateFormat="dd-M-yy" [minDate]="cashEntryStartDate" [maxDate]="date"/>
+                </div>
+                <div class="col-10">
+                    <table>
+                        <tr>
+                            <th style="width: 110px">Actual Income: </th>
+                            <td> {{totalActualIncome | number: '1.2-2'}} TK</td>
+                            <th style="width: 25px"></th>
+                            <td></td>
+                            <th style="width: 145px">Virtual Transaction: </th>
+                            <td> {{totalVirtualTransaction | number: '1.2-2'}} TK</td>
+                            <th style="width: 25px"></th>
+                            <td></td>
+                            <th style="width: 105px">Total Expense:</th>
+                            <td> {{totalExpense | number: '1.2-2'}} TK</td>
+                            <th style="width: 25px"></th>
+                            <td></td>
+                            <th style="width: 75px">Cash B/D: </th>
+                            <td> {{cashBalance | number: '1.2-2'}} TK</td>
+                            <th style="width: 25px"></th>
+                            <td></td>
+                            <th style="width: 100px">Advance B/D:</th>
+                            <td> {{advanceBalance | number: '1.2-2'}} TK</td>
+
+                            <th style="width: 35px"></th>
+                            <td></td>
+                            <th style="width: 80px">Difference: </th>
+                            <td> {{difference | number: '1.2-2'}} TK</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content">
+        <div class="container-fluid">
+            <div class="card">
+                <div class="card-body">
+                   <table class="table table-responsive table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="min-width: 250px"> Actual Income</th>
+                                    <th style="min-width: 80px; text-align: right;">Amount</th>
+                                    <th style="min-width: 250px"> Virtual Transaction</th>
+                                    <th style="min-width: 80px; text-align: right;">Amount</th>
+                                    <th style="min-width: 250px"> Advance</th>
+                                    <th style="min-width: 80px; text-align: right;">Amount</th>
+                                    <th style="min-width: 250px"> Day End Cash</th>
+                                    <th style="min-width: 80px; text-align: right;">Amount</th>
+                                    <th style="min-width: 250px"> Expense</th>
+                                    <th style="min-width: 80px; text-align: right;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody *ngIf="!isLoading">
+                                <tr *ngFor="let a of dailyCashAccounts">
+                                    <td><input type="text" class="form-control" [(ngModel)]="a.actualIncomeHead"></td>
+                                    <td style="text-align: right" (dblclick)="a.actualIncomeEditMode = true">
+                                        <span *ngIf="!a.actualIncomeEditMode">{{a.actualIncomeAmountShow |
+                                            number:'1.2-2'}}</span>
+                                        <input *ngIf="a.actualIncomeEditMode" type="number" class="form-control"
+                                            [(ngModel)]="a.actualIncomeAmount"
+                                            (blur)="amountChanged('actualIncomeAmount', 'actualIncomeAmountShow', 'actualIncomeEditMode', a)"
+                                            [autofocus]="a.actualIncomeEditMode" />
+                                    </td>
+                                    <td><input type="text" class="form-control" [(ngModel)]="a.VirtualIncomeHead"></td>
+                                    <td style="text-align: right" (dblclick)="a.virtualIncomeEditMode = true">
+                                        <span *ngIf="!a.virtualIncomeEditMode">{{a.virtualIncomeAmountShow | number:
+                                            '1.2-2'}}</span>
+                                        <input *ngIf="a.virtualIncomeEditMode" type="number" class="form-control"
+                                            [(ngModel)]="a.virtualIncomeAmount"
+                                            (blur)="amountChanged('virtualIncomeAmount', 'virtualIncomeAmountShow', 'virtualIncomeEditMode', a)"
+                                            [autofocus]="a.virtualIncomeEditMode" />
+                                    </td>
+                                    <td><input type="text" class="form-control" [(ngModel)]="a.advanceHead"></td>
+                                    <td style="text-align: right" (dblclick)="a.advanceEditMode = true">
+                                        <span *ngIf="!a.advanceEditMode">{{a.advanceAmountShow | number:'1.2-2'}}</span>
+                                        <input *ngIf="a.advanceEditMode" type="number" class="form-control"
+                                            [(ngModel)]="a.advanceAmount"
+                                            (blur)="amountChanged('advanceAmount', 'advanceAmountShow', 'advanceEditMode', a)"
+                                            [autofocus]="a.advanceEditMode" />
+                                    </td>
+                                    <td><input type="text" class="form-control" [(ngModel)]="a.dayEndCashHead"></td>
+                                    <td style="text-align: right" (dblclick)="a.dayEndCashEditMode = true">
+                                        <span *ngIf="!a.dayEndCashEditMode">{{a.dayEndCashAmountShow |
+                                            number:'1.2-2'}}</span>
+                                        <input *ngIf="a.dayEndCashEditMode" type="number" class="form-control"
+                                            [(ngModel)]="a.dayEndCashAmount"
+                                            (blur)="amountChanged('dayEndCashAmount', 'dayEndCashAmountShow', 'dayEndCashEditMode', a)"
+                                            [autofocus]="a.dayEndCashEditMode" />
+                                    </td>
+                                    <td><input type="text" class="form-control" [(ngModel)]="a.expenseHead"></td>
+                                    <td style="text-align: right" (dblclick)="a.expenseEditMode = true">
+                                        <span *ngIf="!a.expenseEditMode">{{a.expenseAmountShow | number:'1.2-2'}}</span>
+                                        <input *ngIf="a.expenseEditMode" type="number" class="form-control"
+                                            [(ngModel)]="a.expenseAmount"
+                                            (blur)="amountChanged('expenseAmount', 'expenseAmountShow', 'expenseEditMode', a)"
+                                            [autofocus]="a.expenseEditMode" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    <div style="display: flex;" class="justify-content-between">
+                        <button type="button" class="btn btn-default" (click)="addRows()">
+                            Add New Rows
+                        </button>
+                        <button *ngIf="!id" type="button" class="btn btn-primary" (click)="save()">
+                            Save
+                        </button>
+                        <button *ngIf="id" type="button" class="btn btn-primary" (click)="update()">
+                            Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

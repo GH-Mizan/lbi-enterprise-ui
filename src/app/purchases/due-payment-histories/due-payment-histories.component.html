@@ -1,0 +1,38 @@
+<div>
+    <abp-modal-header title="Payment History" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-responsive table-bordered table-striped">
+                    <thead>
+                        <th style="min-width: 100px">Invoice Date</th>
+                        <th style="min-width: 100px">Payment Date</th>
+                        <th>Invoice Number</th>
+                        <th>Payment Status</th>
+                        <th>Grand Total</th>
+                        <th>Discount</th>
+                        <th>Net Total</th>
+                        <th>Total Paid</th>
+                        <th>Due</th>
+                        <th>Remarks</th>
+                    </thead>
+
+                    <tbody>
+                        <tr *ngFor="let ph of histories">
+                            <td>{{ph.invoiceDate | date: 'dd MMM, yyyy'}}</td>
+                            <td>{{ph.paymentDate | date: 'dd MMM, yyyy'}}</td>
+                            <td>{{ph.invoiceNumber}}</td>
+                            <td>{{ph.paymentStatus == 1 ? 'Paid' : ph.paymentStatus == 2 ? 'Partial Paid' : 'Due'}}</td>
+                            <td class="text-right">{{ph.grandTotal | number: '1.2-2'}}</td>
+                            <td class="text-right">{{ph.discount | number: '1.2-2'}}</td>
+                            <td class="text-right">{{ph.netTotal | number: '1.2-2'}}</td>
+                            <td class="text-right">{{ph.totalPaid | number: '1.2-2'}}</td>
+                            <td class="text-right"><strong>{{ph.due | number: '1.2-2'}}</strong></td>
+                            <td>{{ph.remarks}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

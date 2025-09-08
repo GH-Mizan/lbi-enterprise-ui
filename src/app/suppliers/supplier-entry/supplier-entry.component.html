@@ -1,0 +1,66 @@
+<form class="form-horizontal" autocomplete="off" #supplierEtryModal="ngForm" (ngSubmit)="save()">
+    <abp-modal-header title="Create member" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <div class="modal-body">
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="name">{{ "Name" | localize }}</label>
+            <div class="col-md-9">
+                <input type="text" class="form-control" name="name" id="name" required [(ngModel)]="supplier.name"
+                    #nameModel="ngModel" #nameEl />
+                <abp-validation-summary [control]="nameModel" [controlEl]="nameEl"></abp-validation-summary>
+            </div>
+        </div>
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="shortName">Short Name</label>
+            <div class="col-md-9">
+                <input type="text" class="form-control" name="shortName" id="shortName" required
+                    [(ngModel)]="supplier.shortName" #shortNameModel="ngModel" #shortNameEl />
+                <abp-validation-summary [control]="shortNameModel" [controlEl]="shortNameEl"></abp-validation-summary>
+            </div>
+        </div>
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="contactNo">Contact No.</label>
+            <div class="col-md-9">
+                <input type="text" class="form-control" name="contactNo" id="contactNo" required
+                    [(ngModel)]="supplier.contactNo" #contactNoModel="ngModel" #contactNoEl />
+                <abp-validation-summary [control]="contactNoModel" [controlEl]="contactNoEl"></abp-validation-summary>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="email">Email</label>
+            <div class="col-md-9">
+                <input type="email" class="form-control" name="email" id="email"
+                    pattern="^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{1,})+$" [(ngModel)]="supplier.email"
+                    #emailModel="ngModel" #emailEl />
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="address">Address</label>
+            <div class="col-md-9">
+                <textarea class="form-control" name="address" id="address" [(ngModel)]="supplier.address"
+                    #addressModel="ngModel" #addressEl></textarea>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="remarks">Remarks</label>
+            <div class="col-md-9">
+                <textarea class="form-control" name="remarks" id="remarks" [(ngModel)]="supplier.remarks"
+                    #addressModel="ngModel" #addressEl></textarea>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label">
+                Active
+            </label>
+            <div class="col-md-9">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" name="active" id="active"
+                        [(ngModel)]="supplier.activeStatus" />
+                    <label class="custom-control-label mt-2" for="active"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <abp-modal-footer [cancelDisabled]="saving" [saveDisabled]="!supplierEtryModal.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
+</form>

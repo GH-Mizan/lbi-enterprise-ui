@@ -1,0 +1,33 @@
+table.table td {
+    padding: 1.5px;
+}
+
+.form-control {
+    height: calc(1.8rem + 1px);
+}
+
+:host ::ng-deep .p-inputtext {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.card-body {
+    padding: 0.50rem;
+}
+
+.content-header {
+    padding-top: .25rem;
+    padding-bottom: .25rem;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}

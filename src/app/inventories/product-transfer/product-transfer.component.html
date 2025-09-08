@@ -1,0 +1,52 @@
+<form class="form-horizontal" autocomplete="off" #transferProductModal="ngForm" (ngSubmit)="transfer()">
+    <abp-modal-header title="Product Transfer" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <div class="modal-body">
+        <div class="form-group row required">
+            <label class="col-3 col-form-label" for="product">Product</label>
+            <div class="col-9">
+                <select class="form-select form-control" name="product" id="product" #productModel="ngModel" #productEl
+                    [(ngModel)]="model.productId">
+                    <option *ngFor="let p of products" [value]="p.value">{{p.displayText}}</option>
+                </select>
+                <abp-validation-summary [control]="productModel" [controlEl]="productEl"></abp-validation-summary>
+            </div>
+        </div>
+
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="fromPoint">From Stock</label>
+            <div class="col-md-9">
+                <select class="form-select form-control" name="fromPoint" id="fromPoint" #fromPointModel="ngModel"
+                    #fromPointEl [(ngModel)]="model.fromStockPointId">
+                    <option *ngFor="let sp of fromStockPoints" [value]="sp.value">{{sp.displayText}}</option>
+                </select>
+                <abp-validation-summary [control]="fromPointModel" [controlEl]="fromPointEl"></abp-validation-summary>
+            </div>
+        </div>
+
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="toPoint">To Stock</label>
+            <div class="col-md-9">
+                <select class="form-select form-control" name="toPoint" id="toPoint" #toPointModel="ngModel" #toPointEl
+                    [(ngModel)]="model.toStockPointId">
+                    <option *ngFor="let sp of toStockPoints" [value]="sp.value">{{sp.displayText}}</option>
+                </select>
+                <abp-validation-summary [control]="toPointModel" [controlEl]="toPointEl"></abp-validation-summary>
+            </div>
+        </div>
+
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="transferQty">Transfer Quantity</label>
+            <div class="col-md-9">
+                <input type="number" class="form-control" name="transferQty" id="transferQty" required
+                    [(ngModel)]="model.transferQuantity" #transferQtyModel="ngModel" #transferQtyEl />
+                <abp-validation-summary [control]="transferQtyModel"
+                    [controlEl]="transferQtyEl"></abp-validation-summary>
+            </div>
+        </div>
+
+
+
+    </div>
+    <abp-modal-footer [cancelDisabled]="saving" saveLabel="Transfer" [saveDisabled]="!transferProductModal.form.valid || saving" 
+        (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
+</form>

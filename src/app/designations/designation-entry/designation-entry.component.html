@@ -1,0 +1,28 @@
+<form class="form-horizontal" autocomplete="off" #designationEtryModal="ngForm" (ngSubmit)="save()">
+    <abp-modal-header title="Create Designation" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <div class="modal-body">
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="title">Title</label>
+            <div class="col-md-9">
+                <input type="text" class="form-control" name="title" id="title" required [(ngModel)]="designation.title"
+                    #titleModel="ngModel" #titleEl />
+                <abp-validation-summary [control]="titleModel" [controlEl]="titleEl"></abp-validation-summary>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label">
+                Active
+            </label>
+            <div class="col-md-9">
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" class="custom-control-input" name="active" id="active"
+                        [(ngModel)]="designation.activeStatus" />
+                    <label class="custom-control-label mt-2" for="active"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <abp-modal-footer [cancelDisabled]="saving" [saveDisabled]="!designationEtryModal.form.valid || saving"
+        (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
+</form>

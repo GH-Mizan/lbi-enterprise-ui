@@ -1,0 +1,29 @@
+<abp-modal-header title="Set Customer Prices" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+<div class="modal-body">
+    <div class="row">
+        <h4>{{customerName}}</h4>
+        <table class="table table-responsive table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th style="min-width: 300px;">Product Name</th>
+                    <th>Sell Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let p of customerPrices">
+                    <td>{{p.productName}}</td>
+                    <td><input type="number" [ngClass]="{'invalid_cell': (p.price < 0) }" st class="form-control text-right" [(ngModel)]="p.price" /></td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+<div class="modal-footer justify-content-between">
+    <button type="button" class="btn btn-default" (click)="bsModalRef.hide()">
+       Cancel
+    </button>
+    <button type="button" class="btn btn-primary" (click)="save()">
+        Save
+    </button>
+</div>
