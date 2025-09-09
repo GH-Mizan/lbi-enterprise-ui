@@ -1,8 +1,6 @@
 import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
-import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { DailySalesReportDto, SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import { DailySalesReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { Table } from 'primeng/table';
-import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
 import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
@@ -36,10 +34,14 @@ export class DailySalesReportComponent implements OnInit {
         private cd: ChangeDetectorRef,
         private _salesService: SalesServiceProxy
     ) {
-        
+
     }
     ngOnInit(): void {
         this.loading = true;
+        this.getReportData();
+    }
+
+    getReportData() {
         this._salesService.getDailySalesReport(moment(this.date))
             .pipe(
                 finalize(() => {
@@ -51,27 +53,6 @@ export class DailySalesReportComponent implements OnInit {
                 this.data = result;
                 this.cd.detectChanges();
             });
-    }
-
-    // list(event?: LazyLoadEvent): void {
-    //     this.primengTableHelper.showLoadingIndicator();
-    //     this._salesService.getDailySalesReport(moment(this.date))
-    //         .pipe(
-    //             finalize(() => {
-    //                 this.primengTableHelper.hideLoadingIndicator();
-    //             })
-    //         )
-    //         .subscribe((result) => {
-    //             this.data = result;
-    //             this.primengTableHelper.records = result.details;
-    //             this.primengTableHelper.totalRecordsCount = result.details.length;
-    //             this.primengTableHelper.hideLoadingIndicator();
-    //             this.cd.detectChanges();
-    //         });
-    // }
-
-    delete() {
-
     }
 
     async print() {
@@ -124,9 +105,9 @@ export class DailySalesReportComponent implements OnInit {
 
     private getData(data: any) {
         const body = [
-            [{text: 'User', rowSpan: 3, style: ['headerStyle']}, {text: 'Particular', colSpan: 7, style: ['headerStyle']}, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle']}, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, {text: 'Bill No.', rowSpan: 3, style: ['headerStyle']}, {text: 'Amount', rowSpan: 3, style: ['headerStyle']}, {text: 'Status', rowSpan: 3, style: ['headerStyle']}],
-            [{text: ''}, {text: 'Oxygen', colSpan: 2, style: ['headerStyle']}, { text: '' }, { text: 'Air', colSpan: 2 , style: ['headerStyle']}, { text: '' }, { text: 'Nitros', colSpan: 3, style: ['headerStyle'] }, { text: '' }, { text: '' }, { text: '', colSpan: 3 }, {text: '', style: ['headerStyle']}, {text: ''}],
-            [{text: ''}, {text: '9.80'}, { text: '1.36' }, { text: '9.80' }, { text: '7.00' }, { text: '30KG', fontSize: 10}, { text: '5KG' }, { text: '3KG' }, { text: '', colSpan: 3 }, {text: ''}, {text: ''}],
+            [{ text: 'User', rowSpan: 3, style: ['headerStyle'] }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'] }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'] }, { text: 'Status', rowSpan: 3, style: ['headerStyle'] }],
+            [{ text: '' }, { text: 'Oxygen', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Air', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Nitros', colSpan: 3, style: ['headerStyle'] }, { text: '' }, { text: '' }, { text: '', colSpan: 3 }, { text: '', style: ['headerStyle'] }, { text: '' }],
+            [{ text: '' }, { text: '9.80' }, { text: '1.36' }, { text: '9.80' }, { text: '7.00' }, { text: '30KG', fontSize: 10 }, { text: '5KG' }, { text: '3KG' }, { text: '', colSpan: 3 }, { text: '' }, { text: '' }],
         ];
         data.details.forEach(item => {
             body.push(
@@ -146,47 +127,47 @@ export class DailySalesReportComponent implements OnInit {
             );
         });
 
-        body.push([{text: ' ', colSpan: 11}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}]);
-        body.push([{text: ' ', colSpan: 11}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}]);
+        body.push([{ text: ' ', colSpan: 11 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }]);
+        body.push([{ text: ' ', colSpan: 11 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }]);
 
-        data.dueCollections.forEach(dc=> {
+        data.dueCollections.forEach(dc => {
             body.push(
                 [
-                    {text: dc.customerName, style: ['text_green']}, {text: ' ', colSpan: 8 }, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, 
-                    {text:  this.thousandsSeparator(dc.dueCollection), style: ['cell_style', 'text_green']}, {text: 'Due Col.', style: ['text_green']}
+                    { text: dc.customerName, style: ['text_green'] }, { text: ' ', colSpan: 8 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' },
+                    { text: this.thousandsSeparator(dc.dueCollection), style: ['cell_style', 'text_green'] }, { text: 'Due Col.', style: ['text_green'] }
                 ]
             );
         });
 
-        body.push([{text: ' ', colSpan: 11}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}]);
-        
+        body.push([{ text: ' ', colSpan: 11 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }]);
+
         body.push([
-            {text: 'Total Sale', style: ['footerStyle']}, 
-            {text: data.medicalOxygen9_8TotalQty, style: ['footerParticular']},
-            {text: data.medicalOxygen1_36TotalQty, style: ['footerParticular']},
-            {text: data.medicalAir9_8TotalQty, style: ['footerParticular']},
-            {text: data.medicalAir7TotalQty, style: ['footerParticular']},
-            {text: data.nitros30KgTotalQty, style: ['footerParticular']},
-            {text: data.nitros5KgTotalQty, style: ['footerParticular']},
-            {text: data.nitros3KgTotalQty, style: ['footerParticular']}, 
-            {text: `${this.thousandsSeparator(data.netTotal)}/-`, colSpan: 3, style: ['footerStyle']}, 
-            {text: ''}, {text: ''}
+            { text: 'Total Sale', style: ['footerStyle'] },
+            { text: data.medicalOxygen9_8TotalQty, style: ['footerParticular'] },
+            { text: data.medicalOxygen1_36TotalQty, style: ['footerParticular'] },
+            { text: data.medicalAir9_8TotalQty, style: ['footerParticular'] },
+            { text: data.medicalAir7TotalQty, style: ['footerParticular'] },
+            { text: data.nitros30KgTotalQty, style: ['footerParticular'] },
+            { text: data.nitros5KgTotalQty, style: ['footerParticular'] },
+            { text: data.nitros3KgTotalQty, style: ['footerParticular'] },
+            { text: `${this.thousandsSeparator(data.netTotal)}/-`, colSpan: 3, style: ['footerStyle'] },
+            { text: '' }, { text: '' }
         ]);
 
         body.push([
-            {text: 'Cash Collection', style: ['footerStyle']}, 
-            {text: `${this.thousandsSeparator(data.cashCollection)}/-`, colSpan: 10, style: ['footerStyle']}, 
-            {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}
+            { text: 'Cash Collection', style: ['footerStyle'] },
+            { text: `${this.thousandsSeparator(data.cashCollection)}/-`, colSpan: 10, style: ['footerStyle'] },
+            { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
         ]);
         body.push([
-            {text: 'Due Collection', style: ['footerStyle']}, 
-            {text: `${this.thousandsSeparator(data.dueCollection)}/-`, colSpan: 10, style: ['footerStyle']}, 
-            {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}
+            { text: 'Due Collection', style: ['footerStyle'] },
+            { text: `${this.thousandsSeparator(data.dueCollection)}/-`, colSpan: 10, style: ['footerStyle'] },
+            { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
         ]);
         body.push([
-            {text: 'Due', style: ['footerStyle']}, 
-            {text: `${this.thousandsSeparator(data.due)}/-`, colSpan: 10, style: ['footerStyle']}, 
-            {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}, {text: ''}
+            { text: 'Due', style: ['footerStyle'] },
+            { text: `${this.thousandsSeparator(data.due)}/-`, colSpan: 10, style: ['footerStyle'] },
+            { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
         ]);
 
 

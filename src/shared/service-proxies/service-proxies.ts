@@ -4028,6 +4028,79 @@ export class SalesServiceProxy {
         }
         return _observableOf(null as any);
     }
+
+    /**
+     * @param customerId (optional) 
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    getCustomerLedgerReport(customerId: number | undefined, startDate: moment.Moment | undefined, endDate: moment.Moment | undefined): Observable<CustomerLedgerReportDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/Sales/GetCustomerLedgerReport?";
+        if (customerId === null)
+            throw new Error("The parameter 'customerId' cannot be null.");
+        else if (customerId !== undefined)
+            url_ += "customerId=" + encodeURIComponent("" + customerId) + "&";
+        if (startDate === null)
+            throw new Error("The parameter 'startDate' cannot be null.");
+        else if (startDate !== undefined)
+            url_ += "startDate=" + encodeURIComponent(startDate ? "" + startDate.toISOString() : "") + "&";
+        if (endDate === null)
+            throw new Error("The parameter 'endDate' cannot be null.");
+        else if (endDate !== undefined)
+            url_ += "endDate=" + encodeURIComponent(endDate ? "" + endDate.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetCustomerLedgerReport(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetCustomerLedgerReport(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<CustomerLedgerReportDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<CustomerLedgerReportDto[]>;
+        }));
+    }
+
+    protected processGetCustomerLedgerReport(response: HttpResponseBase): Observable<CustomerLedgerReportDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(CustomerLedgerReportDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 @Injectable()
@@ -6423,6 +6496,97 @@ export interface ICustomerCreateOrUpdateDto {
     email: string | undefined;
     activeStatus: boolean;
     remarks: string | undefined;
+}
+
+export class CustomerLedgerReportDto implements ICustomerLedgerReportDto {
+    date: moment.Moment;
+    customerId: number;
+    customerName: string | undefined;
+    medicalOxygen9_8Qty: number;
+    medicalOxygen1_36Qty: number;
+    medicalAir9_8Qty: number;
+    medicalAir7Qty: number;
+    nitros30KgQty: number;
+    nitros5KgQty: number;
+    nitros3KgQty: number;
+    creditTotal: number;
+    debitTotal: number;
+    balance: number;
+
+    constructor(data?: ICustomerLedgerReportDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.date = _data["date"] ? moment(_data["date"].toString()) : <any>undefined;
+            this.customerId = _data["customerId"];
+            this.customerName = _data["customerName"];
+            this.medicalOxygen9_8Qty = _data["medicalOxygen9_8Qty"];
+            this.medicalOxygen1_36Qty = _data["medicalOxygen1_36Qty"];
+            this.medicalAir9_8Qty = _data["medicalAir9_8Qty"];
+            this.medicalAir7Qty = _data["medicalAir7Qty"];
+            this.nitros30KgQty = _data["nitros30KgQty"];
+            this.nitros5KgQty = _data["nitros5KgQty"];
+            this.nitros3KgQty = _data["nitros3KgQty"];
+            this.creditTotal = _data["creditTotal"];
+            this.debitTotal = _data["debitTotal"];
+            this.balance = _data["balance"];
+        }
+    }
+
+    static fromJS(data: any): CustomerLedgerReportDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CustomerLedgerReportDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["date"] = this.date ? this.date.toISOString() : <any>undefined;
+        data["customerId"] = this.customerId;
+        data["customerName"] = this.customerName;
+        data["medicalOxygen9_8Qty"] = this.medicalOxygen9_8Qty;
+        data["medicalOxygen1_36Qty"] = this.medicalOxygen1_36Qty;
+        data["medicalAir9_8Qty"] = this.medicalAir9_8Qty;
+        data["medicalAir7Qty"] = this.medicalAir7Qty;
+        data["nitros30KgQty"] = this.nitros30KgQty;
+        data["nitros5KgQty"] = this.nitros5KgQty;
+        data["nitros3KgQty"] = this.nitros3KgQty;
+        data["creditTotal"] = this.creditTotal;
+        data["debitTotal"] = this.debitTotal;
+        data["balance"] = this.balance;
+        return data;
+    }
+
+    clone(): CustomerLedgerReportDto {
+        const json = this.toJSON();
+        let result = new CustomerLedgerReportDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICustomerLedgerReportDto {
+    date: moment.Moment;
+    customerId: number;
+    customerName: string | undefined;
+    medicalOxygen9_8Qty: number;
+    medicalOxygen1_36Qty: number;
+    medicalAir9_8Qty: number;
+    medicalAir7Qty: number;
+    nitros30KgQty: number;
+    nitros5KgQty: number;
+    nitros3KgQty: number;
+    creditTotal: number;
+    debitTotal: number;
+    balance: number;
 }
 
 export class CustomerOutputDto implements ICustomerOutputDto {

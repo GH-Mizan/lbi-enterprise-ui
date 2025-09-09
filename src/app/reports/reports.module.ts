@@ -5,12 +5,14 @@ import { ReportsRoutingModule } from './reports-routing.module';
 import { SalesColllectionDueReportComponent } from './sales-collection-due.component';
 import { SharedModule } from '@shared/shared.module';
 import { DailySalesReportComponent } from './daily-sales/daily-sales-report.component';
+import { CustomerLedgerReportComponent } from './customer-ledger/customer-ledger-report.component'
 
 
 @NgModule({
   declarations: [
     SalesColllectionDueReportComponent,
-    DailySalesReportComponent
+    DailySalesReportComponent,
+    CustomerLedgerReportComponent
   ],
   imports: [
     SharedModule,
