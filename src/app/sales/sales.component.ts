@@ -73,6 +73,10 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
     this._router.navigateByUrl(`app/sales/edit/${id}`);
   }
 
+  view(id: number) {
+    this._router.navigateByUrl(`app/sales/view/${id}`);
+  }
+
   delete(): void {
     // abp.message.confirm(`${customer.name} will be deleted`,
     //   undefined,

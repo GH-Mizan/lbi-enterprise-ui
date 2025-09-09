@@ -64,7 +64,7 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
   }
 
   async print() {
-    var items = await firstValueFrom(this._salesService.getSalesCollectionDueReport(
+    const items = await firstValueFrom(this._salesService.getSalesCollectionDueReport(
       moment(this.rangeDates[0]), moment(this.rangeDates[1])
     ));
     var dd = {

@@ -121,7 +121,7 @@
                                                 (change)="checkedChanged(p)" /></td>
                                         <td>{{p.name}}</td>
                                         <td>{{p.typeText}}</td>
-                                        <td>{{p.size}}</td>
+                                        <td>{{p.sizeText}}</td>
                                         <td [ngClass]="{'invalid_cell': (p.salesPrice < 0) }">
                                             <input type="number" selectOnFocus class="form-control text-right"
                                                 [(ngModel)]="p.salesPrice" (ngModelChange)="updateTotalPrice(p)"
@@ -188,7 +188,7 @@
                             Cancel
                         </button>
                         <button type="submit" form="salesEntryForm" class="btn btn-primary"
-                            [disabled]="!salesEntryForm.form.valid || invalid">
+                            [disabled]="!salesEntryForm.form.valid || invalid || viewMode">
                             {{id ? 'Update' : 'Save'}}
                         </button>
                     </div>

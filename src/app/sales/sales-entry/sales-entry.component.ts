@@ -51,6 +51,7 @@ export class SalesEntryComponent implements OnInit {
     date = new Date();
     invalid: boolean = false;
     loading: boolean = true;
+    viewMode: boolean = false;
 
     constructor(
         private readonly _salesService: SalesServiceProxy,
@@ -66,7 +67,10 @@ export class SalesEntryComponent implements OnInit {
     }
 
     async ngOnInit() {
-        this.id = this._activatedRoute.snapshot.params['id'];
+        const snapshot = this._activatedRoute.snapshot;
+        this.id = snapshot.params['id'];
+        this.viewMode = snapshot.url.map(segment => segment.path)[0] == 'view';
+        debugger;
         Promise.all([
             this.populateCustomers(),
             this.populatePaymentStatuses(),

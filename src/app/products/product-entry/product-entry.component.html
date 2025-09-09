@@ -24,8 +24,10 @@
          <div class="form-group row required">
             <label class="col-md-3 col-form-label" for="size">Size</label>
             <div class="col-md-9">
-                <input type="text" class="form-control" name="size" id="size" required [(ngModel)]="product.size"
-                    #sizeModel="ngModel" #sizeEl />
+                 <select class="form-select form-control" name="size" id="size" #sizeModel="ngModel" #sizeEl
+                    [(ngModel)]="product.size">
+                    <option *ngFor="let s of sizes" [value]="s.value">{{s.displayText}}</option>
+                </select>
                 <abp-validation-summary [control]="sizeModel" [controlEl]="sizeEl"></abp-validation-summary>
             </div>
         </div>

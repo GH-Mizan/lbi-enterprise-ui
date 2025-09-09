@@ -2470,6 +2470,64 @@ export class ProductServiceProxy {
         }
         return _observableOf(null as any);
     }
+
+    /**
+     * @return OK
+     */
+    getProductSizeSelectList(): Observable<ComboboxItemDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/Product/GetProductSizeSelectList";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetProductSizeSelectList(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetProductSizeSelectList(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ComboboxItemDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ComboboxItemDto[]>;
+        }));
+    }
+
+    protected processGetProductSizeSelectList(response: HttpResponseBase): Observable<ComboboxItemDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(ComboboxItemDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 @Injectable()
@@ -3905,6 +3963,62 @@ export class SalesServiceProxy {
             else {
                 result200 = <any>null;
             }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param date (optional) 
+     * @return OK
+     */
+    getDailySalesReport(date: moment.Moment | undefined): Observable<DailySalesReportDto> {
+        let url_ = this.baseUrl + "/api/services/app/Sales/GetDailySalesReport?";
+        if (date === null)
+            throw new Error("The parameter 'date' cannot be null.");
+        else if (date !== undefined)
+            url_ += "date=" + encodeURIComponent(date ? "" + date.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetDailySalesReport(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetDailySalesReport(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<DailySalesReportDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<DailySalesReportDto>;
+        }));
+    }
+
+    protected processGetDailySalesReport(response: HttpResponseBase): Observable<DailySalesReportDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DailySalesReportDto.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -6713,6 +6827,279 @@ export interface IDailyCashOutputDtoPagedResultDto {
     totalCount: number;
 }
 
+export class DailySalesReportDetailsDto implements IDailySalesReportDetailsDto {
+    customerId: number;
+    customerName: string | undefined;
+    type: ProductType;
+    typeText: string | undefined;
+    size: ProductSize;
+    sizeText: string | undefined;
+    medicalOxygen9_8Qty: number;
+    medicalOxygen1_36Qty: number;
+    medicalAir9_8Qty: number;
+    medicalAir7Qty: number;
+    nitros30KgQty: number;
+    nitros5KgQty: number;
+    nitros3KgQty: number;
+    invoiceNo: string | undefined;
+    netAmount: number;
+    paidAmount: number;
+    dueAmount: number;
+    paymentStatus: PaymentStatus;
+    paymentStatusText: string | undefined;
+
+    constructor(data?: IDailySalesReportDetailsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.customerId = _data["customerId"];
+            this.customerName = _data["customerName"];
+            this.type = _data["type"];
+            this.typeText = _data["typeText"];
+            this.size = _data["size"];
+            this.sizeText = _data["sizeText"];
+            this.medicalOxygen9_8Qty = _data["medicalOxygen9_8Qty"];
+            this.medicalOxygen1_36Qty = _data["medicalOxygen1_36Qty"];
+            this.medicalAir9_8Qty = _data["medicalAir9_8Qty"];
+            this.medicalAir7Qty = _data["medicalAir7Qty"];
+            this.nitros30KgQty = _data["nitros30KgQty"];
+            this.nitros5KgQty = _data["nitros5KgQty"];
+            this.nitros3KgQty = _data["nitros3KgQty"];
+            this.invoiceNo = _data["invoiceNo"];
+            this.netAmount = _data["netAmount"];
+            this.paidAmount = _data["paidAmount"];
+            this.dueAmount = _data["dueAmount"];
+            this.paymentStatus = _data["paymentStatus"];
+            this.paymentStatusText = _data["paymentStatusText"];
+        }
+    }
+
+    static fromJS(data: any): DailySalesReportDetailsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DailySalesReportDetailsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["customerId"] = this.customerId;
+        data["customerName"] = this.customerName;
+        data["type"] = this.type;
+        data["typeText"] = this.typeText;
+        data["size"] = this.size;
+        data["sizeText"] = this.sizeText;
+        data["medicalOxygen9_8Qty"] = this.medicalOxygen9_8Qty;
+        data["medicalOxygen1_36Qty"] = this.medicalOxygen1_36Qty;
+        data["medicalAir9_8Qty"] = this.medicalAir9_8Qty;
+        data["medicalAir7Qty"] = this.medicalAir7Qty;
+        data["nitros30KgQty"] = this.nitros30KgQty;
+        data["nitros5KgQty"] = this.nitros5KgQty;
+        data["nitros3KgQty"] = this.nitros3KgQty;
+        data["invoiceNo"] = this.invoiceNo;
+        data["netAmount"] = this.netAmount;
+        data["paidAmount"] = this.paidAmount;
+        data["dueAmount"] = this.dueAmount;
+        data["paymentStatus"] = this.paymentStatus;
+        data["paymentStatusText"] = this.paymentStatusText;
+        return data;
+    }
+
+    clone(): DailySalesReportDetailsDto {
+        const json = this.toJSON();
+        let result = new DailySalesReportDetailsDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IDailySalesReportDetailsDto {
+    customerId: number;
+    customerName: string | undefined;
+    type: ProductType;
+    typeText: string | undefined;
+    size: ProductSize;
+    sizeText: string | undefined;
+    medicalOxygen9_8Qty: number;
+    medicalOxygen1_36Qty: number;
+    medicalAir9_8Qty: number;
+    medicalAir7Qty: number;
+    nitros30KgQty: number;
+    nitros5KgQty: number;
+    nitros3KgQty: number;
+    invoiceNo: string | undefined;
+    netAmount: number;
+    paidAmount: number;
+    dueAmount: number;
+    paymentStatus: PaymentStatus;
+    paymentStatusText: string | undefined;
+}
+
+export class DailySalesReportDto implements IDailySalesReportDto {
+    details: DailySalesReportDetailsDto[] | undefined;
+    dueCollections: DailySalesReportDueCollectionDto[] | undefined;
+    medicalOxygen9_8TotalQty: number;
+    medicalOxygen1_36TotalQty: number;
+    medicalAir9_8TotalQty: number;
+    medicalAir7TotalQty: number;
+    nitros30KgTotalQty: number;
+    nitros5KgTotalQty: number;
+    nitros3KgTotalQty: number;
+    netTotal: number;
+    cashCollection: number;
+    dueCollection: number;
+    due: number;
+
+    constructor(data?: IDailySalesReportDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["details"])) {
+                this.details = [] as any;
+                for (let item of _data["details"])
+                    this.details.push(DailySalesReportDetailsDto.fromJS(item));
+            }
+            if (Array.isArray(_data["dueCollections"])) {
+                this.dueCollections = [] as any;
+                for (let item of _data["dueCollections"])
+                    this.dueCollections.push(DailySalesReportDueCollectionDto.fromJS(item));
+            }
+            this.medicalOxygen9_8TotalQty = _data["medicalOxygen9_8TotalQty"];
+            this.medicalOxygen1_36TotalQty = _data["medicalOxygen1_36TotalQty"];
+            this.medicalAir9_8TotalQty = _data["medicalAir9_8TotalQty"];
+            this.medicalAir7TotalQty = _data["medicalAir7TotalQty"];
+            this.nitros30KgTotalQty = _data["nitros30KgTotalQty"];
+            this.nitros5KgTotalQty = _data["nitros5KgTotalQty"];
+            this.nitros3KgTotalQty = _data["nitros3KgTotalQty"];
+            this.netTotal = _data["netTotal"];
+            this.cashCollection = _data["cashCollection"];
+            this.dueCollection = _data["dueCollection"];
+            this.due = _data["due"];
+        }
+    }
+
+    static fromJS(data: any): DailySalesReportDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DailySalesReportDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.details)) {
+            data["details"] = [];
+            for (let item of this.details)
+                data["details"].push(item.toJSON());
+        }
+        if (Array.isArray(this.dueCollections)) {
+            data["dueCollections"] = [];
+            for (let item of this.dueCollections)
+                data["dueCollections"].push(item.toJSON());
+        }
+        data["medicalOxygen9_8TotalQty"] = this.medicalOxygen9_8TotalQty;
+        data["medicalOxygen1_36TotalQty"] = this.medicalOxygen1_36TotalQty;
+        data["medicalAir9_8TotalQty"] = this.medicalAir9_8TotalQty;
+        data["medicalAir7TotalQty"] = this.medicalAir7TotalQty;
+        data["nitros30KgTotalQty"] = this.nitros30KgTotalQty;
+        data["nitros5KgTotalQty"] = this.nitros5KgTotalQty;
+        data["nitros3KgTotalQty"] = this.nitros3KgTotalQty;
+        data["netTotal"] = this.netTotal;
+        data["cashCollection"] = this.cashCollection;
+        data["dueCollection"] = this.dueCollection;
+        data["due"] = this.due;
+        return data;
+    }
+
+    clone(): DailySalesReportDto {
+        const json = this.toJSON();
+        let result = new DailySalesReportDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IDailySalesReportDto {
+    details: DailySalesReportDetailsDto[] | undefined;
+    dueCollections: DailySalesReportDueCollectionDto[] | undefined;
+    medicalOxygen9_8TotalQty: number;
+    medicalOxygen1_36TotalQty: number;
+    medicalAir9_8TotalQty: number;
+    medicalAir7TotalQty: number;
+    nitros30KgTotalQty: number;
+    nitros5KgTotalQty: number;
+    nitros3KgTotalQty: number;
+    netTotal: number;
+    cashCollection: number;
+    dueCollection: number;
+    due: number;
+}
+
+export class DailySalesReportDueCollectionDto implements IDailySalesReportDueCollectionDto {
+    customerId: number;
+    customerName: string | undefined;
+    dueCollection: number;
+
+    constructor(data?: IDailySalesReportDueCollectionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.customerId = _data["customerId"];
+            this.customerName = _data["customerName"];
+            this.dueCollection = _data["dueCollection"];
+        }
+    }
+
+    static fromJS(data: any): DailySalesReportDueCollectionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DailySalesReportDueCollectionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["customerId"] = this.customerId;
+        data["customerName"] = this.customerName;
+        data["dueCollection"] = this.dueCollection;
+        return data;
+    }
+
+    clone(): DailySalesReportDueCollectionDto {
+        const json = this.toJSON();
+        let result = new DailySalesReportDueCollectionDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IDailySalesReportDueCollectionDto {
+    customerId: number;
+    customerName: string | undefined;
+    dueCollection: number;
+}
+
 export class DepartmentCreateOrUpdateDto implements IDepartmentCreateOrUpdateDto {
     id: number | undefined;
     name: string | undefined;
@@ -7155,6 +7542,7 @@ export class DuePaymentHistoryDto implements IDuePaymentHistoryDto {
     netTotal: number;
     totalPaid: number;
     due: number;
+    default: boolean;
     remarks: string | undefined;
 
     constructor(data?: IDuePaymentHistoryDto) {
@@ -7180,6 +7568,7 @@ export class DuePaymentHistoryDto implements IDuePaymentHistoryDto {
             this.netTotal = _data["netTotal"];
             this.totalPaid = _data["totalPaid"];
             this.due = _data["due"];
+            this.default = _data["default"];
             this.remarks = _data["remarks"];
         }
     }
@@ -7205,6 +7594,7 @@ export class DuePaymentHistoryDto implements IDuePaymentHistoryDto {
         data["netTotal"] = this.netTotal;
         data["totalPaid"] = this.totalPaid;
         data["due"] = this.due;
+        data["default"] = this.default;
         data["remarks"] = this.remarks;
         return data;
     }
@@ -7230,6 +7620,7 @@ export interface IDuePaymentHistoryDto {
     netTotal: number;
     totalPaid: number;
     due: number;
+    default: boolean;
     remarks: string | undefined;
 }
 
@@ -7357,6 +7748,7 @@ export class DueReceivedHistoryDto implements IDueReceivedHistoryDto {
     netTotal: number;
     totalPaid: number;
     due: number;
+    default: boolean;
     remarks: string | undefined;
 
     constructor(data?: IDueReceivedHistoryDto) {
@@ -7382,6 +7774,7 @@ export class DueReceivedHistoryDto implements IDueReceivedHistoryDto {
             this.netTotal = _data["netTotal"];
             this.totalPaid = _data["totalPaid"];
             this.due = _data["due"];
+            this.default = _data["default"];
             this.remarks = _data["remarks"];
         }
     }
@@ -7407,6 +7800,7 @@ export class DueReceivedHistoryDto implements IDueReceivedHistoryDto {
         data["netTotal"] = this.netTotal;
         data["totalPaid"] = this.totalPaid;
         data["due"] = this.due;
+        data["default"] = this.default;
         data["remarks"] = this.remarks;
         return data;
     }
@@ -7432,6 +7826,7 @@ export interface IDueReceivedHistoryDto {
     netTotal: number;
     totalPaid: number;
     due: number;
+    default: boolean;
     remarks: string | undefined;
 }
 
@@ -8153,7 +8548,7 @@ export class ProductCreateOrUpdateDto implements IProductCreateOrUpdateDto {
     id: number | undefined;
     name: string | undefined;
     type: ProductType;
-    size: string | undefined;
+    size: ProductSize;
     purchasePrice: number;
     sellPrice: number;
     activeStatus: boolean;
@@ -8210,7 +8605,7 @@ export interface IProductCreateOrUpdateDto {
     id: number | undefined;
     name: string | undefined;
     type: ProductType;
-    size: string | undefined;
+    size: ProductSize;
     purchasePrice: number;
     sellPrice: number;
     activeStatus: boolean;
@@ -8221,7 +8616,8 @@ export class ProductOutputDto implements IProductOutputDto {
     name: string | undefined;
     type: ProductType;
     typeText: string | undefined;
-    size: string | undefined;
+    size: ProductSize;
+    sizeText: string | undefined;
     purchasePrice: number;
     sellPrice: number;
     activeStatus: boolean;
@@ -8242,6 +8638,7 @@ export class ProductOutputDto implements IProductOutputDto {
             this.type = _data["type"];
             this.typeText = _data["typeText"];
             this.size = _data["size"];
+            this.sizeText = _data["sizeText"];
             this.purchasePrice = _data["purchasePrice"];
             this.sellPrice = _data["sellPrice"];
             this.activeStatus = _data["activeStatus"];
@@ -8262,6 +8659,7 @@ export class ProductOutputDto implements IProductOutputDto {
         data["type"] = this.type;
         data["typeText"] = this.typeText;
         data["size"] = this.size;
+        data["sizeText"] = this.sizeText;
         data["purchasePrice"] = this.purchasePrice;
         data["sellPrice"] = this.sellPrice;
         data["activeStatus"] = this.activeStatus;
@@ -8281,7 +8679,8 @@ export interface IProductOutputDto {
     name: string | undefined;
     type: ProductType;
     typeText: string | undefined;
-    size: string | undefined;
+    size: ProductSize;
+    sizeText: string | undefined;
     purchasePrice: number;
     sellPrice: number;
     activeStatus: boolean;
@@ -8340,6 +8739,15 @@ export class ProductOutputDtoPagedResultDto implements IProductOutputDtoPagedRes
 export interface IProductOutputDtoPagedResultDto {
     items: ProductOutputDto[] | undefined;
     totalCount: number;
+}
+
+export enum ProductSize {
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
+    _4 = 4,
+    _5 = 5,
+    _6 = 6,
 }
 
 export class ProductTransferDto implements IProductTransferDto {
@@ -8827,7 +9235,8 @@ export class PurchaseProductDto implements IPurchaseProductDto {
     name: string | undefined;
     type: ProductType;
     typeText: string | undefined;
-    size: string | undefined;
+    size: ProductSize;
+    sizeText: string | undefined;
     purchasePrice: number;
     purchasePriceDisabled: boolean;
     selected: boolean;
@@ -8852,6 +9261,7 @@ export class PurchaseProductDto implements IPurchaseProductDto {
             this.type = _data["type"];
             this.typeText = _data["typeText"];
             this.size = _data["size"];
+            this.sizeText = _data["sizeText"];
             this.purchasePrice = _data["purchasePrice"];
             this.purchasePriceDisabled = _data["purchasePriceDisabled"];
             this.selected = _data["selected"];
@@ -8876,6 +9286,7 @@ export class PurchaseProductDto implements IPurchaseProductDto {
         data["type"] = this.type;
         data["typeText"] = this.typeText;
         data["size"] = this.size;
+        data["sizeText"] = this.sizeText;
         data["purchasePrice"] = this.purchasePrice;
         data["purchasePriceDisabled"] = this.purchasePriceDisabled;
         data["selected"] = this.selected;
@@ -8899,7 +9310,8 @@ export interface IPurchaseProductDto {
     name: string | undefined;
     type: ProductType;
     typeText: string | undefined;
-    size: string | undefined;
+    size: ProductSize;
+    sizeText: string | undefined;
     purchasePrice: number;
     purchasePriceDisabled: boolean;
     selected: boolean;
@@ -9899,7 +10311,8 @@ export class SalesProductDto implements ISalesProductDto {
     name: string | undefined;
     type: ProductType;
     typeText: string | undefined;
-    size: string | undefined;
+    size: ProductSize;
+    sizeText: string | undefined;
     salesPrice: number;
     salesPriceDisabled: boolean;
     selected: boolean;
@@ -9924,6 +10337,7 @@ export class SalesProductDto implements ISalesProductDto {
             this.type = _data["type"];
             this.typeText = _data["typeText"];
             this.size = _data["size"];
+            this.sizeText = _data["sizeText"];
             this.salesPrice = _data["salesPrice"];
             this.salesPriceDisabled = _data["salesPriceDisabled"];
             this.selected = _data["selected"];
@@ -9948,6 +10362,7 @@ export class SalesProductDto implements ISalesProductDto {
         data["type"] = this.type;
         data["typeText"] = this.typeText;
         data["size"] = this.size;
+        data["sizeText"] = this.sizeText;
         data["salesPrice"] = this.salesPrice;
         data["salesPriceDisabled"] = this.salesPriceDisabled;
         data["selected"] = this.selected;
@@ -9971,7 +10386,8 @@ export interface ISalesProductDto {
     name: string | undefined;
     type: ProductType;
     typeText: string | undefined;
-    size: string | undefined;
+    size: ProductSize;
+    sizeText: string | undefined;
     salesPrice: number;
     salesPriceDisabled: boolean;
     selected: boolean;

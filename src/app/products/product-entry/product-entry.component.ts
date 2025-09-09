@@ -15,6 +15,7 @@ export class ProductEntryComponent extends AppComponentBase implements OnInit{
 
     product: ProductCreateOrUpdateDto;
     types: ComboboxItemDto[] = [];
+    sizes: ComboboxItemDto[] = [];
     saving = false;
 
     constructor(
@@ -29,6 +30,11 @@ export class ProductEntryComponent extends AppComponentBase implements OnInit{
     ngOnInit(): void {
         this._productrService.getProductTypeSelectList().subscribe(res=> {
             this.types = res;
+            this.cd.detectChanges();
+        });
+
+        this._productrService.getProductSizeSelectList().subscribe(res=> {
+            this.sizes = res;
             this.cd.detectChanges();
         });
     }

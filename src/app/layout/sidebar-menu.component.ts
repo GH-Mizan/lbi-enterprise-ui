@@ -59,6 +59,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             ]),
             new MenuItem('Reports', '', 'far fa-file-alt', '', true, [
                 new MenuItem('Sale, Collection & Due', '/app/reports/sales-collection-due', 'fas fa-theater-masks', 'Pages.Roles', false),
+                new MenuItem('Daily Sales', '/app/reports/daily-sales', 'fas fa-theater-masks', 'Pages.Roles', false),
             ]),
             new MenuItem('Administrations', '', 'fas fa-user-shield', '', true, [
                 new MenuItem(this.l('Roles'), '/app/roles', 'fas fa-theater-masks', 'Pages.Roles', false),

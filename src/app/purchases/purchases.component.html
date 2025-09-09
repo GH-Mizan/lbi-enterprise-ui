@@ -74,19 +74,19 @@
                                         <span>{{record.supplierName}}</span>
                                     </td>
                                     <td>
-                                        <span>{{record.totalAmount}}</span>
+                                        <span>{{record.totalAmount | number: '1.2-2'}}</span>
                                     </td>
                                     <td>
-                                        <span>{{record.discount}}</span>
+                                        <span>{{record.discount | number: '1.2-2'}}</span>
                                     </td>
                                     <td>
-                                        <span>{{record.netAmount}}</span>
+                                        <span>{{record.netAmount | number: '1.2-2'}}</span>
                                     </td>
                                     <td>
-                                        <span>{{record.paidAmount}}</span>
+                                        <span>{{record.paidAmount | number: '1.2-2'}}</span>
                                     </td>
                                     <td>
-                                        <span>{{record.dueAmount}}</span>
+                                        <span>{{record.dueAmount | number: '1.2-2'}}</span>
                                     </td>
                                     <td *ngIf="record.paymentStatus == 1">
                                         {{record.paymentStatusText}}

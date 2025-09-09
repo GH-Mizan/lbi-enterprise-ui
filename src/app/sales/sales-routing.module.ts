@@ -6,7 +6,9 @@ import { SalesEntryComponent } from './sales-entry/sales-entry.component';
 const routes: Routes = [
   { path: '', component: SalesComponent },
   { path: 'create', component: SalesEntryComponent },
-  { path: 'edit/:id', component: SalesEntryComponent }];
+  { path: 'edit/:id', component: SalesEntryComponent },
+  { path: 'view/:id', component: SalesEntryComponent },
+];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
