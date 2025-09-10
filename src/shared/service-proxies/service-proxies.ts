@@ -4174,6 +4174,74 @@ export class SalesServiceProxy {
         }
         return _observableOf(null as any);
     }
+
+    /**
+     * @param startDate (optional) 
+     * @param endDate (optional) 
+     * @return OK
+     */
+    getCustomersOverallDueReport(startDate: moment.Moment | undefined, endDate: moment.Moment | undefined): Observable<CustomerOverallDueReportDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/Sales/GetCustomersOverallDueReport?";
+        if (startDate === null)
+            throw new Error("The parameter 'startDate' cannot be null.");
+        else if (startDate !== undefined)
+            url_ += "startDate=" + encodeURIComponent(startDate ? "" + startDate.toISOString() : "") + "&";
+        if (endDate === null)
+            throw new Error("The parameter 'endDate' cannot be null.");
+        else if (endDate !== undefined)
+            url_ += "endDate=" + encodeURIComponent(endDate ? "" + endDate.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetCustomersOverallDueReport(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetCustomersOverallDueReport(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<CustomerOverallDueReportDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<CustomerOverallDueReportDto[]>;
+        }));
+    }
+
+    protected processGetCustomersOverallDueReport(response: HttpResponseBase): Observable<CustomerOverallDueReportDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(CustomerOverallDueReportDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 @Injectable()
@@ -6509,6 +6577,7 @@ export class CustomerCreateOrUpdateDto implements ICustomerCreateOrUpdateDto {
     email: string | undefined;
     activeStatus: boolean;
     remarks: string | undefined;
+    initialDue: number;
 
     constructor(data?: ICustomerCreateOrUpdateDto) {
         if (data) {
@@ -6529,6 +6598,7 @@ export class CustomerCreateOrUpdateDto implements ICustomerCreateOrUpdateDto {
             this.email = _data["email"];
             this.activeStatus = _data["activeStatus"];
             this.remarks = _data["remarks"];
+            this.initialDue = _data["initialDue"];
         }
     }
 
@@ -6549,6 +6619,7 @@ export class CustomerCreateOrUpdateDto implements ICustomerCreateOrUpdateDto {
         data["email"] = this.email;
         data["activeStatus"] = this.activeStatus;
         data["remarks"] = this.remarks;
+        data["initialDue"] = this.initialDue;
         return data;
     }
 
@@ -6569,6 +6640,7 @@ export interface ICustomerCreateOrUpdateDto {
     email: string | undefined;
     activeStatus: boolean;
     remarks: string | undefined;
+    initialDue: number;
 }
 
 export class CustomerDueReportDto implements ICustomerDueReportDto {
@@ -6762,6 +6834,7 @@ export class CustomerOutputDto implements ICustomerOutputDto {
     email: string | undefined;
     activeStatus: boolean;
     remarks: string | undefined;
+    initialDue: number;
 
     constructor(data?: ICustomerOutputDto) {
         if (data) {
@@ -6782,6 +6855,7 @@ export class CustomerOutputDto implements ICustomerOutputDto {
             this.email = _data["email"];
             this.activeStatus = _data["activeStatus"];
             this.remarks = _data["remarks"];
+            this.initialDue = _data["initialDue"];
         }
     }
 
@@ -6802,6 +6876,7 @@ export class CustomerOutputDto implements ICustomerOutputDto {
         data["email"] = this.email;
         data["activeStatus"] = this.activeStatus;
         data["remarks"] = this.remarks;
+        data["initialDue"] = this.initialDue;
         return data;
     }
 
@@ -6822,6 +6897,7 @@ export interface ICustomerOutputDto {
     email: string | undefined;
     activeStatus: boolean;
     remarks: string | undefined;
+    initialDue: number;
 }
 
 export class CustomerOutputDtoPagedResultDto implements ICustomerOutputDtoPagedResultDto {
@@ -6877,6 +6953,73 @@ export class CustomerOutputDtoPagedResultDto implements ICustomerOutputDtoPagedR
 export interface ICustomerOutputDtoPagedResultDto {
     items: CustomerOutputDto[] | undefined;
     totalCount: number;
+}
+
+export class CustomerOverallDueReportDto implements ICustomerOverallDueReportDto {
+    serial: string | undefined;
+    customerId: number;
+    customerName: string | undefined;
+    previousDue: number;
+    currentSales: number;
+    currentPaymnet: number;
+    currentDue: number;
+
+    constructor(data?: ICustomerOverallDueReportDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.serial = _data["serial"];
+            this.customerId = _data["customerId"];
+            this.customerName = _data["customerName"];
+            this.previousDue = _data["previousDue"];
+            this.currentSales = _data["currentSales"];
+            this.currentPaymnet = _data["currentPaymnet"];
+            this.currentDue = _data["currentDue"];
+        }
+    }
+
+    static fromJS(data: any): CustomerOverallDueReportDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CustomerOverallDueReportDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["serial"] = this.serial;
+        data["customerId"] = this.customerId;
+        data["customerName"] = this.customerName;
+        data["previousDue"] = this.previousDue;
+        data["currentSales"] = this.currentSales;
+        data["currentPaymnet"] = this.currentPaymnet;
+        data["currentDue"] = this.currentDue;
+        return data;
+    }
+
+    clone(): CustomerOverallDueReportDto {
+        const json = this.toJSON();
+        let result = new CustomerOverallDueReportDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICustomerOverallDueReportDto {
+    serial: string | undefined;
+    customerId: number;
+    customerName: string | undefined;
+    previousDue: number;
+    currentSales: number;
+    currentPaymnet: number;
+    currentDue: number;
 }
 
 export class CustomerPriceDto implements ICustomerPriceDto {

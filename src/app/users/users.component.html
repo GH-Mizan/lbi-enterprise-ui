@@ -127,22 +127,19 @@
                             [tableStyle]="{ 'min-width': '50rem' }">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th style="min-width: 150px" pSortableColumn="userName">
+                                    <th style="min-width: 150px">
                                         {{ 'UserName' | localize }}
-                                        <p-sortIcon field="userName"></p-sortIcon>
                                     </th>
-                                    <th style="min-width: 150px" pSortableColumn="name">
+                                    <th style="min-width: 150px">
                                         {{ 'FullName' | localize }}
-                                        <p-sortIcon field="name"></p-sortIcon>
                                     </th>
-                                    <th style="min-width: 150px" pSortableColumn="emailAddress">
+                                    <th style="min-width: 150px">
                                         {{ 'EmailAddress' | localize }}
-                                        <p-sortIcon field="emailAddress"></p-sortIcon>
                                     </th>
                                     <th style="min-width: 150px">
                                         {{ 'IsActive' | localize }}
                                     </th>
-                                    <th style="min-width: 130px">
+                                    <th style="min-width: 130px" class="text-center">
                                         {{ 'Actions' | localize }}
                                     </th>
                                 </tr>
@@ -170,7 +167,7 @@
                                             {{ record.isActive }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <button
                                             type="button"
                                             class="btn btn-sm bg-secondary"

@@ -7,6 +7,7 @@ import { SharedModule } from '@shared/shared.module';
 import { DailySalesReportComponent } from './daily-sales/daily-sales-report.component';
 import { CustomerLedgerReportComponent } from './customer-ledger/customer-ledger-report.component';
 import { CustomerDueReportComponent } from './customer-dues/customer-due-report.component';
+import { CustomerOverallDuesReportComponent } from './customer-overall-dues/customer-overall-dues-report.component';
 
 
 @NgModule({
@@ -14,7 +15,8 @@ import { CustomerDueReportComponent } from './customer-dues/customer-due-report.
     SalesColllectionDueReportComponent,
     DailySalesReportComponent,
     CustomerLedgerReportComponent,
-    CustomerDueReportComponent
+    CustomerDueReportComponent,
+    CustomerOverallDuesReportComponent
   ],
   imports: [
     SharedModule,

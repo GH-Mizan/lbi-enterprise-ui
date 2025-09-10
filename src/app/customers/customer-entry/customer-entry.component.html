@@ -41,6 +41,13 @@
             </div>
         </div>
         <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="initialDue">Initial Due</label>
+            <div class="col-md-9">
+                <input type="text" class="form-control" name="initialDue" id="initialDue"
+                    [(ngModel)]="customer.initialDue" />
+            </div>
+        </div>
+        <div class="form-group row">
             <label class="col-md-3 col-form-label" for="remarks">Remarks</label>
             <div class="col-md-9">
                 <textarea class="form-control" name="remarks" id="remarks" [(ngModel)]="customer.remarks"
