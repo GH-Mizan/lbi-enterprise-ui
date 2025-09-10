@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ComboboxItemDto, CustomerLedgerReportDto, CustomerServiceProxy, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, CustomerDueReportDto, CustomerLedgerReportDto, CustomerServiceProxy, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { finalize } from "rxjs/operators";
 import moment, { invalid } from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
@@ -10,9 +10,9 @@ import { firstValueFrom } from 'rxjs';
 pdfMake.addVirtualFileSystem(pdfFonts);
 
 @Component({
-    selector: 'app-customer-ledger-report',
+    selector: 'app-customer-due-report',
     standalone: false,
-    templateUrl: './customer-ledger-report.component.html',
+    templateUrl: './customer-due-report.component.html',
     animations: [appModuleAnimation()],
     styles: [
         `
@@ -22,9 +22,9 @@ pdfMake.addVirtualFileSystem(pdfFonts);
     `
     ]
 })
-export class CustomerLedgerReportComponent implements OnInit {
+export class CustomerDueReportComponent implements OnInit {
 
-    data: CustomerLedgerReportDto[] = [];
+    data: CustomerDueReportDto[] = [];
     endDate = new Date();
     startDate = (moment().subtract(30, 'days')).toDate();
     rangeDates = [this.startDate, this.endDate];
@@ -50,7 +50,7 @@ export class CustomerLedgerReportComponent implements OnInit {
 
     getReportData() {
         this.loading = true;
-        this._salesService.getCustomerLedgerReport(parseInt(this.customerId), moment(this.rangeDates[0]), moment(this.rangeDates[1]))
+        this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.rangeDates[0]), moment(this.rangeDates[1]))
             .pipe(
                 finalize(() => {
                     this.loading = false;
@@ -74,12 +74,12 @@ export class CustomerLedgerReportComponent implements OnInit {
     }
 
     async print() {
-        const data = await firstValueFrom(this._salesService.getCustomerLedgerReport(parseInt(this.customerId), moment(this.rangeDates[0]), moment(this.rangeDates[1])));
+        const data = await firstValueFrom(this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.rangeDates[0]), moment(this.rangeDates[1])));
         var dd = {
             pageSize: 'A4',
             pageMargins: [20, 40, 20, 30],
             content: [
-                { text: `Ledger/Statement of ${this.customerName}`, fontSize: 20, bold: true, alignment: 'center', marginBottom: 15 },
+                { text: `Due Bills of ${this.customerName}`, fontSize: 20, bold: true, alignment: 'center', marginBottom: 15 },
                 {
                     table: {
                         widths: [70, '*', '*', '*', '*', '*', '*', '*', 55, 55, 55],
@@ -123,7 +123,7 @@ export class CustomerLedgerReportComponent implements OnInit {
 
     private getData(data: any) {
         const body = [
-            [{ text: 'Date', rowSpan: 3, style: ['headerStyle'] }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Credit', rowSpan: 3, style: ['headerStyle'] }, { text: 'Debit', rowSpan: 3, style: ['headerStyle'] }, { text: 'Balance', rowSpan: 3, style: ['headerStyle'] }],
+            [{ text: 'Date', rowSpan: 3, style: ['headerStyle'] }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'] }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'] }, { text: 'Balance', rowSpan: 3, style: ['headerStyle'] }],
             [{ text: '' }, { text: 'Oxygen', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Air', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Nitros', colSpan: 3, style: ['headerStyle'] }, { text: '' }, { text: '' }, { text: '', colSpan: 3 }, { text: '', style: ['headerStyle'] }, { text: '' }],
             [{ text: '' }, { text: '9.80' }, { text: '1.36' }, { text: '9.80' }, { text: '7.00' }, { text: '30KG' }, { text: '5KG' }, { text: '3KG' }, { text: '', colSpan: 3 }, { text: '' }, { text: '' }],
         ];
@@ -138,8 +138,8 @@ export class CustomerLedgerReportComponent implements OnInit {
                     { text: item.nitros30KgQty, style: ['cell_style', 'margin_1'] },
                     { text: item.nitros5KgQty, style: ['cell_style', 'margin_1'] },
                     { text: item.nitros3KgQty, style: ['cell_style', 'margin_1'] },
-                    { text: this.thousandsSeparator(item.creditTotal), style: ['cell_style', 'margin_1'] },
-                    { text: this.thousandsSeparator(item.debitTotal), style: ['cell_style', 'margin_1'] },
+                    { text: item.invoiceNo, style: ['cell_style', 'margin_1'] },
+                    { text: this.thousandsSeparator(item.totalDue), style: ['cell_style', 'margin_1'] },
                     { text: this.thousandsSeparator(item.balance), style: ['cell_style', 'margin_1'] }
                 ]
             );
