@@ -39,7 +39,7 @@
             <div class="offset-md-1 col-4">
                 <div class="form-group row">
                     <table class="table table-responsive table-bordered table-striped">
-                        <tr>
+                        <!-- <tr>
                             <th class="text-right" style="min-width: 160px;">Grand Total</th>
                             <td class="text-right" style="width:100%">{{dueReceived.grandTotal | number: '1.2-2'}}</td>
                         </tr>
@@ -55,7 +55,7 @@
                             <input *ngIf="discountEditMode" type="number" class="form-control text-right"
                                 [(ngModel)]="dueReceived.discount" (blur)="totalDiscountChanged()"
                                 [autofocus]="discountEditMode" name="discount" />
-                        </tr>
+                        </tr> -->
                         <tr>
                             <th class="text-right" style="min-width: 160px;">Net Total</th>
                             <td class="text-right" style="width:100%">{{dueReceived.netTotal | number: '1.2-2'}}</td>

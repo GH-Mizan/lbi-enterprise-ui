@@ -25,9 +25,6 @@
                             [tableStyle]="{ 'min-width': '50rem' }">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th>
-                                        Product Name
-                                    </th>
                                     <th> StockPoint </th>
                                     <th>
                                         Stock
@@ -41,16 +38,17 @@
                             <ng-template pTemplate="body" let-record="$implicit">
                                 <tr>
                                     <td>
-                                        <span>{{ record.productName }}</span>
-                                    </td>
-                                    <td>
                                         <span>{{ record.stockPointName }}</span>
                                     </td>
                                     <td>
                                         <span>{{record.stock}}</span>
                                     </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-sm bg-secondary mx-1"
+                                    <td class="text-center" style="width: 110px">
+                                        <button type="button" class="btn btn-sm bg-blue mx-1"
+                                            (click)="showBreakpoints(record)">
+                                            <i class="fas fa-external-link-square-alt"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm bg-green"
                                             (click)="showHistories(record.productId)">
                                             <i class="fa fa-history"></i>
                                         </button>

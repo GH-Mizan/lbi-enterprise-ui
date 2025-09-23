@@ -50,8 +50,10 @@ import { AppComponent } from './app.component';
                     { path: 'employees', loadChildren: () => import('./employees/employees.module').then(m => m.EmployeesModule) },
                     { path: 'inventories', loadChildren: () => import('./inventories/inventories.module').then(m => m.InventoriesModule) },
                     { path: 'reports', loadChildren: () => import('./reports/reports.module').then(m => m.ReportsModule) },
+                    { path: 'lbi-settings', loadChildren: () => import('./lbi-settings/lbi-settings.module').then(m => m.LbiSettingsModule) }
                 ],
             },
+            
             
             
            

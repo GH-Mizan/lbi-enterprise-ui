@@ -30,6 +30,7 @@ import { AutofocusDirective } from './directives/autofocus.directive';
 import { SelectOnFocusDirective } from './directives/select-on-focus.directive';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DatePickerModule } from 'primeng/datepicker';
+import { SalesReceiptReport } from './reports/sales-receipt-report';
 
 @NgModule({
     imports: [
@@ -83,7 +84,7 @@ export class SharedModule {
     static forRoot(): ModuleWithProviders<SharedModule> {
         return {
             ngModule: SharedModule,
-            providers: [AppSessionService, AppUrlService, AppAuthService, AppRouteGuard, LayoutStoreService],
+            providers: [AppSessionService, AppUrlService, AppAuthService, AppRouteGuard, LayoutStoreService, SalesReceiptReport],
         };
     }
 }

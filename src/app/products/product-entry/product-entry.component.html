@@ -1,5 +1,5 @@
 <form class="form-horizontal" autocomplete="off" #productEtryModal="ngForm" (ngSubmit)="save()">
-    <abp-modal-header title="Create Product" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <abp-modal-header title="Create product" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
     <div class="modal-body">
         <div class="form-group row required">
             <label class="col-md-3 col-form-label" for="name">{{ "Name" | localize }}</label>
@@ -41,7 +41,7 @@
         </div>
 
         <div class="form-group row required">
-            <label class="col-md-3 col-form-label" for="sellPrice">Sell Price</label>
+            <label class="col-md-3 col-form-label" for="sellPrice">Sale Price</label>
             <div class="col-md-9">
                 <input type="number" class="form-control" name="sellPrice" id="sellPrice"
                     [(ngModel)]="product.sellPrice" [min]="1" />

@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { DueReceivedHistoryComponent } from './due-received-histories/due-received-histories.component';
 import { DueReceivedEntryComponent } from './due-received-entry/due-received-entry.component';
+import { SalesReceiptReport } from '@shared/reports/sales-receipt-report';
 
 @Component({
   selector: 'app-sales',
@@ -29,6 +30,8 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
     private readonly _salesService: SalesServiceProxy,
     private readonly _router: Router,
     private readonly _modalService: BsModalService,
+    private readonly salesReceiptReport: SalesReceiptReport,
+    
     cd: ChangeDetectorRef
   ) {
     super(injector, cd);
@@ -46,7 +49,8 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
       }
     }
 
-    this.primengTableHelper.showLoadingIndicator();
+    //this.primengTableHelper.showLoadingIndicator();
+    this.primengTableHelper.isLoading = true;
     this._salesService.getPaginatedSales(
       moment(new Date()), moment(new Date()),
       this.searchText,
@@ -54,7 +58,9 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
       this.primengTableHelper.getMaxResultCount(this.paginator, event)
     ).pipe(
       finalize(() => {
-        this.primengTableHelper.hideLoadingIndicator();
+        //this.primengTableHelper.hideLoadingIndicator();
+        this.primengTableHelper.isLoading = false;
+        this.cd.detectChanges();
       })
     )
       .subscribe((result) => {
@@ -138,6 +144,10 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
         },
       }
     );
+  }
+
+  async generateReceipt(id: number) {
+     await this.salesReceiptReport.generateSalesReceipt(id);
   }
 
 

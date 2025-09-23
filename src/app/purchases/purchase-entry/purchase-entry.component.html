@@ -2,10 +2,10 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-3">
-                    <h1> Purchase Invoice Create </h1>
+                <div class="col-6">
+                    <h1> Create purchase invoice  </h1>
                 </div>
-                <div class="col-9">
+                <div class="col-6">
 
                 </div>
             </div>
@@ -20,8 +20,8 @@
                             <form class="form-horizontal" autocomplete="off" #purchaseEntryForm="ngForm"
                                 (ngSubmit)="save()" id="purchaseEntryForm">
                                 <div class="form-group row required">
-                                    <label class="col-md-3 col-form-label" for="date">Date</label>
-                                    <div class="col-md-9">
+                                    <label class="col-md-4 col-form-label" for="date">Date</label>
+                                    <div class="col-md-8">
                                         <p-datepicker [(ngModel)]="date" [showIcon]="true" inputId="buttondisplay"
                                             [showOnFocus]="false" dateFormat="dd-M-yy"
                                             [ngModelOptions]="{standalone: true}" />
@@ -29,8 +29,8 @@
                                 </div>
 
                                 <div class="form-group row required">
-                                    <label class="col-md-3 col-form-label" for="invoice">Invoice Number</label>
-                                    <div class="col-md-9">
+                                    <label class="col-md-4 col-form-label" for="invoice">Invoice</label>
+                                    <div class="col-md-8">
                                         <input type="text" class="form-control" name="invoice" id="invoice" required
                                             [(ngModel)]="model.invoiceNumber" #invoiceModel="ngModel" #invoiceEl />
                                         <abp-validation-summary [control]="invoiceModel"
@@ -39,8 +39,8 @@
                                 </div>
 
                                 <div class="form-group row required">
-                                    <label class="col-md-3 col-form-label" for="supplier"> Supplier Name </label>
-                                    <div class="col-md-9">
+                                    <label class="col-md-4 col-form-label" for="supplier"> Supplier </label>
+                                    <div class="col-md-8">
                                         <select class="form-select form-control" name="supplier" id="supplier"
                                             #supplierModel="ngModel" #supplierEl [(ngModel)]="model.supplierId">
                                             <option *ngFor="let s of suppliers" [value]="s.value">{{s.displayText}}
@@ -52,10 +52,11 @@
                                 </div>
 
                                 <div class="form-group row required">
-                                    <label class="col-md-3 col-form-label" for="stockPoint"> Stock Point </label>
-                                    <div class="col-md-9">
-                                        <select class="form-select form-control" name="stockPoint" id="stockPoint" [disabled]="!!id"
-                                            #stockPointModel="ngModel" #stockPointEl [(ngModel)]="model.stockPointId" (ngModelChange)="stockPointChanged()">
+                                    <label class="col-md-4 col-form-label" for="stockPoint"> Stock Point </label>
+                                    <div class="col-md-8">
+                                        <select class="form-select form-control" name="stockPoint" id="stockPoint"
+                                            [disabled]="!!id" #stockPointModel="ngModel" #stockPointEl
+                                            [(ngModel)]="model.stockPointId" (ngModelChange)="stockPointChanged()">
                                             <option *ngFor="let s of stockPoints" [value]="s.value">{{s.displayText}}
                                             </option>
                                         </select>
@@ -64,9 +65,9 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group row required">
-                                    <label class="col-md-3 col-form-label" for="paymentStatus"> Payment Status </label>
-                                    <div class="col-md-9">
+                                <!-- <div class="form-group row required">
+                                    <label class="col-md-4 col-form-label" for="paymentStatus"> Payment Status </label>
+                                    <div class="col-md-8">
                                         <select class="form-select form-control" name="paymentStatus" id="paymentStatus"
                                             #paymentStatusModel="ngModel" #paymentStatusEl
                                             [(ngModel)]="model.paymentStatus">
@@ -77,22 +78,26 @@
                                         <abp-validation-summary [control]="paymentStatusModel"
                                             [controlEl]="paymentStatusEl"></abp-validation-summary>
                                     </div>
-                                </div>
+                                </div> -->
 
                                 <div class="form-group row required">
-                                    <label class="col-md-3 col-form-label" for="purchaseBy">Purchase By</label>
-                                    <div class="col-md-9">
-                                        <input type="text" class="form-control" name="purchaseBy" id="purchaseBy"
-                                            required [(ngModel)]="model.purchaseBy" #purchaseByModel="ngModel"
-                                            #purchaseByEl />
+                                    <label class="col-md-4 col-form-label" for="purchaseBy">Purchaser</label>
+                                    <div class="col-md-8">
+                                        <select class="form-select form-control" name="purchaseBy" id="purchaseBy"
+                                            #purchaseByModel="ngModel" #purchaseByEl
+                                            [(ngModel)]="model.purchaseBy">
+                                            <option *ngFor="let e of employees" [value]="e.value">
+                                                {{e.displayText}}
+                                            </option>
+                                        </select>
                                         <abp-validation-summary [control]="purchaseByModel"
                                             [controlEl]="purchaseByEl"></abp-validation-summary>
                                     </div>
                                 </div>
 
                                 <div class="form-group row">
-                                    <label class="col-md-3 col-form-label" for="remarks">Remarks</label>
-                                    <div class="col-md-9">
+                                    <label class="col-md-4 col-form-label" for="remarks">Remarks</label>
+                                    <div class="col-md-8">
                                         <textarea class="form-control" name="remarks" id="remarks"
                                             [(ngModel)]="model.remarks" rows="3"></textarea>
                                     </div>
@@ -100,16 +105,16 @@
                             </form>
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6">
-                            <h2>Choose Products</h2>
+                            <h2>Choose products</h2>
                             <table class="table table-responsive table-bordered table-striped" *ngIf="!loading">
                                 <thead>
                                     <tr>
-                                        <th><p-checkbox [(ngModel)]="checkedAll" [binary]="true"
+                                        <th>
+                                            <p-checkbox [(ngModel)]="checkedAll" [binary]="true"
                                                 (change)="checkedAllChanged()"
-                                                [indeterminate]="checkedAllIndeterminate" /></th>
-                                        <th style="width: 150px;">Name</th>
-                                        <th>Type</th>
-                                        <th style="min-width:55px;">Size</th>
+                                                [indeterminate]="checkedAllIndeterminate" />
+                                        </th>
+                                        <th style="min-width: 150px;">Name</th>
                                         <th style="min-width:85px;">Unit Price</th>
                                         <th>Quantity</th>
                                         <th>Stock</th>
@@ -118,11 +123,11 @@
                                 </thead>
                                 <tbody>
                                     <tr *ngFor="let p of products">
-                                        <td><p-checkbox [(ngModel)]="p.selected" [binary]="true"
-                                                (change)="checkedChanged(p)" /></td>
+                                        <td>
+                                            <p-checkbox [(ngModel)]="p.selected" [binary]="true"
+                                                (change)="checkedChanged(p)" />
+                                        </td>
                                         <td>{{p.name}}</td>
-                                        <td>{{p.typeText}}</td>
-                                        <td>{{p.sizeText}}</td>
                                         <td [ngClass]="{'invalid_cell': (p.purchasePrice < 0) }">
                                             <input type="number" selectOnFocus class="form-control text-right"
                                                 [(ngModel)]="p.purchasePrice" (ngModelChange)="updateTotalPrice(p)"
@@ -141,30 +146,12 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="7" class="text-right text-bold">Grand Total</td>
-                                        <td class="text-right"><span class="text-bold">{{model.totalAmount | number:
-                                                '1.2-2'}}</span></td>
-                                    </tr>
-                                    <tr style="background-color: rgb(250, 248, 227);">
-                                        <td colspan="7" class="text-right text-bold">Discount</td>
-                                        <td *ngIf="!discountEditMode" class="text-right"
-                                            (dblclick)="discountEditMode = true">
-                                            <span>{{model.discount | number: '1.2-2'}}</span>
-                                        </td>
-                                        <td *ngIf="discountEditMode"
-                                            [ngClass]="{'invalid_cell': (model.discount < 0) }">
-                                            <input type="number" class="form-control text-right"
-                                                [(ngModel)]="model.discount" (blur)="totalDiscountChanged()"
-                                                [autofocus]="discountEditMode" name="discount" />
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="7" class="text-right text-bold">Net Total</td>
+                                        <td colspan="5" class="text-right text-bold">Total</td>
                                         <td class="text-right"><span class="text-bold">{{model.netAmount| number:
                                                 '1.2-2'}}</span></td>
                                     </tr>
                                     <tr style="background-color: rgb(250, 248, 227);">
-                                        <td colspan="7" class="text-right text-bold">Total Paid</td>
+                                        <td colspan="5" class="text-right text-bold">Paid</td>
                                         <td *ngIf="!totalPaidEditMode" class="text-right"
                                             (dblclick)="!id ? totalPaidEditMode = true : totalPaidEditMode = false">
                                             <span>{{model.paidAmount | number: '1.2-2'}}</span>
@@ -175,7 +162,7 @@
                                                 (blur)="totalPaidChanged()" [autofocus]="totalPaidEditMode" /></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="7" class="text-right text-bold">Due</td>
+                                        <td colspan="5" class="text-right text-bold">Due</td>
                                         <td class="text-right"><span class="text-bold">{{model.dueAmount | number:
                                                 '1.2-2'}}</span></td>
                                     </tr>

@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-6">
-                    <h1>StockPoints</h1>
+                    <h1>Stock Points</h1>
                 </div>
                 <div class="col-6 text-right">
                     <a href="javascript:;" class="btn bg-blue" (click)="create()">
@@ -46,7 +46,7 @@
                                     <th style="min-width: 150px"> Name </th>
                                     <th> Type </th>
                                     <th> Number </th>
-                                    <th> Gps Tracker </th>
+                                    <!-- <th> Gps Tracker </th> -->
                                     <th style="width: 68px"> Active </th>
                                     <th style="min-width: 150px"> Remarks </th>
                                     <th style="width: 120px; min-width: 120px" class="text-center">
@@ -66,9 +66,9 @@
                                     <td>
                                         <span>{{ record.stockPointNumber }}</span>
                                     </td>
-                                    <td>
+                                    <!-- <td>
                                         <span>{{record.gpsTrackerNo}}</span>
-                                    </td>
+                                    </td> -->
                                     <td class="text-center">
                                         <span> <input type="checkbox" value="" [checked]="record.activeStatus" disabled> </span>
                                     </td>

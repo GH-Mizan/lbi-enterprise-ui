@@ -44,10 +44,10 @@
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th style="min-width: 150px"> Name </th>
-                                    <th> Type </th>
-                                    <th> Size </th>
+                                    <!-- <th> Type </th>
+                                    <th> Size </th> -->
                                     <th> Purchase Price </th>
-                                    <th> SellPrice </th>
+                                    <th> Sale Price </th>
                                     <th style="width: 68px"> Active </th>
                                     <th style="width: 120px; min-width: 180px" class="text-center">
                                         {{ "Actions" }}
@@ -60,17 +60,17 @@
                                     <td>
                                         <span>{{ record.name }}</span>
                                     </td>
-                                    <td>
+                                    <!-- <td>
                                         <span>{{ record.typeText }}</span>
                                     </td>
                                     <td>
                                         <span>{{record.sizeText}}</span>
+                                    </td> -->
+                                    <td>
+                                        <span>{{record.purchasePrice | number: '1.2-2'}}</span>
                                     </td>
                                     <td>
-                                        <span>{{record.purchasePrice}}</span>
-                                    </td>
-                                    <td>
-                                        <span>{{record.sellPrice}}</span>
+                                        <span>{{record.sellPrice | number: '1.2-2'}}</span>
                                     </td>
                                     <td class="text-center">
                                         <span> <input type="checkbox" value="" [checked]="record.activeStatus" disabled> </span>

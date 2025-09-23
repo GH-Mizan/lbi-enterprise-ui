@@ -3,12 +3,13 @@ import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { Table } from 'primeng/table';
 import { Paginator } from "primeng/paginator";
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { InventoryServiceProxy, ProductTransferDto, SupplierCreateOrUpdateDto, SupplierOutputDto, SupplierServiceProxy } from '@shared/service-proxies/service-proxies';
+import { InventoryServiceProxy, ProductTransferDto, StockQuantityOutputDto, SupplierCreateOrUpdateDto, SupplierOutputDto, SupplierServiceProxy } from '@shared/service-proxies/service-proxies';
 import { BsModalService, BsModalRef } from "ngx-bootstrap/modal";
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
 import { ProductTransferComponent } from './product-transfer/product-transfer.component';
 import { ProductTransferHistoriesComponent } from './transfer-histories/product-transfer-history.component';
+import { InventoriesBreakpointComponent } from './breakpoints/inventories-breakpoint.component';
 //import { SupplierEntryComponent } from './inventory-entry/inventory-entry.component';
 
 @Component({
@@ -17,7 +18,7 @@ import { ProductTransferHistoriesComponent } from './transfer-histories/product-
   templateUrl: './inventories.component.html',
   animations: [appModuleAnimation()],
 })
-export class InventoriesComponent extends PagedListingComponentBase<SupplierOutputDto> {
+export class InventoriesComponent extends PagedListingComponentBase<StockQuantityOutputDto> {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
 
   searchText: string = "";
@@ -56,6 +57,10 @@ export class InventoriesComponent extends PagedListingComponentBase<SupplierOutp
     this.showProductTransferHistoryDialog(productId);
   }
 
+  showBreakpoints(record: StockQuantityOutputDto) {
+    this.showInventoriesBerakpointDialog(record);
+  }
+
   delete(): void {
 
   }
@@ -80,6 +85,19 @@ export class InventoriesComponent extends PagedListingComponentBase<SupplierOutp
         class: "modal-lg",
          initialState: {
           productId: productId,
+        },
+      }
+    );
+  }
+
+  private showInventoriesBerakpointDialog(record: StockQuantityOutputDto): void {
+   this._modalService.show(
+      InventoriesBreakpointComponent,
+      {
+        class: "modal-lg",
+         initialState: {
+          stockPointId: record.stockPointId,
+          stockPointName: record.stockPointName
         },
       }
     );

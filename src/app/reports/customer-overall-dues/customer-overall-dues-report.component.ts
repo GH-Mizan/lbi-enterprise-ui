@@ -30,7 +30,6 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
 
     endDate = new Date();
     startDate = (moment().subtract(30, 'days')).toDate();
-    rangeDates = [this.startDate, this.endDate];
 
     previousDue: number;
     currentSales: number;
@@ -48,7 +47,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
 
     list(event?: LazyLoadEvent): void {
         this.primengTableHelper.showLoadingIndicator();
-        this._salesService.getCustomersOverallDueReport(moment(this.rangeDates[0]), moment(this.rangeDates[1]))
+        this._salesService.getCustomersOverallDueReport(moment(this.startDate), moment(this.endDate))
             .pipe(
                 finalize(() => {
                     this.primengTableHelper.hideLoadingIndicator();
@@ -82,14 +81,14 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
 
     async print() {
         const items = await firstValueFrom(this._salesService.getCustomersOverallDueReport(
-            moment(this.rangeDates[0]), moment(this.rangeDates[1])
+            moment(this.startDate), moment(this.endDate)
         ));
         var dd = {
             pageSize: 'A4',
             pageMargins: [30, 40, 30, 40],
             content: [
                 { text: 'Users’ Due/Balance (Total Market Due)', fontSize: 20, bold: true, alignment: 'center', marginBottom: 2 },
-                { text: `From ${moment(this.rangeDates[0]).format('D MMM, YYYY')} to ${moment(this.rangeDates[1]).format('D MMM, YYYY')}`, fontSize: 17, bold: true, alignment: 'center', marginBottom: 15 },
+                { text: `From ${moment(this.startDate).format('D MMM, YYYY')} to ${moment(this.endDate).format('D MMM, YYYY')}`, fontSize: 17, bold: true, alignment: 'center', marginBottom: 15 },
                 {
                     table: {
                         widths: [20, 150, '*', '*', '*', '*'],

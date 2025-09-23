@@ -8,7 +8,9 @@ import { DailySalesReportComponent } from './daily-sales/daily-sales-report.comp
 import { CustomerLedgerReportComponent } from './customer-ledger/customer-ledger-report.component';
 import { CustomerDueReportComponent } from './customer-dues/customer-due-report.component';
 import { CustomerOverallDuesReportComponent } from './customer-overall-dues/customer-overall-dues-report.component';
-
+import { MonthlySalesRankingReportComponent } from './monthly-sales-ranking/monthly-sales-ranking.component';
+import { DailyPurchaseReportComponent } from './daily-purchase/daily-purchase-report.component';
+import { MonthlySalesInvoiceReportComponent } from './monthly-sales-invoices/monthly-sales-invoices.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +18,10 @@ import { CustomerOverallDuesReportComponent } from './customer-overall-dues/cust
     DailySalesReportComponent,
     CustomerLedgerReportComponent,
     CustomerDueReportComponent,
-    CustomerOverallDuesReportComponent
+    CustomerOverallDuesReportComponent,
+    MonthlySalesRankingReportComponent,
+    DailyPurchaseReportComponent,
+    MonthlySalesInvoiceReportComponent
   ],
   imports: [
     SharedModule,
@@ -24,4 +29,5 @@ import { CustomerOverallDuesReportComponent } from './customer-overall-dues/cust
     ReportsRoutingModule
   ]
 })
+
 export class ReportsModule { }

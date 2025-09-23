@@ -44,11 +44,12 @@
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th style="min-width: 150px"> Name </th>
-                                    <th> Department </th>
                                     <th> Designation </th>
+                                    <th> Department </th>
+                                    <th> Contact </th>
+                                    <th style="min-width: 150px"> Address </th>
                                     <th> Joining Date </th>
-                                    <th> Contact No. </th>
-                                    <th style="width: 68px"> Active </th>
+                                    <th style="width: 120px" class="text-center"> Active </th>
                                     <th style="width: 120px; min-width: 120px" class="text-center">
                                         {{ "Actions" }}
                                     </th>
@@ -58,10 +59,11 @@
                             <ng-template pTemplate="body" let-record="$implicit">
                                 <tr>
                                     <td> <span>{{ record.name }}</span> </td>
-                                    <td><span>{{ record.departmentName }}</span></td>
-                                    <td><span>{{ record.designationName }}</span></td>
-                                    <td><span>{{ record.joiningDate | date: 'dd MMM, yyyy' }}</span></td>
+                                    <td> <span>{{ record.designationName }}</span> </td>
+                                    <td> <span>{{ record.departmentName }}</span> </td>
                                     <td><span>{{ record.contactNumber }}</span></td>
+                                    <td> <span>{{ record.address }}</span> </td>
+                                    <td><span>{{ record.joiningDate | date: 'dd MMM, yyyy' }}</span></td>
                                     <td class="text-center">
                                         <span> <input type="checkbox" value="" [checked]="record.activeStatus" disabled> </span>
                                     </td>

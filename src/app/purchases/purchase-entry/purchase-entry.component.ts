@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-import { ComboboxItemDto, DuePaymentHistoryDto, PaymentStatus, PurchaseDetailsEntryDto, PurchaseEntryDto, PurchaseEntryInput, PurchaseProductDto, PurchaseServiceProxy, SupplierServiceProxy, StockPointServiceProxy } from "@shared/service-proxies/service-proxies";
+import { ComboboxItemDto, DuePaymentHistoryDto, PaymentStatus, PurchaseDetailsEntryDto, PurchaseEntryDto, PurchaseEntryInput, PurchaseProductDto, PurchaseServiceProxy, SupplierServiceProxy, StockPointServiceProxy, EmployeeServiceProxy } from "@shared/service-proxies/service-proxies";
 import { ActivatedRoute, Router } from '@angular/router';
 import moment from "moment";
 import { NotifyService } from 'abp-ng2-module';
@@ -41,6 +41,7 @@ export class PurchaseEntryComponent implements OnInit {
 
     model = { totalAmount: 0, discount: 0, netAmount: 0, paidAmount: 0, dueAmount: 0 } as PurchaseEntryDto;
     suppliers: ComboboxItemDto[] = [];
+    employees: ComboboxItemDto[] = [];
     paymentStatuses: ComboboxItemDto[] = [];
     stockPoints: ComboboxItemDto[] = [];
 
@@ -55,6 +56,7 @@ export class PurchaseEntryComponent implements OnInit {
         private readonly _purchaseService: PurchaseServiceProxy,
         private readonly _supplierService: SupplierServiceProxy,
         private readonly _stockPointService: StockPointServiceProxy,
+        private readonly _employeeService: EmployeeServiceProxy,
         private readonly _activatedRoute: ActivatedRoute,
         private readonly _router: Router,
         private readonly _notifyService: NotifyService,
@@ -69,7 +71,8 @@ export class PurchaseEntryComponent implements OnInit {
             this.populateSuppliers(),
             this.populatePaymentStatuses(),
             this.getModel(),
-            this.populateStockPoints()
+            this.populateStockPoints(),
+            this.populateEmployees()
         ]).then(() => {
             this.cd.detectChanges();
         })
@@ -105,6 +108,10 @@ export class PurchaseEntryComponent implements OnInit {
 
     private async populateSuppliers() {
         this.suppliers = await firstValueFrom(this._supplierService.getSuppliersSelectList());
+    }
+
+    private async populateEmployees() {
+        this.employees = await firstValueFrom(this._employeeService.getEmployees());
     }
 
     private async populateStockPoints() {

@@ -1,5 +1,5 @@
 <form class="form-horizontal" autocomplete="off" #employeeEtryModal="ngForm" (ngSubmit)="save()">
-    <abp-modal-header title="Add Employee" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <abp-modal-header title="Add employee" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
     <div class="modal-body">
         <div class="form-group row required">
             <label class="col-md-3 col-form-label" for="name">{{ "Name" | localize }}</label>
@@ -7,18 +7,6 @@
                 <input type="text" class="form-control" name="name" id="name" required [(ngModel)]="employee.name"
                     #nameModel="ngModel" #nameEl />
                 <abp-validation-summary [control]="nameModel" [controlEl]="nameEl"></abp-validation-summary>
-            </div>
-        </div>
-
-        <div class="form-group row required">
-            <label class="col-md-3 col-form-label" for="department"> Department </label>
-            <div class="col-md-9">
-                <select class="form-select form-control" name="department" id="department" #departmentModel="ngModel"
-                    #departmentEl [(ngModel)]="employee.departmentId">
-                    <option *ngFor="let dp of departments" [value]="dp.value">{{dp.displayText}}
-                    </option>
-                </select>
-                <abp-validation-summary [control]="departmentModel" [controlEl]="departmentEl"></abp-validation-summary>
             </div>
         </div>
 
@@ -36,18 +24,14 @@
         </div>
 
         <div class="form-group row required">
-            <label class="col-md-3 col-form-label" for="joiningDate">Joining Date</label>
+            <label class="col-md-3 col-form-label" for="department"> Department </label>
             <div class="col-md-9">
-                <p-datepicker [(ngModel)]="joiningDate" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false"
-                    dateFormat="dd-M-yy" [ngModelOptions]="{standalone: true}" />
-            </div>
-        </div>
-
-        <div class="form-group row required">
-            <label class="col-md-3 col-form-label" for="birthDate">Birth Date</label>
-            <div class="col-md-9">
-                <p-datepicker [(ngModel)]="birthDate" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false"
-                    dateFormat="dd-M-yy" [ngModelOptions]="{standalone: true}" />
+                <select class="form-select form-control" name="department" id="department" #departmentModel="ngModel"
+                    #departmentEl [(ngModel)]="employee.departmentId">
+                    <option *ngFor="let dp of departments" [value]="dp.value">{{dp.displayText}}
+                    </option>
+                </select>
+                <abp-validation-summary [control]="departmentModel" [controlEl]="departmentEl"></abp-validation-summary>
             </div>
         </div>
 
@@ -68,6 +52,22 @@
             </div>
         </div>
 
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="joiningDate">Joining Date</label>
+            <div class="col-md-9">
+                <p-datepicker [(ngModel)]="joiningDate" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false"
+                    dateFormat="dd-M-yy" [ngModelOptions]="{standalone: true}" />
+            </div>
+        </div>
+
+        <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="birthDate">Date of Birth </label>
+            <div class="col-md-9">
+                <p-datepicker [(ngModel)]="birthDate" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false"
+                    dateFormat="dd-M-yy" [ngModelOptions]="{standalone: true}" />
+            </div>
+        </div>
+
         <div class="form-group row">
             <label class="col-md-3 col-form-label" for="remarks">Remarks</label>
             <div class="col-md-9">
@@ -79,7 +79,7 @@
         <div class="form-group row">
             <label class="col-md-3 col-form-label" for="reference">Reference</label>
             <div class="col-md-9">
-                <input type="text" class="form-control" name="reference" id="reference" required [(ngModel)]="employee.reference"
+                <input type="text" class="form-control" name="reference" id="reference" [(ngModel)]="employee.reference"
                     #referenceModel="ngModel" #referenceEl />
             </div>
         </div>

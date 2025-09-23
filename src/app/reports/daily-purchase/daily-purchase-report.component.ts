@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { DailySalesReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { Table } from 'primeng/table';
 import { finalize } from "rxjs/operators";
 import moment from 'moment';
@@ -8,13 +7,14 @@ import { appModuleAnimation } from '@shared/animations/routerTransition';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
+import { DailyPurchaseReportDto, PurchaseServiceProxy } from '../../../shared/service-proxies/service-proxies';
 import { Utils } from '@shared/helpers/Utils';
 pdfMake.addVirtualFileSystem(pdfFonts);
 
 @Component({
-    selector: 'app-daily-sales-report',
+    selector: 'app-daily-purchase-report',
     standalone: false,
-    templateUrl: './daily-sales-report.component.html',
+    templateUrl: './daily-purchase-report.component.html',
     animations: [appModuleAnimation()],
     styles: [
         `
@@ -24,16 +24,16 @@ pdfMake.addVirtualFileSystem(pdfFonts);
     `
     ]
 })
-export class DailySalesReportComponent implements OnInit {
+export class DailyPurchaseReportComponent implements OnInit {
     @ViewChild('dataTable', { static: true }) dataTable: Table;
 
-    data: DailySalesReportDto;
+    data: DailyPurchaseReportDto;
     date = new Date();
     loading: boolean = false;
 
     constructor(
         private cd: ChangeDetectorRef,
-        private _salesService: SalesServiceProxy
+        private _purchaseService: PurchaseServiceProxy
     ) {
 
     }
@@ -43,7 +43,7 @@ export class DailySalesReportComponent implements OnInit {
     }
 
     getReportData() {
-        this._salesService.getDailySalesReport(moment(this.date))
+        this._purchaseService.getDailyPurchaseReport(moment(this.date))
             .pipe(
                 finalize(() => {
                     this.loading = false;
@@ -57,8 +57,8 @@ export class DailySalesReportComponent implements OnInit {
     }
 
     async print() {
-        const data = await firstValueFrom(this._salesService.getDailySalesReport(moment(this.date)));
-        const logo = await Utils.getImageDataUrl('assets/img/logo.png');
+        const data = await firstValueFrom(this._purchaseService.getDailyPurchaseReport(moment(this.date)));
+        const logo = await Utils.getImageDataUrl('../../assets/img/logo.png');
         var dd = {
             pageSize: 'A4',
             pageMargins: [20, 40, 20, 30],
@@ -68,7 +68,7 @@ export class DailySalesReportComponent implements OnInit {
                     table: {
                         widths: ['*'],
                         body: [
-                            [{ text: `Daily Sales (${moment(this.date).format('D MMM, YYYY').toString()})`, bold: true, fontSize: 20, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'] }],
+                            [{ text: `Daily Purchase (${moment(this.date).format('D MMM, YYYY').toString()})`, bold: true, fontSize: 20, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'] }],
                         ]
                     }
                 },
@@ -110,7 +110,6 @@ export class DailySalesReportComponent implements OnInit {
                     alignment: 'center'
                 }
             }
-
         };
         // pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
         pdfMake.createPdf(dd).open();
@@ -119,14 +118,14 @@ export class DailySalesReportComponent implements OnInit {
 
     private getData(data: any) {
         const body = [
-            [{ text: 'User', rowSpan: 3, style: ['headerStyle'] }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'] }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'] }, { text: 'Due Col.', rowSpan: 3, style: ['headerStyle'] }, { text: 'Status', rowSpan: 3, style: ['headerStyle'] }],
+            [{ text: 'Supplier', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Due Pay.', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Status', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }],
             [{ text: '' }, { text: 'Oxygen', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Air', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Nitros (KG)', colSpan: 3, style: ['headerStyle'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['headerStyle'] }, { text: '' }, { text: '' }],
             [{ text: '' }, { text: '9.8', style: ['textCenter'] }, { text: '1.36', style: ['textCenter'] }, { text: '9.8', style: ['textCenter'] }, { text: '7.0', style: ['textCenter'] }, { text: '30', style: ['textCenter'] }, { text: '5', style: ['textCenter'] }, { text: '3', style: ['textCenter'] }, { text: '', colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }],
         ];
         data.details.forEach(item => {
             body.push(
                 [
-                    { text: item.customerName, style: ['cell_style', 'margin_1'] },
+                    { text: item.supplierName, style: ['cell_style', 'margin_1'] },
                     { text: item.medicalOxygen9_8Qty, style: ['cell_style', 'margin_1'] },
                     { text: item.medicalOxygen1_36Qty, style: ['cell_style', 'margin_1'] },
                     { text: item.medicalAir9_8Qty, style: ['cell_style', 'margin_1'] },
@@ -136,7 +135,7 @@ export class DailySalesReportComponent implements OnInit {
                     { text: item.nitros3KgQty, style: ['cell_style', 'margin_1'] },
                     { text: item.invoiceNo, style: ['cell_style', 'margin_1'] },
                     { text: Utils.thousandsSeparator(item.netAmount), style: ['cell_style', 'margin_1'] },
-                    { text: Utils.thousandsSeparator(item.dueCollection), style: ['cell_style', 'margin_1'] },
+                    { text: Utils.thousandsSeparator(item.duePayment), style: ['cell_style', 'margin_1'] },
                     { text: item.paymentStatusText, style: ['cell_style', 'margin_1'] }
                 ]
             );
@@ -145,7 +144,7 @@ export class DailySalesReportComponent implements OnInit {
         body.push([{ text: ' ', colSpan: 12 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }]);
 
         body.push([
-            { text: 'Total Sale', style: ['footerStyle'] },
+            { text: 'Total Purchase', style: ['footerStyle'] },
             { text: data.medicalOxygen9_8TotalQty, style: ['footerParticular'] },
             { text: data.medicalOxygen1_36TotalQty, style: ['footerParticular'] },
             { text: data.medicalAir9_8TotalQty, style: ['footerParticular'] },
@@ -158,13 +157,13 @@ export class DailySalesReportComponent implements OnInit {
         ]);
 
         body.push([
-            { text: 'Cash Collection', style: ['footerStyle'] },
-            { text: `${Utils.thousandsSeparator(data.cashCollection)}/-`, colSpan: 11, style: ['footerStyle'] },
+            { text: 'Cash Payment', style: ['footerStyle'] },
+            { text: `${Utils.thousandsSeparator(data.cashPayment)}/-`, colSpan: 11, style: ['footerStyle'] },
             { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
         ]);
         body.push([
-            { text: 'Due Collection', style: ['footerStyle'] },
-            { text: `${Utils.thousandsSeparator(data.dueCollection)}/-`, colSpan: 11, style: ['footerStyle'] },
+            { text: 'Due Payment', style: ['footerStyle'] },
+            { text: `${Utils.thousandsSeparator(data.duePayment)}/-`, colSpan: 11, style: ['footerStyle'] },
             { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
         ]);
         body.push([
@@ -175,5 +174,4 @@ export class DailySalesReportComponent implements OnInit {
 
         return body;
     }
-
 }

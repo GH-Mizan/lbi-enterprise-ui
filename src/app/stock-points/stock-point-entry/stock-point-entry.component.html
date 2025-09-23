@@ -1,5 +1,5 @@
 <form class="form-horizontal" autocomplete="off" #stockPointEtryModal="ngForm" (ngSubmit)="save()">
-    <abp-modal-header title="Create member" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <abp-modal-header title="Create stock point" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
     <div class="modal-body">
         <div class="form-group row required">
             <label class="col-md-3 col-form-label" for="name">{{ "Name" | localize }}</label>
@@ -22,21 +22,21 @@
             </div>
         </div>
 
-
         <div class="form-group row">
-            <label class="col-md-3 col-form-label" for="stockPointNumber">StockPoint Number</label>
+            <label class="col-md-3 col-form-label" for="stockPointNumber">Stock Point Number</label>
             <div class="col-md-9">
                 <input type="text" class="form-control" name="stockPointNumber" id="stockPointNumber"
                     [(ngModel)]="stockPoint.stockPointNumber" />
             </div>
         </div>
-        <div class="form-group row">
+        
+        <!-- <div class="form-group row">
             <label class="col-md-3 col-form-label" for="gpsTrackerNo">Gps Tracker No.</label>
             <div class="col-md-9">
                 <input type="text" class="form-control" name="gpsTrackerNo" id="gpsTrackerNo"
                     [(ngModel)]="stockPoint.gpsTrackerNo" />
             </div>
-        </div>
+        </div> -->
 
         <div class="form-group row">
             <label class="col-md-3 col-form-label" for="remarks">Remarks</label>

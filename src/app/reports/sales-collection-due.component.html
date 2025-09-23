@@ -2,7 +2,7 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-6">
+                <div class="col-8">
                     <h1>Sales, Collection & Due </h1>
                 </div>
             </div>
@@ -12,29 +12,43 @@
         <div class="container-fluid">
             <div class="card table-wrapper">
                 <div class="card-header">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="float-left">
-                                <div class="input-group">
-                                    <p-datepicker [(ngModel)]="rangeDates" selectionMode="range" [readonlyInput]="true"
-                                        dateFormat="dd/M/yy" />
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn bg-blue" (click)="list()">
-                                            <i class="fas fa-search"></i>
-                                        </button>
+                    <form class="form" autocomplete="off">
+                        <div class="row">
+
+                            <div class="col-3">
+                                <div class="form-group row">
+                                    <label class="col-4 col-form-label" for="name">Start Date</label>
+                                    <div class="col-8">
+                                        <p-datepicker [(ngModel)]="startDate" [readonlyInput]="true"
+                                            dateFormat="dd/M/yy" [showIcon]="true"
+                                            [ngModelOptions]="{standalone: true}" />
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="float-right">
-                                <button type="button" class="btn bg-green" (click)="print()">
-                                    Print
-                                </button>
-                            </div>
-                        </div>
-                    </div>
 
+                            <div class="col-3">
+                                <div class="form-group row">
+                                    <label class="col-4 col-form-label" for="name">End Date</label>
+                                    <div class="col-8">
+                                        <p-datepicker [(ngModel)]="endDate" [readonlyInput]="true" dateFormat="dd/M/yy"
+                                            [showIcon]="true" [ngModelOptions]="{standalone: true}" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="float-right">
+                                    <button type="button" class="btn bg-blue mx-1" (click)="list()">
+                                        Search
+                                    </button>
+                                    <button type="button" class="btn bg-green" (click)="print()">
+                                        Print
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
                 </div>
                 <div class="card-body table-responsive table-striped table-bordered">
                     <!--<Primeng-TurboTable-Start>-->

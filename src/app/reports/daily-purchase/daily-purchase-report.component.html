@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-6">
-                    <h1>Daily Sales ({{date | date: 'dd MMM, yyyy' }}) </h1>
+                    <h1>Daily Purchase ({{date | date: 'dd MMM, yyyy' }}) </h1>
                 </div>
             </div>
         </div>
@@ -39,11 +39,11 @@
                     <table class="table table-responsive table-striped table-bordered">
                         <thead>
                             <tr>
-                                <th rowspan="3" class="text-center">User</th>
+                                <th rowspan="3" class="text-center">Supplier</th>
                                 <th colspan="7" class="text-center">Particular</th>
                                 <th rowspan="3" class="text-center">Bill No.</th>
                                 <th rowspan="3" class="text-center">Amount</th>
-                                <th rowspan="3" class="text-center">Due Col.</th>
+                                <th rowspan="3" class="text-center">Due Pay.</th>
                                 <th rowspan="3" class="text-center">Status</th>
                             </tr>
                             <tr>
@@ -64,7 +64,7 @@
                         <tbody *ngIf="!loading">
                             <tr *ngFor="let record of data.details">
                                 <td style="width: 25%;">
-                                    <span>{{ record.customerName }}</span>
+                                    <span>{{ record.supplierName }}</span>
                                 </td>
                                 <td class="text-center" style="width: 8%;">
                                     <span>{{ record.medicalOxygen9_8Qty }}</span>
@@ -95,7 +95,7 @@
                                     <span>{{record.netAmount | number: '1.2-2' }}</span>
                                 </td>
                                 <td class="text-center" style="min-width: 110px;">
-                                    <span>{{record.dueCollection | number: '1.2-2' }}</span>
+                                    <span>{{record.duePayment | number: '1.2-2' }}</span>
                                 </td>
                                 <td class="text-center" style="min-width: 85px">
                                     <span>{{record.paymentStatusText }}</span>
@@ -110,7 +110,7 @@
                         </tbody>
                         <tfoot *ngIf="data && data.details && data.details.length > 0">
                             <tr>
-                                <td class="text-bold text-right"> Total Sale </td>
+                                <td class="text-bold text-right"> Total Purchase </td>
                                 <td class="text-bold text-center"> {{data.medicalOxygen9_8TotalQty}} </td>
                                 <td class="text-bold text-center"> {{data.medicalOxygen1_36TotalQty}} </td>
                                 <td class="text-bold text-center"> {{data.medicalAir9_8TotalQty}} </td>
@@ -121,12 +121,12 @@
                                 <td class="text-bold text-right" colspan="4"> {{data.netTotal | number: '1.2-2'}}/- </td>
                             </tr>
                             <tr>
-                                <td class="text-bold text-right"> Cash Collection </td>
-                                <td class="text-bold text-right" colspan="11"> {{data.cashCollection | number: '1.2-2'}}/- </td>
+                                <td class="text-bold text-right"> Cash Payment </td>
+                                <td class="text-bold text-right" colspan="11"> {{data.cashPayment | number: '1.2-2'}}/- </td>
                             </tr>
                             <tr>
-                                <td class="text-bold text-right"> Due Collection </td>
-                                <td class="text-bold text-right" colspan="11"> {{data.dueCollection | number: '1.2-2'}}/- </td>
+                                <td class="text-bold text-right"> Due Payment </td>
+                                <td class="text-bold text-right" colspan="11"> {{data.duePayment | number: '1.2-2'}}/- </td>
                             </tr>
                             <tr>
                                 <td class="text-bold text-right"> Due </td>

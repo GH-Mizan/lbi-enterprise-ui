@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ComboboxItemDto, CustomerDueReportDto, CustomerLedgerReportDto, CustomerServiceProxy, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { finalize } from "rxjs/operators";
-import moment, { invalid } from 'moment';
+import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 
 import * as pdfMake from 'pdfmake/build/pdfmake';
@@ -27,7 +27,6 @@ export class CustomerDueReportComponent implements OnInit {
     data: CustomerDueReportDto[] = [];
     endDate = new Date();
     startDate = (moment().subtract(30, 'days')).toDate();
-    rangeDates = [this.startDate, this.endDate];
     loading: boolean = true;
     customerId: string = "";
     customerName: string = "";
@@ -50,7 +49,7 @@ export class CustomerDueReportComponent implements OnInit {
 
     getReportData() {
         this.loading = true;
-        this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.rangeDates[0]), moment(this.rangeDates[1]))
+        this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate))
             .pipe(
                 finalize(() => {
                     this.loading = false;
@@ -74,7 +73,7 @@ export class CustomerDueReportComponent implements OnInit {
     }
 
     async print() {
-        const data = await firstValueFrom(this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.rangeDates[0]), moment(this.rangeDates[1])));
+        const data = await firstValueFrom(this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate)));
         var dd = {
             pageSize: 'A4',
             pageMargins: [20, 40, 20, 30],

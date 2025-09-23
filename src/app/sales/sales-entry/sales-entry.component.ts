@@ -1,12 +1,12 @@
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
-import { firstValueFrom } from "rxjs";
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-import { ComboboxItemDto, CustomerServiceProxy, DueReceivedHistoryDto, PaymentStatus, PurchaseServiceProxy, SalesDetailsEntryDto, SalesEntryDto, SalesEntryInput, SalesServiceProxy, StockPointServiceProxy } from "@shared/service-proxies/service-proxies";
+import { ComboboxItemDto, CustomerServiceProxy, DueReceivedHistoryDto, EmployeeServiceProxy, PaymentStatus, PurchaseServiceProxy, SalesDetailsEntryDto, SalesEntryDto, SalesEntryInput, SalesServiceProxy, StockPointServiceProxy } from "@shared/service-proxies/service-proxies";
 import { ActivatedRoute, Router } from '@angular/router';
-import moment from "moment";
 import { NotifyService } from 'abp-ng2-module';
 import { SalesProductDto } from "@shared/service-proxies/service-proxies";
-
+import { SalesReceiptReport } from "@shared/reports/sales-receipt-report";
+import { firstValueFrom } from "rxjs";
+import moment from "moment";
 
 @Component({
     selector: 'app-sales-entry',
@@ -44,6 +44,7 @@ export class SalesEntryComponent implements OnInit {
     customers: ComboboxItemDto[] = [];
     stockPoints: ComboboxItemDto[] = [];
     paymentStatuses: ComboboxItemDto[] = [];
+    employees: ComboboxItemDto[] = [];
 
     discountEditMode: boolean = false;
     totalPaidEditMode: boolean = false;
@@ -58,12 +59,14 @@ export class SalesEntryComponent implements OnInit {
         private readonly _purchaseService: PurchaseServiceProxy,
         private readonly _customerService: CustomerServiceProxy,
         private readonly _stockPointService: StockPointServiceProxy,
+        private readonly _employeeService: EmployeeServiceProxy,
         private readonly _activatedRoute: ActivatedRoute,
         private readonly _router: Router,
         private readonly _notifyService: NotifyService,
-        private readonly cd: ChangeDetectorRef
-    ) {
+        private readonly cd: ChangeDetectorRef,
+        private readonly salesReceiptReport: SalesReceiptReport
 
+    ) {
     }
 
     async ngOnInit() {
@@ -75,7 +78,8 @@ export class SalesEntryComponent implements OnInit {
             this.populateCustomers(),
             this.populatePaymentStatuses(),
             this.getModel(),
-            this.populateStockPoints()
+            this.populateStockPoints(),
+            this.populateEmployees()
         ]).then(() => {
             this.cd.detectChanges();
         })
@@ -111,6 +115,10 @@ export class SalesEntryComponent implements OnInit {
 
     private async populateCustomers() {
         this.customers = await firstValueFrom(this._customerService.getCustomersSelectList());
+    }
+
+    private async populateEmployees() {
+        this.employees = await firstValueFrom(this._employeeService.getEmployees());
     }
 
     private async populateStockPoints() {
@@ -264,11 +272,10 @@ export class SalesEntryComponent implements OnInit {
                 });
                 this.cd.detectChanges();
             }
-
         })
     }
 
-    save() {
+    save(print: boolean) {
         const model = this.model;
         model.date = moment(this.date);
         model.customerName = this.customers.find(f => f.value == model.customerId.toString()).displayText;
@@ -305,16 +312,24 @@ export class SalesEntryComponent implements OnInit {
             } as DueReceivedHistoryDto;
         }
 
-        this._salesService.createOrUpdate(input).subscribe(() => {
+        this._salesService.createOrUpdate(input).subscribe(async (id) => {
             this._notifyService.success("Successfully " + this.id ? 'Saved' : 'Updated' + "");
+            if(print) await this.salesReceiptReport.generateSalesReceipt(id);
             this._router.navigateByUrl('app/sales');
         });
+    }
+
+    submit() {
+        this.save(false);
+    }
+
+    submitAndPrint() {
+        this.save(true);
     }
 
     cancel() {
         this._router.navigateByUrl('app/sales');
     }
-
 
     populatePaymentStatus() {
         if (this.model.totalAmount > 0) {
@@ -329,4 +344,6 @@ export class SalesEntryComponent implements OnInit {
             this.model.paymentStatus = null;
         }
     }
+
+
 }

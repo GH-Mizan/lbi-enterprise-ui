@@ -43,17 +43,15 @@
                             [tableStyle]="{ 'min-width': '50rem' }">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th style="min-width: 150px"> Date </th>
-                                    <th> Invoice No. </th>
+                                    <th style="min-width: 110px"> Date </th>
+                                    <th> Invoice </th>
                                     <th> Stock Point </th>
-                                    <th> Supplier Name </th>
-                                    <th> Total Amount </th>
-                                    <th> Discount </th>
-                                    <th> Net Amount </th>
-                                    <th> Paid Amount </th>
-                                    <th> Due Amount </th>
-                                    <th>Status </th>
-                                    <th style="width: 120px; min-width: 180px" class="text-center">
+                                    <th> Supplier </th>
+                                    <th style="width:100px"> Amount </th> <!--net amount-->
+                                    <th style="width:100px"> Paid </th>
+                                    <th style="width:100px"> Due </th>
+                                    <th style="width:80px">Status </th>
+                                    <th style="min-width: 180px" class="text-center">
                                         {{ "Actions" }}
                                     </th>
                                 </tr>
@@ -72,12 +70,6 @@
                                     </td>
                                     <td>
                                         <span>{{record.supplierName}}</span>
-                                    </td>
-                                    <td>
-                                        <span>{{record.totalAmount | number: '1.2-2'}}</span>
-                                    </td>
-                                    <td>
-                                        <span>{{record.discount | number: '1.2-2'}}</span>
                                     </td>
                                     <td>
                                         <span>{{record.netAmount | number: '1.2-2'}}</span>

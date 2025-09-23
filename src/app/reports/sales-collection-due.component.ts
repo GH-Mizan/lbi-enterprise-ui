@@ -16,21 +16,13 @@ pdfMake.addVirtualFileSystem(pdfFonts);
   selector: 'app-sales-collection-due-report',
   standalone: false,
   templateUrl: './sales-collection-due.component.html',
-  animations: [appModuleAnimation()],
-  styles: [
-    `
-     :host ::ng-deep .p-inputtext {
-        min-width: 185px !important;
-      }
-    `
-  ]
+  animations: [appModuleAnimation()]
 })
 export class SalesColllectionDueReportComponent extends PagedListingComponentBase<SalesCollectionDueReportDto> {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
 
   endDate = new Date();
   startDate = (moment().subtract(30, 'days')).toDate();
-  rangeDates = [this.startDate, this.endDate];
 
 
   constructor(
@@ -45,7 +37,7 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
   list(event?: LazyLoadEvent): void {
     this.primengTableHelper.showLoadingIndicator();
     this._salesService.getSalesCollectionDueReport(
-      moment(this.rangeDates[0]), moment(this.rangeDates[1])
+      moment(this.startDate), moment(this.endDate)
     ).pipe(
       finalize(() => {
         this.primengTableHelper.hideLoadingIndicator();
@@ -65,7 +57,7 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
 
   async print() {
     const items = await firstValueFrom(this._salesService.getSalesCollectionDueReport(
-      moment(this.rangeDates[0]), moment(this.rangeDates[1])
+      moment(this.startDate), moment(this.endDate)
     ));
     var dd = {
       pageSize: 'A4',
