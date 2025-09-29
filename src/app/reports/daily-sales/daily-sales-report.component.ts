@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { DailySalesReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import { DailySalesReportDetailsDto, DailySalesReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { Table } from 'primeng/table';
 import { finalize } from "rxjs/operators";
 import moment from 'moment';
@@ -58,56 +58,53 @@ export class DailySalesReportComponent implements OnInit {
 
     async print() {
         const data = await firstValueFrom(this._salesService.getDailySalesReport(moment(this.date)));
+        // let count = data.details.length + 1;
+        // for (let i = count; i < 118 + count; i++) {
+        //     data.details.push({ customerName: i.toString(), netAmount: 0, dueCollection: 0 } as DailySalesReportDetailsDto);
+        // }
         const logo = await Utils.getImageDataUrl('assets/img/logo.png');
         var dd = {
             pageSize: 'A4',
-            pageMargins: [20, 40, 20, 30],
-            content: [
-                Utils.getReportHeaders(logo),
-                {
-                    table: {
-                        widths: ['*'],
-                        body: [
-                            [{ text: `Daily Sales (${moment(this.date).format('D MMM, YYYY').toString()})`, bold: true, fontSize: 20, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'] }],
-                        ]
-                    }
-                },
-                { text: ' ', fontSize: 10 },
-                {
-                    table: {
-                        widths: ['*', 17, 25, 17, 17, 17, 17, 17, 40, 45, 45, 32],
-                        body: this.getData(data)
-                    }
-                }
-            ],
+            pageMargins: [30, 20, 30, 20],
+            content: this.getContent(data, logo),
             styles: {
                 headerStyle: {
-                    fontSize: 11,
+                    fontSize: 12,
                     bold: true,
                     alignment: 'center'
                 },
-                text_green: {
-                    color: 'green'
-                },
-                cell_style: {
+                subHeader: {
                     fontSize: 10,
+                    bold: true,
                     alignment: 'center'
                 },
-                margin_1: {
-                    marginTop: 1,
-                    marginBottom: 1
+                particularHeader: {
+                    fontSize: 10,
+                    bold: true,
+                    alignment: 'center'
+                },
+                cell_style: {
+                    fontSize: 9,
+                    alignment: 'center'
                 },
                 footerStyle: {
-                    fontSize: 11,
+                    fontSize: 9,
                     bold: true,
                     alignment: 'right'
                 },
                 footerParticular: {
+                    fontSize: 9,
                     bold: true,
                     alignment: 'center'
                 },
-                textCenter: {
+                particularHeader136: {
+                    fontSize: 8,
+                    bold: true,
                     alignment: 'center'
+                },
+                cellAmount: {
+                    fontSize: 9,
+                    alignment: 'right'
                 }
             }
 
@@ -117,61 +114,274 @@ export class DailySalesReportComponent implements OnInit {
         // //pdfMake.createPdf(docDefinition).print();
     }
 
-    private getData(data: any) {
+    private getContent(data: DailySalesReportDto, logo: any) {
+        const details = data.details;
+        const totalRows = details.length;
+        const totalValues = {
+            medicalOxygen9_8TotalQty: data.medicalOxygen9_8TotalQty,
+            medicalOxygen1_36TotalQty: data.medicalOxygen1_36TotalQty,
+            medicalAir9_8TotalQty: data.medicalAir9_8TotalQty,
+            medicalAir7TotalQty: data.medicalAir7TotalQty,
+            nitros30KgTotalQty: data.nitros30KgTotalQty,
+            nitros5KgTotalQty: data.nitros5KgTotalQty,
+            nitros3KgTotalQty: data.nitros3KgTotalQty,
+            netTotal: data.netTotal,
+            cashCollection: data.cashCollection,
+            dueCollection: data.dueCollection,
+            due: data.due
+        };
+
+        let hasNextpage = false;
+        const metaData: DailySalesReportDetailsDto[][] = [];
+        let slicedData: DailySalesReportDetailsDto[] = [];
+
+        if (totalRows > 38) {
+            hasNextpage = true;
+            const partition = Math.ceil(totalRows / 41);
+            for (let i = 0; i < partition; i++) {
+                slicedData = [];
+                const itemsToTransfer = details.slice(0, 41);
+                slicedData.push(...itemsToTransfer);
+                details.splice(0, 41);
+                metaData.push(slicedData);
+            }
+        }
+
+        if (!hasNextpage) {
+            return [
+                Utils.getReportHeaders(logo),
+                {
+                    table: {
+                        widths: ['*'],
+                        body: [
+                            [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                        ]
+                    }
+                },
+                { text: ' ', fontSize: 5 },
+                {
+                    layout: {
+                        hLineColor: () => 'grey',
+                        vLineColor: () => 'grey',
+                        hLineWidth: () => 1,
+                        vLineWidth: () => 1,
+                    },
+                    table: {
+                        widths: ['*', 19, 16, 17, 17, 17, 17, 17, 40, 45, 45, 32],
+                        body: this.getData(details, true, totalValues)
+                    }
+                }
+            ];
+        } else {
+            const content = [];
+            metaData.forEach((items, index) => {
+                const lastItem = metaData.length === index + 1;
+                if (lastItem && items.length <= 37) {
+                    content.push(
+                        Utils.getReportHeaders(logo),
+                        {
+                            table: {
+                                widths: ['*'],
+                                body: [
+                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                ]
+                            }
+                        },
+                        { text: ' ', fontSize: 5 },
+                        {
+                            layout: {
+                                hLineColor: () => 'grey',
+                                vLineColor: () => 'grey',
+                                hLineWidth: () => 1,
+                                vLineWidth: () => 1,
+                            },
+                            table: {
+                                widths: ['*', 19, 16, 17, 17, 17, 17, 17, 40, 45, 45, 32],
+                                body: this.getData(items, true, totalValues)
+                            }
+                        },
+                        { text: `Page: ${index + 1}`, fontSize: 7, alignment: 'right', marginTop: 3 },
+                    );
+                } else if (lastItem && items.length > 37) {
+                    content.push(
+                        Utils.getReportHeaders(logo),
+                        {
+                            table: {
+                                widths: ['*'],
+                                body: [
+                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                ]
+                            }
+                        },
+                        { text: ' ', fontSize: 5 },
+                        {
+                            layout: {
+                                hLineColor: () => 'grey',
+                                vLineColor: () => 'grey',
+                                hLineWidth: () => 1,
+                                vLineWidth: () => 1,
+                            },
+                            table: {
+                                widths: ['*', 19, 16, 17, 17, 17, 17, 17, 40, 45, 45, 32],
+                                body: this.getData(items, false)
+                            }
+                        },
+                        { text: `Page: ${index + 1}`, fontSize: 7, alignment: 'right', marginTop: 3 },
+                        { text: '', pageBreak: 'after' }
+                    );
+
+                    content.push(
+                        Utils.getReportHeaders(logo),
+                        {
+                            table: {
+                                widths: ['*'],
+                                body: [
+                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                ]
+                            }
+                        },
+                        { text: ' ', fontSize: 5 },
+                        {
+                            layout: {
+                                hLineColor: () => 'grey',
+                                vLineColor: () => 'grey',
+                                hLineWidth: () => 1,
+                                vLineWidth: () => 1,
+                            },
+                            table: {
+                                widths: ['*', 19, 16, 17, 17, 17, 17, 17, 40, 45, 45, 32],
+                                body: this.getTotal(totalValues)
+                            }
+                        },
+                        { text: `Page: ${index + 2}`, fontSize: 7, alignment: 'right', marginTop: 3 }
+                    );
+                } else {
+                    content.push(
+                        Utils.getReportHeaders(logo),
+                        {
+                            table: {
+                                widths: ['*'],
+                                body: [
+                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                ]
+                            }
+                        },
+                        { text: ' ', fontSize: 5 },
+                        {
+                            layout: {
+                                hLineColor: () => 'grey',
+                                vLineColor: () => 'grey',
+                                hLineWidth: () => 1,
+                                vLineWidth: () => 1,
+                            },
+                            table: {
+                                widths: ['*', 19, 16, 17, 17, 17, 17, 17, 40, 45, 45, 32],
+                                body: this.getData(items, false)
+                            }
+                        },
+                        { text: `Page: ${index + 1}`, fontSize: 7, alignment: 'right', marginTop: 3 },
+                        { text: '', pageBreak: 'after' }
+                    );
+                }
+            });
+            return content;
+        }
+
+    }
+
+    private getTotal(totalValues: any) {
         const body = [
-            [{ text: 'User', rowSpan: 3, style: ['headerStyle'] }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'] }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'] }, { text: 'Due Col.', rowSpan: 3, style: ['headerStyle'] }, { text: 'Status', rowSpan: 3, style: ['headerStyle'] }],
-            [{ text: '' }, { text: 'Oxygen', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Air', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Nitros (KG)', colSpan: 3, style: ['headerStyle'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['headerStyle'] }, { text: '' }, { text: '' }],
-            [{ text: '' }, { text: '9.8', style: ['textCenter'] }, { text: '1.36', style: ['textCenter'] }, { text: '9.8', style: ['textCenter'] }, { text: '7.0', style: ['textCenter'] }, { text: '30', style: ['textCenter'] }, { text: '5', style: ['textCenter'] }, { text: '3', style: ['textCenter'] }, { text: '', colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }],
+            [{ text: 'Client', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Due Col.', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Status', rowSpan: 3, style: ['subHeader'], marginTop: 18 }] as any,
+            [{ text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'], fillColor: '#E6E6E6' }, { text: '' }, { text: 'NO (KG)', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['subHeader'] }, { text: '' }, { text: '' }],
+            [{ text: '' }, { text: '9.8', style: ['particularHeader'] }, { text: '1.36', style: ['particularHeader136'], marginTop: 1 }, { text: '9.8', style: ['particularHeader'], fillColor: '#E6E6E6' }, { text: '7.0', style: ['particularHeader'], fillColor: '#E6E6E6' }, { text: '30', style: ['particularHeader'] }, { text: '5', style: ['particularHeader'] }, { text: '3', style: ['particularHeader'] }, { text: '', colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }],
         ];
-        data.details.forEach(item => {
-            body.push(
-                [
-                    { text: item.customerName, style: ['cell_style', 'margin_1'] },
-                    { text: item.medicalOxygen9_8Qty, style: ['cell_style', 'margin_1'] },
-                    { text: item.medicalOxygen1_36Qty, style: ['cell_style', 'margin_1'] },
-                    { text: item.medicalAir9_8Qty, style: ['cell_style', 'margin_1'] },
-                    { text: item.medicalAir7Qty, style: ['cell_style', 'margin_1'] },
-                    { text: item.nitros30KgQty, style: ['cell_style', 'margin_1'] },
-                    { text: item.nitros5KgQty, style: ['cell_style', 'margin_1'] },
-                    { text: item.nitros3KgQty, style: ['cell_style', 'margin_1'] },
-                    { text: item.invoiceNo, style: ['cell_style', 'margin_1'] },
-                    { text: Utils.thousandsSeparator(item.netAmount), style: ['cell_style', 'margin_1'] },
-                    { text: Utils.thousandsSeparator(item.dueCollection), style: ['cell_style', 'margin_1'] },
-                    { text: item.paymentStatusText, style: ['cell_style', 'margin_1'] }
-                ]
-            );
-        });
-
-        body.push([{ text: ' ', colSpan: 12 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }]);
-
         body.push([
             { text: 'Total Sale', style: ['footerStyle'] },
-            { text: data.medicalOxygen9_8TotalQty, style: ['footerParticular'] },
-            { text: data.medicalOxygen1_36TotalQty, style: ['footerParticular'] },
-            { text: data.medicalAir9_8TotalQty, style: ['footerParticular'] },
-            { text: data.medicalAir7TotalQty, style: ['footerParticular'] },
-            { text: data.nitros30KgTotalQty, style: ['footerParticular'] },
-            { text: data.nitros5KgTotalQty, style: ['footerParticular'] },
-            { text: data.nitros3KgTotalQty, style: ['footerParticular'] },
-            { text: `${Utils.thousandsSeparator(data.netTotal)}/-`, colSpan: 4, style: ['footerStyle'] },
+            { text: totalValues.medicalOxygen9_8TotalQty, style: ['footerParticular'] },
+            { text: totalValues.medicalOxygen1_36TotalQty, style: ['footerParticular'] },
+            { text: totalValues.medicalAir9_8TotalQty, style: ['footerParticular'], fillColor: '#E6E6E6' },
+            { text: totalValues.medicalAir7TotalQty, style: ['footerParticular'], fillColor: '#E6E6E6' },
+            { text: totalValues.nitros30KgTotalQty, style: ['footerParticular'] },
+            { text: totalValues.nitros5KgTotalQty, style: ['footerParticular'] },
+            { text: totalValues.nitros3KgTotalQty, style: ['footerParticular'] },
+            { text: `${Utils.thousandsSeparator(totalValues.netTotal)}/-`, colSpan: 4, style: ['footerStyle'] },
             { text: '' }, { text: '' }, { text: '' }
         ]);
 
         body.push([
             { text: 'Cash Collection', style: ['footerStyle'] },
-            { text: `${Utils.thousandsSeparator(data.cashCollection)}/-`, colSpan: 11, style: ['footerStyle'] },
+            { text: `${Utils.thousandsSeparator(totalValues.cashCollection)}/-`, colSpan: 11, style: ['footerStyle'] },
             { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
         ]);
         body.push([
             { text: 'Due Collection', style: ['footerStyle'] },
-            { text: `${Utils.thousandsSeparator(data.dueCollection)}/-`, colSpan: 11, style: ['footerStyle'] },
+            { text: `${Utils.thousandsSeparator(totalValues.dueCollection)}/-`, colSpan: 11, style: ['footerStyle'] },
             { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
         ]);
         body.push([
             { text: 'Due', style: ['footerStyle'] },
-            { text: `${Utils.thousandsSeparator(data.due)}/-`, colSpan: 11, style: ['footerStyle'] },
+            { text: `${Utils.thousandsSeparator(totalValues.due)}/-`, colSpan: 11, style: ['footerStyle'] },
             { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
         ]);
+        return body;
+
+    }
+
+    private getData(data: DailySalesReportDetailsDto[], showTotal: boolean, totalValues?: any) {
+        const body = [
+            [{ text: 'Client', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Due Col.', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Status', rowSpan: 3, style: ['subHeader'], marginTop: 18 }] as any,
+            [{ text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'], fillColor: '#E6E6E6' }, { text: '' }, { text: 'NO (KG)', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['subHeader'] }, { text: '' }, { text: '' }],
+            [{ text: '' }, { text: '9.8', style: ['particularHeader'] }, { text: '1.36', style: ['particularHeader136'], marginTop: 1 }, { text: '9.8', style: ['particularHeader'], fillColor: '#E6E6E6' }, { text: '7.0', style: ['particularHeader'], fillColor: '#E6E6E6' }, { text: '30', style: ['particularHeader'] }, { text: '5', style: ['particularHeader'] }, { text: '3', style: ['particularHeader'] }, { text: '', colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }],
+        ];
+        data.forEach(item => {
+            body.push(
+                [
+                    { text: item.customerName, fontSize: 9 },
+                    { text: item.medicalOxygen9_8Qty, style: ['cell_style'] },
+                    { text: item.medicalOxygen1_36Qty, style: ['cell_style'] },
+                    { text: item.medicalAir9_8Qty, style: ['cell_style'], fillColor: '#E6E6E6' },
+                    { text: item.medicalAir7Qty, style: ['cell_style'], fillColor: '#E6E6E6' },
+                    { text: item.nitros30KgQty, style: ['cell_style'] },
+                    { text: item.nitros5KgQty, style: ['cell_style'] },
+                    { text: item.nitros3KgQty, style: ['cell_style'] },
+                    { text: item.invoiceNo, style: ['cell_style'] },
+                    { text: `${Utils.thousandsSeparator(item.netAmount)}/-`, style: ['cellAmount'] },
+                    { text: `${Utils.thousandsSeparator(item.dueCollection)}/-`, style: ['cellAmount'] },
+                    { text: item.paymentStatusText, style: ['cell_style'] }
+                ]
+            );
+        });
+
+        if (showTotal) {
+            body.push([
+                { text: 'Total Sale', style: ['footerStyle'] },
+                { text: totalValues.medicalOxygen9_8TotalQty, style: ['footerParticular'] },
+                { text: totalValues.medicalOxygen1_36TotalQty, style: ['footerParticular'] },
+                { text: totalValues.medicalAir9_8TotalQty, style: ['footerParticular'], fillColor: '#E6E6E6' },
+                { text: totalValues.medicalAir7TotalQty, style: ['footerParticular'], fillColor: '#E6E6E6' },
+                { text: totalValues.nitros30KgTotalQty, style: ['footerParticular'] },
+                { text: totalValues.nitros5KgTotalQty, style: ['footerParticular'] },
+                { text: totalValues.nitros3KgTotalQty, style: ['footerParticular'] },
+                { text: `${Utils.thousandsSeparator(totalValues.netTotal)}/-`, colSpan: 4, style: ['footerStyle'] },
+                { text: '' }, { text: '' }, { text: '' }
+            ]);
+
+            body.push([
+                { text: 'Cash Collection', style: ['footerStyle'] },
+                { text: `${Utils.thousandsSeparator(totalValues.cashCollection)}/-`, colSpan: 11, style: ['footerStyle'] },
+                { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
+            ]);
+            body.push([
+                { text: 'Due Collection', style: ['footerStyle'] },
+                { text: `${Utils.thousandsSeparator(totalValues.dueCollection)}/-`, colSpan: 11, style: ['footerStyle'] },
+                { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
+            ]);
+            body.push([
+                { text: 'Due', style: ['footerStyle'] },
+                { text: `${Utils.thousandsSeparator(totalValues.due)}/-`, colSpan: 11, style: ['footerStyle'] },
+                { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }
+            ]);
+        }
 
         return body;
     }

@@ -58,44 +58,48 @@ export class DailyPurchaseReportComponent implements OnInit {
 
     async print() {
         const data = await firstValueFrom(this._purchaseService.getDailyPurchaseReport(moment(this.date)));
-        const logo = await Utils.getImageDataUrl('../../assets/img/logo.png');
+        const logo = await Utils.getImageDataUrl('assets/img/logo.png');
         var dd = {
             pageSize: 'A4',
-            pageMargins: [20, 40, 20, 30],
+            pageMargins: [30, 20, 30, 20],
             content: [
                 Utils.getReportHeaders(logo),
                 {
                     table: {
                         widths: ['*'],
                         body: [
-                            [{ text: `Daily Purchase (${moment(this.date).format('D MMM, YYYY').toString()})`, bold: true, fontSize: 20, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'] }],
+                            [{ text: `DAILY PURCHASE (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
                         ]
                     }
                 },
-                { text: ' ', fontSize: 10 },
+                { text: ' ', fontSize: 5 },
                 {
+                    layout: {
+                        hLineColor: () => 'grey',
+                        vLineColor: () => 'grey',
+                        hLineWidth: () => 1,
+                        vLineWidth: () => 1,
+                    },
                     table: {
-                        widths: ['*', 17, 25, 17, 17, 17, 17, 17, 40, 45, 45, 32],
+                        widths: [100, '*', '*', '*', '*', '*', '*', '*', 42, 52, 52, 16],
                         body: this.getData(data)
                     }
                 }
             ],
             styles: {
                 headerStyle: {
-                    fontSize: 11,
+                    fontSize: 12,
                     bold: true,
                     alignment: 'center'
                 },
-                text_green: {
-                    color: 'green'
+                subHeader: {
+                    fontSize: 10,
+                    bold: true,
+                    alignment: 'center'
                 },
                 cell_style: {
                     fontSize: 10,
                     alignment: 'center'
-                },
-                margin_1: {
-                    marginTop: 1,
-                    marginBottom: 1
                 },
                 footerStyle: {
                     fontSize: 11,
@@ -103,11 +107,16 @@ export class DailyPurchaseReportComponent implements OnInit {
                     alignment: 'right'
                 },
                 footerParticular: {
+                    fontSize: 10,
                     bold: true,
                     alignment: 'center'
                 },
                 textCenter: {
                     alignment: 'center'
+                },
+                cellAmount: {
+                    fontSize: 10,
+                    alignment: 'right'
                 }
             }
         };
@@ -118,30 +127,28 @@ export class DailyPurchaseReportComponent implements OnInit {
 
     private getData(data: any) {
         const body = [
-            [{ text: 'Supplier', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Due Pay.', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Status', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }],
-            [{ text: '' }, { text: 'Oxygen', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Air', colSpan: 2, style: ['headerStyle'] }, { text: '' }, { text: 'Nitros (KG)', colSpan: 3, style: ['headerStyle'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['headerStyle'] }, { text: '' }, { text: '' }],
+            [{ text: 'Supplier', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'Due Pay.', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }, { text: 'ST', rowSpan: 3, style: ['headerStyle'], marginTop: 20 }] as any,
+            [{ text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'NO (KG)', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['headerStyle'] }, { text: '' }, { text: '' }],
             [{ text: '' }, { text: '9.8', style: ['textCenter'] }, { text: '1.36', style: ['textCenter'] }, { text: '9.8', style: ['textCenter'] }, { text: '7.0', style: ['textCenter'] }, { text: '30', style: ['textCenter'] }, { text: '5', style: ['textCenter'] }, { text: '3', style: ['textCenter'] }, { text: '', colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }],
         ];
         data.details.forEach(item => {
             body.push(
                 [
-                    { text: item.supplierName, style: ['cell_style', 'margin_1'] },
-                    { text: item.medicalOxygen9_8Qty, style: ['cell_style', 'margin_1'] },
-                    { text: item.medicalOxygen1_36Qty, style: ['cell_style', 'margin_1'] },
-                    { text: item.medicalAir9_8Qty, style: ['cell_style', 'margin_1'] },
-                    { text: item.medicalAir7Qty, style: ['cell_style', 'margin_1'] },
-                    { text: item.nitros30KgQty, style: ['cell_style', 'margin_1'] },
-                    { text: item.nitros5KgQty, style: ['cell_style', 'margin_1'] },
-                    { text: item.nitros3KgQty, style: ['cell_style', 'margin_1'] },
-                    { text: item.invoiceNo, style: ['cell_style', 'margin_1'] },
-                    { text: Utils.thousandsSeparator(item.netAmount), style: ['cell_style', 'margin_1'] },
-                    { text: Utils.thousandsSeparator(item.duePayment), style: ['cell_style', 'margin_1'] },
-                    { text: item.paymentStatusText, style: ['cell_style', 'margin_1'] }
+                    { text: item.supplierName, fontSize: 10 },
+                    { text: item.medicalOxygen9_8Qty, style: ['cell_style'] },
+                    { text: item.medicalOxygen1_36Qty, style: ['cell_style'] },
+                    { text: item.medicalAir9_8Qty, style: ['cell_style'] },
+                    { text: item.medicalAir7Qty, style: ['cell_style'] },
+                    { text: item.nitros30KgQty, style: ['cell_style'] },
+                    { text: item.nitros5KgQty, style: ['cell_style'] },
+                    { text: item.nitros3KgQty, style: ['cell_style'] },
+                    { text: item.invoiceNo, style: ['cell_style'] },
+                    { text: `${Utils.thousandsSeparator(item.netAmount)}/-`, style: ['cellAmount'] },
+                    { text: `${Utils.thousandsSeparator(item.duePayment)}/-`, style: ['cellAmount'] },
+                    { text: item.paymentStatusText == 'Paid' ? 'P' : item.paymentStatusText == 'Due' ? 'D' : 'PP', style: ['cell_style'] }
                 ]
             );
         });
-
-        body.push([{ text: ' ', colSpan: 12 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }]);
 
         body.push([
             { text: 'Total Purchase', style: ['footerStyle'] },

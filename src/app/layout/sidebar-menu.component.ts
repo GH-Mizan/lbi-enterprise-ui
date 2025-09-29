@@ -44,7 +44,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
         return [
             new MenuItem(this.l('HomePage'), '/app/home', 'fas fa-home', '', false),
             new MenuItem('Purchases', '/app/purchases', 'fa-solid fa-cart-shopping', '', false),
-            new MenuItem('Sales', '/app/sales', 'fa-solid fa-sack-dollar', '', false),
+            new MenuItem('Sales', '/app/sales', 'fab fa-sellcast', '', false),
             new MenuItem('Inventories', '/app/inventories', 'fas fa-store', '', false),
 
             new MenuItem('Daily Cash', '/app/daily-cash', 'fas fa-dollar-sign', '', false),

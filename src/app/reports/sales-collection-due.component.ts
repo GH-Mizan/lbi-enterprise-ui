@@ -10,6 +10,7 @@ import { appModuleAnimation } from '@shared/animations/routerTransition';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
+import { Utils } from '@shared/helpers/Utils';
 pdfMake.addVirtualFileSystem(pdfFonts);
 
 @Component({
@@ -22,7 +23,8 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
   @ViewChild('dataTable', { static: true }) dataTable: Table;
 
   endDate = new Date();
-  startDate = (moment().subtract(30, 'days')).toDate();
+  startDate = (moment().subtract(31, 'days')).toDate();
+  maxDate = this.endDate;
 
 
   constructor(
@@ -44,8 +46,9 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
       })
     )
       .subscribe((result) => {
-        this.primengTableHelper.records = result;
-        this.primengTableHelper.totalRecordsCount = result.length;
+        const items = result.filter(f => !f.empty);
+        this.primengTableHelper.records = items;
+        this.primengTableHelper.totalRecordsCount = items.length;
         this.primengTableHelper.hideLoadingIndicator();
         this.cd.detectChanges();
       });
@@ -59,73 +62,87 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
     const items = await firstValueFrom(this._salesService.getSalesCollectionDueReport(
       moment(this.startDate), moment(this.endDate)
     ));
+    const logo = await Utils.getImageDataUrl('assets/img/logo.png');
+
     var dd = {
       pageSize: 'A4',
-      pageMargins: [30, 40, 30, 40],
+      pageMargins: [30, 20, 30, 20],
       content: [
-        { text: 'Sales, Collection & Due', fontSize: 20, bold: true, alignment: 'center', marginBottom: 15 },
+        Utils.getReportHeaders(logo),
         {
           table: {
-            widths: [70, '*', '*', '*', '*', '*', '*', '*', '*', '*'],
+            widths: ['*'],
+            body: [
+              [{ text: 'SALE, COLLECTION & DUE', bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+            ]
+          }
+        },
+        { text: ' ', fontSize: 5 },
+        {
+          layout: {
+            hLineColor: () => 'grey',
+            vLineColor: () => 'grey',
+            hLineWidth: () => 1,
+            vLineWidth: () => 1,
+          },
+          table: {
+            widths: [46, '*', '*', '*', 39, '*', '*', '*', '*', '*'],
             body: this.getData(items)
           }
         }
       ],
       styles: {
         headerStyle: {
-          fontSize: 16,
+          fontSize: 12,
           bold: true,
           alignment: 'center'
-        },
-        text_green: {
-          color: 'green'
-        },
-        text_blue: {
-          color: 'blue'
-        },
-        text_red: {
-          color: 'red'
         },
         cell_style: {
-          bold: true,
+          fontSize: 10,
+          alignment: 'right'
+        },
+        subHeader: {
+          fontSize: 10,
           alignment: 'center'
         },
-        margin_1: {
-          marginTop: 1,
-          marginBottom: 1
+        highlight: {
+          fillColor: '#E6E6E6'
         }
       }
 
     };
-    pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
-    //pdfMake.createPdf(docDefinition).open();
+    //pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
+    pdfMake.createPdf(dd).open();
     //pdfMake.createPdf(docDefinition).print();
   }
 
   private getData(items: any[]) {
     const body = [
-      [{ text: 'Date', style: ['headerStyle'], rowSpan: 2 }, { text: "Sale", style: ['headerStyle', 'text_blue'], colSpan: 2 }, { text: '' }, { text: 'Collection', style: ['headerStyle', 'text_green'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: 'Due', style: ['headerStyle', 'text_red'], colSpan: 3 }, { text: '' }, { text: '' }],
-      [{ text: '' }, { text: 'Today', style: ['text_blue', 'cell_style'] }, { text: "Balance", style: ['text_blue', 'cell_style'] }, { text: "Cash", style: ['text_green', 'cell_style'] }, { text: 'Due', style: ['text_green', 'cell_style'] }, { text: "Total", style: ['text_green', 'cell_style'] }, { text: "Balance", style: ['text_green', 'cell_style'] }, { text: 'Add', style: ['text_red', 'cell_style'] }, { text: "Deduct", style: ['text_red', 'cell_style'] }, { text: "Balance", style: ['text_red', 'cell_style'] }]
+      [{ text: 'Date', style: ['headerStyle'], rowSpan: 2, marginTop: 11 }, { text: "Sale", style: ['headerStyle'], colSpan: 2 }, { text: '' }, { text: 'Collection', style: ['headerStyle', 'highlight'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: 'Due', style: ['headerStyle'], colSpan: 3 }, { text: '' }, { text: '' }] as any,
+      [{ text: '' }, { text: 'Today', style: ['subHeader'] }, { text: "Balance", style: ['subHeader'] }, { text: "Cash", style: ['highlight', 'subHeader'] }, { text: 'Due', style: ['highlight', 'subHeader'] }, { text: "Total", style: ['highlight', 'subHeader'] }, { text: "Balance", style: ['highlight', 'subHeader'] }, { text: 'Today', style: ['subHeader'] }, { text: "Collection", style: ['subHeader'] }, { text: "Balance", style: ['subHeader'] }]
     ];
-    items.forEach(item => {
+    items.filter(f => !f.empty).forEach(item => {
       body.push(
-        [{ text: moment(item.date).format('D MMM, YYYY').toString(), style: ['cell_style', 'margin_1'] }, 
-        { text: this.thousandsSeparator(item.totalSales), style: ['cell_style', 'text_blue', 'margin_1'] }, 
-        { text: this.thousandsSeparator(item.currentBalance), style: ['cell_style', 'text_blue', 'margin_1'] }, 
-        { text: this.thousandsSeparator(item.cashCollection), style: ['cell_style', 'text_green', 'margin_1'] }, 
-        { text: this.thousandsSeparator(item.dueCollection), style: ['cell_style', 'text_green', 'margin_1'] }, 
-        { text: this.thousandsSeparator(item.totalCollection), style: ['cell_style', 'text_green', 'margin_1'] }, 
-        { text: this.thousandsSeparator(item.collectedBalance), style: ['cell_style', 'text_green', 'margin_1'] }, 
-        { text: this.thousandsSeparator(item.currenctDue), style: ['cell_style', 'text_red', 'margin_1'] }, 
-        { text: this.thousandsSeparator(item.detuctedDue), style: ['cell_style', 'text_red', 'margin_1'] }, 
-        { text: this.thousandsSeparator(item.dueBalance), style: ['cell_style', 'text_red', 'margin_1'] }]
+        [{ text: moment(item.date).format('DD-MMM-YY').toString(), style: ['subHeader'], },
+        { text: Utils.thousandsSeparator(item.totalSales), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.currentBalance), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.cashCollection), style: ['cell_style', 'highlight'] },
+        { text: Utils.thousandsSeparator(item.dueCollection), style: ['cell_style', 'highlight'] },
+        { text: Utils.thousandsSeparator(item.totalCollection), style: ['cell_style', 'highlight'] },
+        { text: Utils.thousandsSeparator(item.collectedBalance), style: ['cell_style', 'highlight'] },
+        { text: Utils.thousandsSeparator(item.currenctDue), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.detuctedDue), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.dueBalance), style: ['cell_style'] }]
       );
     });
     return body;
   }
 
-private thousandsSeparator(num: number): string {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  startDateChanged() {
+    this.endDate = new Date(this.startDate);
+    this.endDate.setDate(this.endDate.getDate() + 31);
+    this.maxDate = this.endDate;
+    this.cd.detectChanges();
   }
 
 }

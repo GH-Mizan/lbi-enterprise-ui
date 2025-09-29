@@ -135,7 +135,7 @@ export class SalesEntryComponent implements OnInit {
     }
 
     updateTotalPrice(sales: SalesProductDto) {
-        sales.totalPrice = sales.salesPrice * sales.quantity;
+        sales.totalPrice = parseFloat((sales.salesPrice * sales.quantity).toFixed(2));
         this.calculateTotal();
         this.populatePaymentStatus();
     }
@@ -180,7 +180,7 @@ export class SalesEntryComponent implements OnInit {
         this.products.forEach(p => {
             grandTotal += p.totalPrice;
         });
-        this.model.totalAmount = grandTotal;
+        this.model.totalAmount = parseFloat(grandTotal.toFixed(2));
         this.model.netAmount = this.model.totalAmount - this.model.discount;
         this.model.dueAmount = this.model.netAmount - this.model.paidAmount;
 
@@ -295,26 +295,25 @@ export class SalesEntryComponent implements OnInit {
             salesDetails: details,
         } as SalesEntryInput;
 
-        if (!this.id) {
-            input.dueReceived = {
-                salesId: model.id,
-                creationTime: moment(new Date()),
-                invoiceDate: model.date,
-                receiveDate: model.date,
-                invoiceNumber: model.invoiceNumber,
-                paymentStatus: model.paymentStatus,
-                grandTotal: model.totalAmount,
-                discount: model.discount,
-                netTotal: model.netAmount,
-                totalPaid: model.paidAmount,
-                due: model.dueAmount,
-                remarks: model.remarks
-            } as DueReceivedHistoryDto;
-        }
+        input.dueReceived = {
+            salesId: model.id,
+            creationTime: moment(new Date()),
+            invoiceDate: model.date,
+            receiveDate: model.date,
+            invoiceNumber: model.invoiceNumber,
+            paymentStatus: model.paymentStatus,
+            grandTotal: model.totalAmount,
+            discount: model.discount,
+            netTotal: model.netAmount,
+            totalPaid: model.paidAmount,
+            due: model.dueAmount,
+            default: true,
+            remarks: model.remarks
+        } as DueReceivedHistoryDto;
 
         this._salesService.createOrUpdate(input).subscribe(async (id) => {
             this._notifyService.success("Successfully " + this.id ? 'Saved' : 'Updated' + "");
-            if(print) await this.salesReceiptReport.generateSalesReceipt(id);
+            if (print) await this.salesReceiptReport.generateSalesReceipt(id);
             this._router.navigateByUrl('app/sales');
         });
     }

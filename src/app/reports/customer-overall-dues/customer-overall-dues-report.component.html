@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-6">
-                    <h1>User's Due/Balance (Total Market Due) </h1>
+                    <h1>Clients' Balance </h1>
                 </div>
             </div>
         </div>
@@ -20,8 +20,8 @@
                                     <label class="col-4 col-form-label" for="name">Start Date</label>
                                     <div class="col-8">
                                         <p-datepicker [(ngModel)]="startDate" [readonlyInput]="true"
-                                            dateFormat="dd/M/yy" [showIcon]="true"
-                                            [ngModelOptions]="{standalone: true}" />
+                                            dateFormat="dd/M/yy" [showIcon]="true" [ngModelOptions]="{standalone: true}" 
+                                            (ngModelChange)="startDateChanged()"/>
                                     </div>
                                 </div>
                             </div>
@@ -31,7 +31,7 @@
                                     <label class="col-4 col-form-label" for="name">End Date</label>
                                     <div class="col-8">
                                         <p-datepicker [(ngModel)]="endDate" [readonlyInput]="true" dateFormat="dd/M/yy"
-                                            [showIcon]="true" [ngModelOptions]="{standalone: true}" />
+                                            [showIcon]="true" [ngModelOptions]="{standalone: true}" [maxDate]="maxDate" />
                                     </div>
                                 </div>
                             </div>
@@ -60,7 +60,7 @@
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th class="text-center"> # </th>
-                                    <th class="text-center"> User </th>
+                                    <th class="text-center"> Client </th>
                                     <th class="text-center"> Previous Due </th>
                                     <th class="text-center"> Sales </th>
                                     <th class="text-center"> Payment </th>
@@ -76,16 +76,16 @@
                                     <td>
                                         <span>{{ record.customerName }}</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-right">
                                         <span>{{ record.previousDue | number: '1.2-2'}}</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-right">
                                         <span>{{record.currentSales | number: '1.2-2'}}</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-right">
                                         <span>{{record.currentPaymnet | number: '1.2-2'}}</span>
                                     </td>
-                                    <td class="text-center">
+                                    <td class="text-right">
                                         <span>{{record.currentDue | number: '1.2-2'}}</span>
                                     </td>
                                 </tr>
@@ -94,10 +94,10 @@
                             <ng-template pTemplate="footer">
                                 <tr>
                                     <td colspan="2" class="text-right text-bold">Total</td>
-                                    <td class="text-center text-bold">{{previousDue | number: '1.2-2'}}</td>
-                                    <td class="text-center text-bold">{{currentSales | number: '1.2-2'}}</td>
-                                    <td class="text-center text-bold">{{currentPaymnet | number: '1.2-2'}}</td>
-                                    <td class="text-center text-bold">{{currentDue | number: '1.2-2'}}</td>
+                                    <td class="text-right text-bold">{{previousDue | number: '1.2-2'}}</td>
+                                    <td class="text-right text-bold">{{currentSales | number: '1.2-2'}}</td>
+                                    <td class="text-right text-bold">{{currentPaymnet | number: '1.2-2'}}</td>
+                                    <td class="text-right text-bold">{{currentDue | number: '1.2-2'}}</td>
                                 </tr>
                             </ng-template>
                         </p-table>

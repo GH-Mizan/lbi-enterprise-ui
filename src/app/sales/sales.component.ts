@@ -83,18 +83,18 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
     this._router.navigateByUrl(`app/sales/view/${id}`);
   }
 
-  delete(): void {
-    // abp.message.confirm(`${customer.name} will be deleted`,
-    //   undefined,
-    //   (result: boolean) => {
-    //     if (result) {
-    //       this._customerService.delete(customer.id).subscribe(() => {
-    //         abp.notify.success(this.l("SuccessfullyDeleted"));
-    //         this.refresh();
-    //       });
-    //     }
-    //   }
-    // );
+  delete(item: SalesOutputDto): void {
+    abp.message.confirm(`${item.invoiceNumber} will be deleted`,
+      undefined,
+      (result: boolean) => {
+        if (result) {
+          this._salesService.delete(item.id, item.stockPointId).subscribe(() => {
+            abp.notify.success(this.l("SuccessfullyDeleted"));
+            this.refresh();
+          });
+        }
+      }
+    );
   }
 
   makePaymentReceive(sales: SalesOutputDto) {

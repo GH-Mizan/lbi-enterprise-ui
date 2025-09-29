@@ -128,7 +128,7 @@ export class PurchaseEntryComponent implements OnInit {
     }
 
     updateTotalPrice(product: PurchaseProductDto) {
-        product.totalPrice = product.purchasePrice * product.quantity;
+        product.totalPrice = parseFloat((product.purchasePrice * product.quantity).toFixed(2));
         this.calculateTotal();
         this.populatePaymentStatus();
     }
@@ -170,7 +170,7 @@ export class PurchaseEntryComponent implements OnInit {
         this.products.forEach(p => {
             grandTotal += p.totalPrice;
         });
-        this.model.totalAmount = grandTotal;
+        this.model.totalAmount = parseFloat(grandTotal.toFixed(2));
         this.model.netAmount = this.model.totalAmount - this.model.discount;
         this.model.dueAmount = this.model.netAmount - this.model.paidAmount;
 
@@ -272,22 +272,21 @@ export class PurchaseEntryComponent implements OnInit {
             purchase: model,
             purchaseDetails: details
         } as PurchaseEntryInput;
-        if (!this.id) {
-            input.duePayment = {
-                purchaseId: model.id,
-                creationTime: moment(new Date()),
-                invoiceDate: model.date,
-                paymentDate: model.date,
-                invoiceNumber: model.invoiceNumber,
-                paymentStatus: model.paymentStatus,
-                grandTotal: model.totalAmount,
-                discount: model.discount,
-                netTotal: model.netAmount,
-                totalPaid: model.paidAmount,
-                due: model.dueAmount,
-                remarks: model.remarks
-            } as DuePaymentHistoryDto; 
-        }
+        input.duePayment = {
+            purchaseId: model.id,
+            creationTime: moment(new Date()),
+            invoiceDate: model.date,
+            paymentDate: model.date,
+            invoiceNumber: model.invoiceNumber,
+            paymentStatus: model.paymentStatus,
+            grandTotal: model.totalAmount,
+            discount: model.discount,
+            netTotal: model.netAmount,
+            totalPaid: model.paidAmount,
+            due: model.dueAmount,
+            default: true,
+            remarks: model.remarks
+        } as DuePaymentHistoryDto;
 
         this._purchaseService.createOrUpdate(input).subscribe(() => {
             this._notifyService.success("Successfully " + this.id ? 'Saved' : 'Updated' + "");
@@ -312,4 +311,18 @@ export class PurchaseEntryComponent implements OnInit {
             this.model.paymentStatus = null;
         }
     }
+
+    delete(): void {
+        abp.message.confirm(`${this.model.invoiceNumber} will be deleted`,
+          undefined,
+          (result: boolean) => {
+            if (result) {
+              this._purchaseService.delete(this.model.id, this.model.stockPointId).subscribe(() => {
+                abp.notify.success("Successfully Deleted");
+                this._router.navigateByUrl('app/purchases');
+              });
+            }
+          }
+        );
+      }
 }

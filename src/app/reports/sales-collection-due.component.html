@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-8">
-                    <h1>Sales, Collection & Due </h1>
+                    <h1>SALE, COLLECTION & DUE </h1>
                 </div>
             </div>
         </div>
@@ -17,21 +17,21 @@
 
                             <div class="col-3">
                                 <div class="form-group row">
-                                    <label class="col-4 col-form-label" for="name">Start Date</label>
+                                    <label class="col-4 col-form-label" for="startDate">Start Date</label>
                                     <div class="col-8">
                                         <p-datepicker [(ngModel)]="startDate" [readonlyInput]="true"
-                                            dateFormat="dd/M/yy" [showIcon]="true"
-                                            [ngModelOptions]="{standalone: true}" />
+                                            dateFormat="dd/M/yy" [showIcon]="true" [ngModelOptions]="{standalone: true}" 
+                                            (ngModelChange)="startDateChanged()"/>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-3">
                                 <div class="form-group row">
-                                    <label class="col-4 col-form-label" for="name">End Date</label>
+                                    <label class="col-4 col-form-label" for="endDate">End Date</label>
                                     <div class="col-8">
                                         <p-datepicker [(ngModel)]="endDate" [readonlyInput]="true" dateFormat="dd/M/yy"
-                                            [showIcon]="true" [ngModelOptions]="{standalone: true}" />
+                                            [showIcon]="true" [ngModelOptions]="{standalone: true}" [maxDate]="maxDate"/>
                                     </div>
                                 </div>
                             </div>
@@ -64,48 +64,48 @@
                                     <th colspan="3" class="text-center text-danger"> Due </th>
                                 </tr>
                                 <tr>
-                                    <th class="text-primary">Today</th>
-                                    <th class="text-primary">Balance</th>
-                                    <th class="text-success">Cash</th>
-                                    <th class="text-success">Due</th>
-                                    <th class="text-success">Total</th>
-                                    <th class="text-success">Balance</th>
-                                    <th class="text-danger">Add</th>
-                                    <th class="text-danger">Deduct</th>
-                                    <th class="text-danger">Balance</th>
+                                    <th class="text-primary text-center">Today</th>
+                                    <th class="text-primary text-center">Balance</th>
+                                    <th class="text-success text-center">Cash</th>
+                                    <th class="text-success text-center">Due</th>
+                                    <th class="text-success text-center">Total</th>
+                                    <th class="text-success text-center">Balance</th>
+                                    <th class="text-danger text-center">Today</th>
+                                    <th class="text-danger text-center">Collection</th>
+                                    <th class="text-danger text-center">Balance</th>
                                 </tr>
                             </ng-template>
 
                             <ng-template pTemplate="body" let-record="$implicit">
                                 <tr>
-                                    <td>
-                                        <span>{{ record.date | date: 'dd MMM, yyyy' }}</span>
+                                    <td class="text-enter">
+                                        <span>{{ record.date | date: 'dd-MMM-yy' }}</span>
                                     </td>
-                                    <td class="text-primary">
+                                    <td class="text-primary text-right">
                                         <span>{{ record.totalSales | number: '1.2-2' }}</span>
                                     </td>
-                                    <td class="text-primary">
+                                    <td class="text-primary text-right">
                                         <span>{{record.currentBalance | number: '1.2-2' }}</span>
                                     </td>
-                                    <td class="text-success">
+                                    <td class="text-success text-right">
                                         <span>{{record.cashCollection | number: '1.2-2' }}</span>
                                     </td>
-                                    <td class="text-success">
+                                    <td class="text-success text-right">
                                         <span>{{record.dueCollection | number: '1.2-2' }}</span>
                                     </td>
-                                    <td class="text-success">
+                                    <td class="text-success text-right">
                                         <span>{{record.totalCollection | number: '1.2-2' }}</span>
                                     </td>
-                                    <td class="text-success">
+                                    <td class="text-success text-right">
                                         <span>{{record.collectedBalance | number: '1.2-2' }}</span>
                                     </td>
-                                    <td class="text-danger">
+                                    <td class="text-danger text-right">
                                         <span>{{record.currenctDue | number: '1.2-2' }}</span>
                                     </td>
-                                    <td class="text-danger">
+                                    <td class="text-danger text-right">
                                         <span>{{record.detuctedDue | number: '1.2-2' }}</span>
                                     </td>
-                                    <td class="text-danger">
+                                    <td class="text-danger text-right">
                                         <span>{{record.dueBalance | number: '1.2-2' }}</span>
                                     </td>
                                 </tr>

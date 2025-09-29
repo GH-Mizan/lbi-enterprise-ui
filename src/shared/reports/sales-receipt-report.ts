@@ -1,7 +1,7 @@
 
 import { Injectable } from '@angular/core';
 import { firstValueFrom } from "rxjs";
-import { SalesReceiptOutputDto, SalesRecieptProductDto, SalesServiceProxy } from "../service-proxies/service-proxies";
+import { SalesReceiptOutputDto, SalesServiceProxy } from "../service-proxies/service-proxies";
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Utils } from '@shared/helpers/Utils';
@@ -18,11 +18,11 @@ export class SalesReceiptReport {
 
     async generateSalesReceipt(saleId: number) {
         const data = await firstValueFrom(this._salesService.getSalesReceipt(saleId));
-        const logo = await Utils.getImageDataUrl('../../assets/img/logo.png');
+        const logo = await Utils.getImageDataUrl('assets/img/logo.png');
 
         var dd = {
             pageSize: 'A4',
-            pageMargins: [20, 40, 20, 30],
+            pageMargins: [30, 20, 30, 20],
             content: [
                 Utils.getReportHeaders(logo),
                 {
@@ -30,49 +30,30 @@ export class SalesReceiptReport {
                         widths: ['*'], // Two columns, equal width
                         body: [
                             [
-                                { text: 'Sales Invoice', bold: true, fontSize: 20, alignment: 'center' },
+                                { text: 'SALES INVOICE', bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'black', '', 'black'], fillColor: '#C4C4C4' },
                             ]
                         ]
-                    },
-                    layout: {
-                        hLineWidth: function (i, node) {
-                            return 1; // Thicker top/bottom lines
-                        },
-                        vLineWidth: function (i, node) {
-                            return 0; // No vertical lines
-                        },
-                        hLineColor: function (i, node) {
-                            return 'gray'; // Different colors
-                        },
-                        vLineColor: function (i, node) {
-                            return 'black';
-                        },
-                        paddingLeft: function (i, node) { return 4; },
-                        paddingRight: function (i, node) { return 4; },
-                        paddingTop: function (i, node) { return 2; },
-                        paddingBottom: function (i, node) { return 2; }
                     }
-
                 },
-                { text: ' ', fontSize: 5 },
+                { text: ' ', fontSize: 15 },
                 {
                     layout: "noBorders",
                     table: {
-                        widths: [50, 3, 320, 40, 3, '*'], // Two columns, equal width
+                        widths: [43, 2, 300, 35, 2, '*'], // Two columns, equal width
                         body: [
                             [
-                                { text: 'Client' }, { text: ':' }, { text: data.customerName }, { text: 'Invoice' }, { text: ':' }, { text: data.invoiceNumber }
+                                { text: 'Client', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: data.customerName, fontSize: 11 }, { text: 'Invoice', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: data.invoiceNumber, fontSize: 11 }
                             ],
                             [
-                                { text: 'Address' }, { text: ':' }, { text: data.address }, { text: 'Sales' }, { text: ':' }, { text: data.saler }
+                                { text: 'Address', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: data.address, fontSize: 11 }, { text: 'Sales', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: data.saler, fontSize: 11 }
                             ],
                         ]
                     }
                 },
-                { text: ' ', fontSize: 5 },
+                { text: ' ', fontSize: 10 },
                 {
                     table: {
-                        widths: [5, 350, '*', '*', '*'],
+                        widths: [5, '*', 70, 70, 70],
                         body: this.getBody(data)
                     }
                 },
@@ -81,12 +62,12 @@ export class SalesReceiptReport {
                 { text: ' ', fontSize: 5 },
                 {
                     table: {
-                        widths: ['*', '*'],
+                        widths: [100, 100],
                         body: [
                             [{ text: 'Due Account', colSpan: 2, style: ['headerStyle', 'margin_1'] }, {text:''}],
-                            [{ text: 'Previous Due', style: ['textRight'] }, { text: `${Utils.thousandsSeparator(data.previousDue)}/-`, style: ['textRight'] }],
-                            [{ text: 'Invoice Due', style: ['textRight'] }, { text: `${Utils.thousandsSeparator(data.totalDue)}/-`, style: ['textRight'] }],
-                            [{ text: 'Total Due', style: ['textRight'] }, { text: `${Utils.thousandsSeparator(data.overallDue)}/-`, style: ['textRight'] }],
+                            [{ text: 'Previous Due' }, { text: `${Utils.thousandsSeparator(data.previousDue)}/-`, style: ['textRight'] }],
+                            [{ text: 'Invoice Due' }, { text: `${Utils.thousandsSeparator(data.totalDue)}/-`, style: ['textRight'] }],
+                            [{ text: 'Total Due' }, { text: `${Utils.thousandsSeparator(data.overallDue)}/-`, style: ['textRight'] }],
                         ]
                     }
                 },
@@ -134,9 +115,6 @@ export class SalesReceiptReport {
                     bold: true,
                     alignment: 'center'
                 },
-                text_green: {
-                    color: 'green'
-                },
                 textCenter: {
                     alignment: 'center'
                 },
@@ -146,16 +124,7 @@ export class SalesReceiptReport {
                 margin_1: {
                     marginTop: 1,
                     marginBottom: 1
-                },
-                footerStyle: {
-                    fontSize: 15,
-                    bold: true,
-                    alignment: 'right'
-                },
-                footerParticular: {
-                    bold: true,
-                    alignment: 'center'
-                },
+                }
             }
 
         };
@@ -173,15 +142,15 @@ export class SalesReceiptReport {
             body.push([
                 { text: (index + 1).toString(), style: ['margin_1'] },
                 { text: x.product, style: ['margin_1'] },
-                { text: Utils.thousandsSeparator(x.unitPrice), style: ['textCenter', 'margin_1'] },
+                { text: Utils.thousandsSeparator(x.unitPrice), style: ['textRight', 'margin_1'] },
                 { text: x.qty.toString(), style: ['textCenter', 'margin_1'] },
-                { text: `${Utils.thousandsSeparator(x.amount)}/-`, style: ['textCenter', 'margin_1'] }
+                { text: `${Utils.thousandsSeparator(x.amount)}/-`, style: ['textRight', 'margin_1'] }
             ])
         });
 
-        body.push([{ text: 'Total', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalAmount)}/-`, style: ['textCenter', 'margin_1'] }]);
-        body.push([{ text: 'Paid', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalPaid)}/-`, style: ['textCenter', 'margin_1'] }]);
-        body.push([{ text: 'Due', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalDue)}/-`, style: ['textCenter', 'margin_1'] }]);
+        body.push([{ text: 'Total', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalAmount)}/-`, style: ['textRight', 'margin_1'] }]);
+        body.push([{ text: 'Paid', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalPaid)}/-`, style: ['textRight', 'margin_1'] }]);
+        body.push([{ text: 'Due', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalDue)}/-`, style: ['textRight', 'margin_1'] }]);
 
         return body;
     }

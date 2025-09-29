@@ -136,8 +136,12 @@
                                     </tr>
                                     <tr style="background-color: rgb(250, 248, 227);">
                                         <td colspan="5" class="text-right text-bold">Paid</td>
-                                        <td *ngIf="!totalPaidEditMode" class="text-right"
+                                        <!-- <td *ngIf="!totalPaidEditMode" class="text-right"
                                             (dblclick)="!id ? totalPaidEditMode = true : totalPaidEditMode = false">
+                                            <span>{{model.paidAmount | number: '1.2-2'}}</span>
+                                        </td> -->
+                                        <td *ngIf="!totalPaidEditMode" class="text-right"
+                                            (dblclick)="totalPaidEditMode = true">
                                             <span>{{model.paidAmount | number: '1.2-2'}}</span>
                                         </td>
                                         <td *ngIf="totalPaidEditMode"

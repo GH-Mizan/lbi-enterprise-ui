@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-6">
-                    <h1>Daily Purchase ({{date | date: 'dd MMM, yyyy' }}) </h1>
+                    <h1>DAILY PURCHASE ({{date | date: 'dd-MMM-yy' }}) </h1>
                 </div>
             </div>
         </div>
@@ -48,8 +48,8 @@
                             </tr>
                             <tr>
                                 <th colspan="2" class="text-center">Medical Oxygen</th>
-                                <th colspan="2" class="text-center">Medical Air</th>
-                                <th colspan="3" class="text-center">Nitros</th>
+                                <th colspan="2" class="text-center">Medical Compressed Air</th>
+                                <th colspan="3" class="text-center">Nitrous Oxide</th>
                             </tr>
                             <tr>
                                 <th class="text-center">9.80</th>
@@ -91,10 +91,10 @@
                                 <td class="text-center" style="width: 15%;">
                                     <span>{{record.invoiceNo }}</span>
                                 </td>
-                                <td class="text-center" style="min-width: 110px;">
+                                <td class="text-right" style="min-width: 110px;">
                                     <span>{{record.netAmount | number: '1.2-2' }}</span>
                                 </td>
-                                <td class="text-center" style="min-width: 110px;">
+                                <td class="text-right" style="min-width: 110px;">
                                     <span>{{record.duePayment | number: '1.2-2' }}</span>
                                 </td>
                                 <td class="text-center" style="min-width: 85px">
@@ -102,10 +102,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="12" style="width: 1582px;"><span>&nbsp;</span></td>
-                            </tr>
-                            <tr>
-                                <td colspan="12"><span>&nbsp;</span></td>
+                                <td *ngIf="data && data.details && data.details.length > 0" colspan="12" style="width: 1582px; padding: 0px"><span>&nbsp;</span></td>
                             </tr>
                         </tbody>
                         <tfoot *ngIf="data && data.details && data.details.length > 0">

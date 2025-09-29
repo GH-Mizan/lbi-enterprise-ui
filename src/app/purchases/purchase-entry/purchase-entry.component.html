@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-6">
-                    <h1> Create purchase invoice  </h1>
+                    <h1> Create purchase invoice </h1>
                 </div>
                 <div class="col-6">
 
@@ -84,8 +84,7 @@
                                     <label class="col-md-4 col-form-label" for="purchaseBy">Purchaser</label>
                                     <div class="col-md-8">
                                         <select class="form-select form-control" name="purchaseBy" id="purchaseBy"
-                                            #purchaseByModel="ngModel" #purchaseByEl
-                                            [(ngModel)]="model.purchaseBy">
+                                            #purchaseByModel="ngModel" #purchaseByEl [(ngModel)]="model.purchaseBy">
                                             <option *ngFor="let e of employees" [value]="e.value">
                                                 {{e.displayText}}
                                             </option>
@@ -152,8 +151,12 @@
                                     </tr>
                                     <tr style="background-color: rgb(250, 248, 227);">
                                         <td colspan="5" class="text-right text-bold">Paid</td>
-                                        <td *ngIf="!totalPaidEditMode" class="text-right"
+                                        <!-- <td *ngIf="!totalPaidEditMode" class="text-right"
                                             (dblclick)="!id ? totalPaidEditMode = true : totalPaidEditMode = false">
+                                            <span>{{model.paidAmount | number: '1.2-2'}}</span>
+                                        </td> -->
+                                        <td *ngIf="!totalPaidEditMode" class="text-right"
+                                            (dblclick)="totalPaidEditMode = true">
                                             <span>{{model.paidAmount | number: '1.2-2'}}</span>
                                         </td>
                                         <td *ngIf="totalPaidEditMode"
@@ -173,9 +176,16 @@
                 </div>
                 <div class="card-footer">
                     <div style="display: flex;" class="justify-content-between">
-                        <button type="button" class="btn btn-default" (click)="cancel()">
-                            Cancel
-                        </button>
+                        <div>
+                            <button type="button" class="btn btn-default mx-1" (click)="cancel()">
+                                Cancel
+                            </button>
+                            <button type="button" class="btn btn-danger" (click)="delete()" [disabled]="invalid"
+                                *ngIf="!!id">
+                                Delete
+                            </button>
+                        </div>
+
                         <button type="submit" form="purchaseEntryForm" class="btn btn-primary"
                             [disabled]="!purchaseEntryForm.form.valid || invalid">
                             {{id ? 'Update' : 'Save'}}

@@ -61,22 +61,20 @@ export class Utils {
         const header = {
             layout: "noBorders",
             table: {
-                widths: [100, '*'],
+                widths: [65, '*'],
                 body: [
                     [
-
                         {
                             image: logo,
-                            rowSpan: 4,
-                            width: 100, // Adjust width as needed
-                            alignment: 'center' // Align the image within the column
+                            rowSpan: 3,
+                            width: 60,
+                            height: 60,
+                            alignment: 'center'
                         },
-                        { text: 'LBI Enterprise', bold: true, fontSize: 20, marginTop: 10 },
-
+                        { text: 'LBI Enterprise', bold: true, fontSize: 18, marginTop: 5 },
                     ],
-                    [{ text: '' }, { text: '3/2 Ishwar Chandraghosh Street, Babu Bazar, Dhaka-1100' }],
-                    [{ text: '' }, { text: 'Contact: 01912776389,  01401212419' }],
-                    [{ text: '' }, { text: 'E-mail: lbienterprise6@gmail.com' }]
+                    [{ text: '' }, { text: '3/2 Ishwar Chandraghosh Street, Babu Bazar, Dhaka-1100', fontSize: 10 }],
+                    [{ text: '' }, { text: 'Contact: 01912776389, 01401212419    E-mail: lbienterprise6@gmail.com', fontSize: 10 }]
                 ]
             }
         };

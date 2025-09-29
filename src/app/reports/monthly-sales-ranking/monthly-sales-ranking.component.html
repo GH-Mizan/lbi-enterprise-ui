@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-6">
-                    <h1>Monthly Sales Ranking</h1>
+                    <h1>MONTHLY SALES RANKING</h1>
                 </div>
             </div>
         </div>
@@ -51,14 +51,14 @@
                         <thead>
                             <tr>
                                 <th rowspan="3" class="text-center">Rank</th>
-                                <th rowspan="3" class="text-center" style="min-width: 160px;">User</th>
+                                <th rowspan="3" class="text-center" style="min-width: 160px;">Client</th>
                                 <th colspan="7" class="text-center">Particular</th>
-                                <th rowspan="3" class="text-center">Revenue</th>
+                                <th rowspan="3" class="text-center" style="width: 120px;">Revenue</th>
                             </tr>
                             <tr>
-                                <th colspan="2" class="text-center">M. Oxygen</th>
-                                <th colspan="2" class="text-center">M. Air</th>
-                                <th colspan="3" class="text-center">Nitros</th>
+                                <th colspan="2" class="text-center">Medical Oxygen</th>
+                                <th colspan="2" class="text-center">Medical Compressed Air</th>
+                                <th colspan="3" class="text-center">Nitrous Oxide</th>
                             </tr>
                             <tr>
                                 <th class="text-center">9.80</th>
@@ -99,12 +99,12 @@
                                 <td class="text-center">
                                     <span>{{ record.nitros3KgQty }}</span>
                                 </td>
-                                <td class="text-center" style="min-width: 110px;">
-                                    <span>{{record.revenue }}</span>
+                                <td class="text-right" style="min-width: 110px;">
+                                    <span>{{record.revenue | number: '1.2-2' }}</span>
                                 </td>
                             </tr>
                             <tr *ngIf="data.length > 0">
-                                <td colspan="10" style="width: 1582px;">
+                                <td colspan="10" style="width: 1582px; padding:0px">
                                    &nbsp;
                                 </td>
                             </tr>

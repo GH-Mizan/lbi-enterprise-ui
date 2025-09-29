@@ -3311,6 +3311,63 @@ export class PurchaseServiceProxy {
         }
         return _observableOf(null as any);
     }
+
+    /**
+     * @param purchaseId (optional) 
+     * @param stockPointId (optional) 
+     * @return OK
+     */
+    delete(purchaseId: number | undefined, stockPointId: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/Purchase/Delete?";
+        if (purchaseId === null)
+            throw new Error("The parameter 'purchaseId' cannot be null.");
+        else if (purchaseId !== undefined)
+            url_ += "purchaseId=" + encodeURIComponent("" + purchaseId) + "&";
+        if (stockPointId === null)
+            throw new Error("The parameter 'stockPointId' cannot be null.");
+        else if (stockPointId !== undefined)
+            url_ += "stockPointId=" + encodeURIComponent("" + stockPointId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 @Injectable()
@@ -4339,7 +4396,7 @@ export class SalesServiceProxy {
      * @param endDate (optional) 
      * @return OK
      */
-    getCustomerLedgerReport(customerId: number | undefined, startDate: moment.Moment | undefined, endDate: moment.Moment | undefined): Observable<CustomerLedgerReportDto[]> {
+    getCustomerLedgerReport(customerId: number | undefined, startDate: moment.Moment | undefined, endDate: moment.Moment | undefined): Observable<CustomerLedgerReportDto> {
         let url_ = this.baseUrl + "/api/services/app/Sales/GetCustomerLedgerReport?";
         if (customerId === null)
             throw new Error("The parameter 'customerId' cannot be null.");
@@ -4370,14 +4427,14 @@ export class SalesServiceProxy {
                 try {
                     return this.processGetCustomerLedgerReport(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<CustomerLedgerReportDto[]>;
+                    return _observableThrow(e) as any as Observable<CustomerLedgerReportDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<CustomerLedgerReportDto[]>;
+                return _observableThrow(response_) as any as Observable<CustomerLedgerReportDto>;
         }));
     }
 
-    protected processGetCustomerLedgerReport(response: HttpResponseBase): Observable<CustomerLedgerReportDto[]> {
+    protected processGetCustomerLedgerReport(response: HttpResponseBase): Observable<CustomerLedgerReportDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4388,14 +4445,7 @@ export class SalesServiceProxy {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200.push(CustomerLedgerReportDto.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = CustomerLedgerReportDto.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -4412,7 +4462,7 @@ export class SalesServiceProxy {
      * @param endDate (optional) 
      * @return OK
      */
-    getCustomerDueReport(customerId: number | undefined, startDate: moment.Moment | undefined, endDate: moment.Moment | undefined): Observable<CustomerDueReportDto[]> {
+    getCustomerDueReport(customerId: number | undefined, startDate: moment.Moment | undefined, endDate: moment.Moment | undefined): Observable<CustomerDueReportDto> {
         let url_ = this.baseUrl + "/api/services/app/Sales/GetCustomerDueReport?";
         if (customerId === null)
             throw new Error("The parameter 'customerId' cannot be null.");
@@ -4443,14 +4493,14 @@ export class SalesServiceProxy {
                 try {
                     return this.processGetCustomerDueReport(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<CustomerDueReportDto[]>;
+                    return _observableThrow(e) as any as Observable<CustomerDueReportDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<CustomerDueReportDto[]>;
+                return _observableThrow(response_) as any as Observable<CustomerDueReportDto>;
         }));
     }
 
-    protected processGetCustomerDueReport(response: HttpResponseBase): Observable<CustomerDueReportDto[]> {
+    protected processGetCustomerDueReport(response: HttpResponseBase): Observable<CustomerDueReportDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -4461,14 +4511,7 @@ export class SalesServiceProxy {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200.push(CustomerDueReportDto.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = CustomerDueReportDto.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -4728,6 +4771,63 @@ export class SalesServiceProxy {
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = MonthlySalesInvoiceReportDto.fromJS(resultData200);
             return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param saleId (optional) 
+     * @param stockPointId (optional) 
+     * @return OK
+     */
+    delete(saleId: number | undefined, stockPointId: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/Sales/Delete?";
+        if (saleId === null)
+            throw new Error("The parameter 'saleId' cannot be null.");
+        else if (saleId !== undefined)
+            url_ += "saleId=" + encodeURIComponent("" + saleId) + "&";
+        if (stockPointId === null)
+            throw new Error("The parameter 'stockPointId' cannot be null.");
+        else if (stockPointId !== undefined)
+            url_ += "stockPointId=" + encodeURIComponent("" + stockPointId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -7137,7 +7237,7 @@ export interface ICustomerCreateOrUpdateDto {
     initialDue: number;
 }
 
-export class CustomerDueReportDto implements ICustomerDueReportDto {
+export class CustomerDueDetailsDto implements ICustomerDueDetailsDto {
     date: moment.Moment;
     customerId: number;
     customerName: string | undefined;
@@ -7152,7 +7252,7 @@ export class CustomerDueReportDto implements ICustomerDueReportDto {
     totalDue: number;
     balance: number;
 
-    constructor(data?: ICustomerDueReportDto) {
+    constructor(data?: ICustomerDueDetailsDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -7179,9 +7279,9 @@ export class CustomerDueReportDto implements ICustomerDueReportDto {
         }
     }
 
-    static fromJS(data: any): CustomerDueReportDto {
+    static fromJS(data: any): CustomerDueDetailsDto {
         data = typeof data === 'object' ? data : {};
-        let result = new CustomerDueReportDto();
+        let result = new CustomerDueDetailsDto();
         result.init(data);
         return result;
     }
@@ -7204,15 +7304,15 @@ export class CustomerDueReportDto implements ICustomerDueReportDto {
         return data;
     }
 
-    clone(): CustomerDueReportDto {
+    clone(): CustomerDueDetailsDto {
         const json = this.toJSON();
-        let result = new CustomerDueReportDto();
+        let result = new CustomerDueDetailsDto();
         result.init(json);
         return result;
     }
 }
 
-export interface ICustomerDueReportDto {
+export interface ICustomerDueDetailsDto {
     date: moment.Moment;
     customerId: number;
     customerName: string | undefined;
@@ -7228,7 +7328,98 @@ export interface ICustomerDueReportDto {
     balance: number;
 }
 
-export class CustomerLedgerReportDto implements ICustomerLedgerReportDto {
+export class CustomerDueReportDto implements ICustomerDueReportDto {
+    medicalOxygen9_8TotalQty: number;
+    medicalOxygen1_36TotalQty: number;
+    medicalAir9_8TotalQty: number;
+    medicalAir7TotalQty: number;
+    nitros30KgTotalQty: number;
+    nitros5KgTotalQty: number;
+    nitros3KgTotalQty: number;
+    overallDue: number;
+    overallBalance: number;
+    actualDue: number;
+    details: CustomerDueDetailsDto[] | undefined;
+
+    constructor(data?: ICustomerDueReportDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.medicalOxygen9_8TotalQty = _data["medicalOxygen9_8TotalQty"];
+            this.medicalOxygen1_36TotalQty = _data["medicalOxygen1_36TotalQty"];
+            this.medicalAir9_8TotalQty = _data["medicalAir9_8TotalQty"];
+            this.medicalAir7TotalQty = _data["medicalAir7TotalQty"];
+            this.nitros30KgTotalQty = _data["nitros30KgTotalQty"];
+            this.nitros5KgTotalQty = _data["nitros5KgTotalQty"];
+            this.nitros3KgTotalQty = _data["nitros3KgTotalQty"];
+            this.overallDue = _data["overallDue"];
+            this.overallBalance = _data["overallBalance"];
+            this.actualDue = _data["actualDue"];
+            if (Array.isArray(_data["details"])) {
+                this.details = [] as any;
+                for (let item of _data["details"])
+                    this.details.push(CustomerDueDetailsDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): CustomerDueReportDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CustomerDueReportDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["medicalOxygen9_8TotalQty"] = this.medicalOxygen9_8TotalQty;
+        data["medicalOxygen1_36TotalQty"] = this.medicalOxygen1_36TotalQty;
+        data["medicalAir9_8TotalQty"] = this.medicalAir9_8TotalQty;
+        data["medicalAir7TotalQty"] = this.medicalAir7TotalQty;
+        data["nitros30KgTotalQty"] = this.nitros30KgTotalQty;
+        data["nitros5KgTotalQty"] = this.nitros5KgTotalQty;
+        data["nitros3KgTotalQty"] = this.nitros3KgTotalQty;
+        data["overallDue"] = this.overallDue;
+        data["overallBalance"] = this.overallBalance;
+        data["actualDue"] = this.actualDue;
+        if (Array.isArray(this.details)) {
+            data["details"] = [];
+            for (let item of this.details)
+                data["details"].push(item.toJSON());
+        }
+        return data;
+    }
+
+    clone(): CustomerDueReportDto {
+        const json = this.toJSON();
+        let result = new CustomerDueReportDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICustomerDueReportDto {
+    medicalOxygen9_8TotalQty: number;
+    medicalOxygen1_36TotalQty: number;
+    medicalAir9_8TotalQty: number;
+    medicalAir7TotalQty: number;
+    nitros30KgTotalQty: number;
+    nitros5KgTotalQty: number;
+    nitros3KgTotalQty: number;
+    overallDue: number;
+    overallBalance: number;
+    actualDue: number;
+    details: CustomerDueDetailsDto[] | undefined;
+}
+
+export class CustomerLedgerDetailsDto implements ICustomerLedgerDetailsDto {
     date: moment.Moment;
     customerId: number;
     customerName: string | undefined;
@@ -7243,7 +7434,7 @@ export class CustomerLedgerReportDto implements ICustomerLedgerReportDto {
     debitTotal: number;
     balance: number;
 
-    constructor(data?: ICustomerLedgerReportDto) {
+    constructor(data?: ICustomerLedgerDetailsDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -7270,9 +7461,9 @@ export class CustomerLedgerReportDto implements ICustomerLedgerReportDto {
         }
     }
 
-    static fromJS(data: any): CustomerLedgerReportDto {
+    static fromJS(data: any): CustomerLedgerDetailsDto {
         data = typeof data === 'object' ? data : {};
-        let result = new CustomerLedgerReportDto();
+        let result = new CustomerLedgerDetailsDto();
         result.init(data);
         return result;
     }
@@ -7295,15 +7486,15 @@ export class CustomerLedgerReportDto implements ICustomerLedgerReportDto {
         return data;
     }
 
-    clone(): CustomerLedgerReportDto {
+    clone(): CustomerLedgerDetailsDto {
         const json = this.toJSON();
-        let result = new CustomerLedgerReportDto();
+        let result = new CustomerLedgerDetailsDto();
         result.init(json);
         return result;
     }
 }
 
-export interface ICustomerLedgerReportDto {
+export interface ICustomerLedgerDetailsDto {
     date: moment.Moment;
     customerId: number;
     customerName: string | undefined;
@@ -7317,6 +7508,105 @@ export interface ICustomerLedgerReportDto {
     creditTotal: number;
     debitTotal: number;
     balance: number;
+}
+
+export class CustomerLedgerReportDto implements ICustomerLedgerReportDto {
+    medicalOxygen9_8TotalQty: number;
+    medicalOxygen1_36TotalQty: number;
+    medicalAir9_8TotalQty: number;
+    medicalAir7TotalQty: number;
+    nitros30KgTotalQty: number;
+    nitros5KgTotalQty: number;
+    nitros3KgTotalQty: number;
+    overallCreditTotal: number;
+    overallDebitTotal: number;
+    overallBalance: number;
+    actualCreditTotal: number;
+    actualDebitTotal: number;
+    details: CustomerLedgerDetailsDto[] | undefined;
+
+    constructor(data?: ICustomerLedgerReportDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.medicalOxygen9_8TotalQty = _data["medicalOxygen9_8TotalQty"];
+            this.medicalOxygen1_36TotalQty = _data["medicalOxygen1_36TotalQty"];
+            this.medicalAir9_8TotalQty = _data["medicalAir9_8TotalQty"];
+            this.medicalAir7TotalQty = _data["medicalAir7TotalQty"];
+            this.nitros30KgTotalQty = _data["nitros30KgTotalQty"];
+            this.nitros5KgTotalQty = _data["nitros5KgTotalQty"];
+            this.nitros3KgTotalQty = _data["nitros3KgTotalQty"];
+            this.overallCreditTotal = _data["overallCreditTotal"];
+            this.overallDebitTotal = _data["overallDebitTotal"];
+            this.overallBalance = _data["overallBalance"];
+            this.actualCreditTotal = _data["actualCreditTotal"];
+            this.actualDebitTotal = _data["actualDebitTotal"];
+            if (Array.isArray(_data["details"])) {
+                this.details = [] as any;
+                for (let item of _data["details"])
+                    this.details.push(CustomerLedgerDetailsDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): CustomerLedgerReportDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CustomerLedgerReportDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["medicalOxygen9_8TotalQty"] = this.medicalOxygen9_8TotalQty;
+        data["medicalOxygen1_36TotalQty"] = this.medicalOxygen1_36TotalQty;
+        data["medicalAir9_8TotalQty"] = this.medicalAir9_8TotalQty;
+        data["medicalAir7TotalQty"] = this.medicalAir7TotalQty;
+        data["nitros30KgTotalQty"] = this.nitros30KgTotalQty;
+        data["nitros5KgTotalQty"] = this.nitros5KgTotalQty;
+        data["nitros3KgTotalQty"] = this.nitros3KgTotalQty;
+        data["overallCreditTotal"] = this.overallCreditTotal;
+        data["overallDebitTotal"] = this.overallDebitTotal;
+        data["overallBalance"] = this.overallBalance;
+        data["actualCreditTotal"] = this.actualCreditTotal;
+        data["actualDebitTotal"] = this.actualDebitTotal;
+        if (Array.isArray(this.details)) {
+            data["details"] = [];
+            for (let item of this.details)
+                data["details"].push(item.toJSON());
+        }
+        return data;
+    }
+
+    clone(): CustomerLedgerReportDto {
+        const json = this.toJSON();
+        let result = new CustomerLedgerReportDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICustomerLedgerReportDto {
+    medicalOxygen9_8TotalQty: number;
+    medicalOxygen1_36TotalQty: number;
+    medicalAir9_8TotalQty: number;
+    medicalAir7TotalQty: number;
+    nitros30KgTotalQty: number;
+    nitros5KgTotalQty: number;
+    nitros3KgTotalQty: number;
+    overallCreditTotal: number;
+    overallDebitTotal: number;
+    overallBalance: number;
+    actualCreditTotal: number;
+    actualDebitTotal: number;
+    details: CustomerLedgerDetailsDto[] | undefined;
 }
 
 export class CustomerOutputDto implements ICustomerOutputDto {
@@ -11272,6 +11562,7 @@ export class SalesCollectionDueReportDto implements ISalesCollectionDueReportDto
     currenctDue: number;
     detuctedDue: number;
     dueBalance: number;
+    empty: boolean;
 
     constructor(data?: ISalesCollectionDueReportDto) {
         if (data) {
@@ -11294,6 +11585,7 @@ export class SalesCollectionDueReportDto implements ISalesCollectionDueReportDto
             this.currenctDue = _data["currenctDue"];
             this.detuctedDue = _data["detuctedDue"];
             this.dueBalance = _data["dueBalance"];
+            this.empty = _data["empty"];
         }
     }
 
@@ -11316,6 +11608,7 @@ export class SalesCollectionDueReportDto implements ISalesCollectionDueReportDto
         data["currenctDue"] = this.currenctDue;
         data["detuctedDue"] = this.detuctedDue;
         data["dueBalance"] = this.dueBalance;
+        data["empty"] = this.empty;
         return data;
     }
 
@@ -11338,6 +11631,7 @@ export interface ISalesCollectionDueReportDto {
     currenctDue: number;
     detuctedDue: number;
     dueBalance: number;
+    empty: boolean;
 }
 
 export class SalesDetailsEntryDto implements ISalesDetailsEntryDto {

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import { CustomerOverallDueReportDto, SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { Table } from 'primeng/table';
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
@@ -10,6 +10,7 @@ import { appModuleAnimation } from '@shared/animations/routerTransition';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
+import { Utils } from '@shared/helpers/Utils';
 pdfMake.addVirtualFileSystem(pdfFonts);
 
 @Component({
@@ -20,7 +21,7 @@ pdfMake.addVirtualFileSystem(pdfFonts);
     styles: [
         `
         :host ::ng-deep .p-inputtext {
-            min-width: 185px !important;
+            min-width: 110px !important;
         }
         `
     ]
@@ -29,7 +30,8 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
     @ViewChild('dataTable', { static: true }) dataTable: Table;
 
     endDate = new Date();
-    startDate = (moment().subtract(30, 'days')).toDate();
+    startDate = (moment().subtract(31, 'days')).toDate();
+    maxDate = this.endDate;
 
     previousDue: number;
     currentSales: number;
@@ -75,6 +77,13 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
             });
     }
 
+    startDateChanged() {
+        this.endDate = new Date(this.startDate);
+        this.endDate.setDate(this.endDate.getDate() + 31);
+        this.maxDate = this.endDate;
+        this.cd.detectChanges();
+    }
+
     delete() {
 
     }
@@ -83,48 +92,36 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
         const items = await firstValueFrom(this._salesService.getCustomersOverallDueReport(
             moment(this.startDate), moment(this.endDate)
         ));
+        const logo = await Utils.getImageDataUrl('assets/img/logo.png');
+        // let count = items.length + 1;
+        // for (let i = count; i < 123 + count; i++) {
+        //     items.push({ serial: i.toString(), previousDue: 0, currentSales: 0, currentPaymnet: 0, currentDue: 0 } as CustomerOverallDueReportDto);
+        // }
+
         var dd = {
             pageSize: 'A4',
-            pageMargins: [30, 40, 30, 40],
-            content: [
-                { text: 'Users’ Due/Balance (Total Market Due)', fontSize: 20, bold: true, alignment: 'center', marginBottom: 2 },
-                { text: `From ${moment(this.startDate).format('D MMM, YYYY')} to ${moment(this.endDate).format('D MMM, YYYY')}`, fontSize: 17, bold: true, alignment: 'center', marginBottom: 15 },
-                {
-                    table: {
-                        widths: [20, 150, '*', '*', '*', '*'],
-                        body: this.getData(items)
-                    }
-                }
-            ],
+            pageMargins: [30, 20, 30, 20],
+            content: this.getContent(items, logo),
             styles: {
                 headerStyle: {
-                    fillColor: '#D1D1D1',
-                    fontSize: 16,
+                    fontSize: 11,
                     bold: true,
                     alignment: 'center'
                 },
-                cell_style: {
-                    bold: true,
-                    alignment: 'center'
-                },
-                center: {
+                textCenter: {
                     alignment: 'center'
                 },
                 cellLightGrey: {
                     fillColor: '#F2F2F2'
                 },
                 cellTotal: {
-                    fontSize: 14,
+                    fontSize: 9,
                     bold: true,
                     alignment: 'right'
                 },
-                margin_1: {
-                    marginTop: 1,
-                    marginBottom: 1
-                },
-                margin_2: {
-                    marginTop: 2,
-                    marginBottom: 2
+                cellAmount: {
+                    fontSize: 9,
+                    alignment: 'right'
                 }
             }
 
@@ -134,23 +131,9 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
         //pdfMake.createPdf(docDefinition).print();
     }
 
-    private getData(items: any[]) {
-        const body = [
-            [{ text: '#', style: ['headerStyle'], colSpan: 1 }, { text: "User", style: ['headerStyle'] }, { text: "Previous Due", style: ['headerStyle', 'center'] }, { text: "Sales", style: ['headerStyle', 'center'] }, { text: "Payment", style: ['headerStyle', 'center'] }, { text: "Current Due", style: ['headerStyle', 'center'] }],
-        ];
-        items.forEach(item => {
-            body.push(
-                [
-                    { text: item.serial, style: ['cell_style', 'margin_1'] },
-                    { text: item.customerName, style: ['margin_1'] },
-                    { text: this.thousandsSeparator(item.previousDue), style: ['cell_style', 'margin_1'] },
-                    { text: this.thousandsSeparator(item.currentSales), style: ['cell_style', 'margin_1'] },
-                    { text: this.thousandsSeparator(item.currentPaymnet), style: ['cell_style', 'margin_1'] },
-                    { text: this.thousandsSeparator(item.currentDue), style: ['cell_style', 'margin_1'] }
-                ]
-            );
-        });
-        const values = items.reduce((accumulator, item) => {
+    private getContent(data: CustomerOverallDueReportDto[], logo: any) {
+        const totalRows = data.length;
+        const totalValues = data.reduce((accumulator, item) => {
             accumulator.previousDue += item.previousDue;
             accumulator.currentSales += item.currentSales;
             accumulator.currentPaymnet += item.currentPaymnet;
@@ -158,22 +141,206 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
             return accumulator;
         }, { previousDue: 0, currentSales: 0, currentPaymnet: 0, currentDue: 0 });
 
-        body.push(
-                [
-                    { text: "Total", style: ['cellTotal', 'margin_2', 'cellLightGrey'], colSpan: 2 },
-                    { text: '', style: ['margin_2'] },
-                    { text: this.thousandsSeparator(values.previousDue), style: ['cell_style', 'margin_2', 'cellLightGrey'] },
-                    { text: this.thousandsSeparator(values.currentSales), style: ['cell_style', 'margin_2', 'cellLightGrey'] },
-                    { text: this.thousandsSeparator(values.currentPaymnet), style: ['cell_style', 'margin_2', 'cellLightGrey'] },
-                    { text: this.thousandsSeparator(values.currentDue), style: ['cell_style', 'margin_2', 'cellLightGrey'] }
-                ]
-            );
+        let hasNextpage = false;
+        const metaData: CustomerOverallDueReportDto[][] = [];
+        let slicedData: CustomerOverallDueReportDto[] = [];
+        if (totalRows > 43) {
+            hasNextpage = true;
+            const partition = Math.ceil(totalRows / 42);
+            for (let i = 0; i < partition; i++) {
+                slicedData = [];
+                const itemsToTransfer = data.slice(0, 42);
+                slicedData.push(...itemsToTransfer);
+                data.splice(0, 42);
+                metaData.push(slicedData);
+            }
+        }
 
+        if (!hasNextpage) {
+            return [
+                Utils.getReportHeaders(logo),
+                {
+                    table: {
+                        widths: ['*'], // Two columns, equal width
+                        body: [
+                            [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                        ]
+                    }
+                },
+                { text: ' ', fontSize: 5 },
+                {
+                    layout: {
+                        hLineColor: () => 'grey',
+                        vLineColor: () => 'grey',
+                        hLineWidth: () => 1,
+                        vLineWidth: () => 1,
+                    },
+                    table: {
+                        widths: [20, '*', 68, 65, 65, 65],
+                        body: this.getData(data, true, totalValues)
+                    }
+                }
+            ]
+        } else {
+            const content = [];
+            metaData.forEach((items, index) => {
+                const lastItem = metaData.length === index + 1;
+                if (lastItem && items.length === 42) {
+                    content.push(
+                        Utils.getReportHeaders(logo),
+                        {
+                            table: {
+                                widths: ['*'], // Two columns, equal width
+                                body: [
+                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                ]
+                            }
+                        },
+                        { text: ' ', fontSize: 5 },
+                        {
+                            layout: {
+                                hLineColor: () => 'grey',
+                                vLineColor: () => 'grey',
+                                hLineWidth: () => 1,
+                                vLineWidth: () => 1,
+                            },
+                            table: {
+                                widths: [20, '*', 68, 65, 65, 65],
+                                body: this.getData(items, false)
+                            }
+                        },
+                        { text: `Page: ${index + 1}`, fontSize: 7, alignment: 'right', marginTop: 3 },
+                        { text: '', pageBreak: 'after' }
+                    );
+                    content.push(
+                        Utils.getReportHeaders(logo),
+                        {
+                            table: {
+                                widths: ['*'], // Two columns, equal width
+                                body: [
+                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                ]
+                            }
+                        },
+                        { text: ' ', fontSize: 5 },
+                        {
+                            layout: {
+                                hLineColor: () => 'grey',
+                                vLineColor: () => 'grey',
+                                hLineWidth: () => 1,
+                                vLineWidth: () => 1,
+                            },
+                            table: {
+                                widths: [20, '*', 68, 65, 65, 65],
+                                body: this.getTotal(totalValues)
+                            }
+                        },
+                        { text: `Page: ${index + 2}`, fontSize: 7, alignment: 'right', marginTop: 3 },
+                    );
+                } else if (lastItem && items.length < 42) {
+                    content.push(
+                        Utils.getReportHeaders(logo),
+                        {
+                            table: {
+                                widths: ['*'], // Two columns, equal width
+                                body: [
+                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                ]
+                            }
+                        },
+                        { text: ' ', fontSize: 5 },
+                        {
+                            layout: {
+                                hLineColor: () => 'grey',
+                                vLineColor: () => 'grey',
+                                hLineWidth: () => 1,
+                                vLineWidth: () => 1,
+                            },
+                            table: {
+                                widths: [20, '*', 68, 65, 65, 65],
+                                body: this.getData(items, true, totalValues)
+                            }
+                        },
+                        { text: `Page: ${index + 1}`, fontSize: 7, alignment: 'right', marginTop: 3 }
+                    )
+                } else {
+                    content.push(
+                        Utils.getReportHeaders(logo),
+                        {
+                            table: {
+                                widths: ['*'], // Two columns, equal width
+                                body: [
+                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                ]
+                            }
+                        },
+                        { text: ' ', fontSize: 5 },
+                        {
+                            layout: {
+                                hLineColor: () => 'grey',
+                                vLineColor: () => 'grey',
+                                hLineWidth: () => 1,
+                                vLineWidth: () => 1,
+                            },
+                            table: {
+                                widths: [20, '*', 68, 65, 65, 65],
+                                body: this.getData(items, false)
+                            }
+                        },
+                        { text: `Page: ${index + 1}`, fontSize: 7, alignment: 'right', marginTop: 3 },
+                        { text: '', pageBreak: 'after' }
+                    )
+                }
+            });
+            return content;
+        }
+    }
+
+    private getTotal(totalValues?: any) {
+        const body = [
+            [{ text: '#', style: ['headerStyle'] }, { text: "Client", style: ['headerStyle'] }, { text: "Previous Due", style: ['headerStyle', 'textCenter'] }, { text: "Sales", style: ['headerStyle', 'textCenter'] }, { text: "Payment", style: ['headerStyle', 'textCenter'] }, { text: "Current Due", style: ['headerStyle', 'textCenter'] }] as any,
+        ];
+        body.push([
+            { text: "Total", style: ['cellTotal', 'cellLightGrey'], colSpan: 2 },
+            { text: '' },
+            { text: Utils.thousandsSeparator(totalValues.previousDue), style: ['cellAmount', 'cellLightGrey'], bold: true },
+            { text: Utils.thousandsSeparator(totalValues.currentSales), style: ['cellAmount', 'cellLightGrey'], bold: true },
+            { text: Utils.thousandsSeparator(totalValues.currentPaymnet), style: ['cellAmount', 'cellLightGrey'], bold: true },
+            { text: Utils.thousandsSeparator(totalValues.currentDue), style: ['cellAmount', 'cellLightGrey'], bold: true }
+        ]);
         return body;
     }
 
-    private thousandsSeparator(num: number): string {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    private getData(items: CustomerOverallDueReportDto[], showTotal: boolean, totalValues?: any) {
+        const body = [
+            [{ text: '#', style: ['headerStyle'] }, { text: "Client", style: ['headerStyle'] }, { text: "Previous Due", style: ['headerStyle', 'textCenter'] }, { text: "Sales", style: ['headerStyle', 'textCenter'] }, { text: "Payment", style: ['headerStyle', 'textCenter'] }, { text: "Current Due", style: ['headerStyle', 'textCenter'] }] as any,
+        ];
+        items.forEach(item => {
+            body.push(
+                [
+                    { text: item.serial, fontSize: 9, alignment: 'center' },
+                    { text: item.customerName },
+                    { text: Utils.thousandsSeparator(item.previousDue), style: ['cellAmount'] },
+                    { text: Utils.thousandsSeparator(item.currentSales), style: ['cellAmount'] },
+                    { text: Utils.thousandsSeparator(item.currentPaymnet), style: ['cellAmount'] },
+                    { text: Utils.thousandsSeparator(item.currentDue), style: ['cellAmount'] }
+                ]
+            );
+        });
+
+        if (showTotal) {
+            body.push(
+                [
+                    { text: "Total", style: ['cellTotal', 'cellLightGrey'], colSpan: 2 },
+                    { text: '' },
+                    { text: Utils.thousandsSeparator(totalValues.previousDue), style: ['cellAmount', 'cellLightGrey'], bold: true },
+                    { text: Utils.thousandsSeparator(totalValues.currentSales), style: ['cellAmount', 'cellLightGrey'], bold: true },
+                    { text: Utils.thousandsSeparator(totalValues.currentPaymnet), style: ['cellAmount', 'cellLightGrey'], bold: true },
+                    { text: Utils.thousandsSeparator(totalValues.currentDue), style: ['cellAmount', 'cellLightGrey'], bold: true }
+                ]
+            );
+        }
+        return body;
     }
 
 }

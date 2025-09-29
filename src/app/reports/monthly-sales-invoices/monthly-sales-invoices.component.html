@@ -62,12 +62,12 @@
                             <tr>
                                 <th rowspan="3" class="text-center">Date</th>
                                 <th colspan="7" class="text-center">Particular</th>
-                                <th rowspan="3" class="text-center">Revenue</th>
+                                <th rowspan="3" class="text-center" style="width: 120px;">Revenue</th>
                             </tr>
                             <tr>
-                                <th colspan="2" class="text-center">M. Oxygen</th>
-                                <th colspan="2" class="text-center">M. Air</th>
-                                <th colspan="3" class="text-center">Nitros</th>
+                                <th colspan="2" class="text-center">Medical Oxygen</th>
+                                <th colspan="2" class="text-center">Medical Compressed Air</th>
+                                <th colspan="3" class="text-center">Nitrous Oxide</th>
                             </tr>
                             <tr>
                                 <th class="text-center">9.80</th>
@@ -105,12 +105,12 @@
                                 <td class="text-center">
                                     <span>{{ record.nitros3KgQty }}</span>
                                 </td>
-                                <td class="text-center" style="min-width: 110px;">
+                                <td class="text-right" style="min-width: 110px;">
                                     <span>{{record.amount | number: '1.2-2' }}</span>
                                 </td>
                             </tr>
                             <tr *ngIf="data.details.length > 0">
-                                <td colspan="10" style="width: 1582px;">
+                                <td colspan="10" style="width: 1582px; padding: 0px;">
                                    &nbsp;
                                 </td>
                             </tr>
@@ -134,7 +134,7 @@
                                 <td class="text-center"><strong>{{data.nitros30KgTotalQty}}</strong></td>
                                 <td class="text-center"><strong>{{data.nitros5KgTotalQty}}</strong></td>
                                 <td class="text-center"><strong>{{data.nitros3KgTotalQty}}</strong></td>
-                                <td class="text-center"><strong>{{data.totalAmount | number: '1.2-2'}}</strong></td>
+                                <td class="text-right"><strong>{{data.totalAmount | number: '1.2-2'}}</strong></td>
                             </tr>
                         </tfoot>
                     </table>
