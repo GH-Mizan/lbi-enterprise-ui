@@ -1,14 +1,14 @@
 
-import { Injectable } from '@angular/core';
+import { Injectable, OnInit } from '@angular/core';
 import { firstValueFrom } from "rxjs";
 import { SalesReceiptOutputDto, SalesServiceProxy } from "../service-proxies/service-proxies";
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Utils } from '@shared/helpers/Utils';
-pdfMake.addVirtualFileSystem(pdfFonts);
+import moment from 'moment';
 
 @Injectable()
 export class SalesReceiptReport {
+
+    pdfMake: any;
 
     constructor(
         private readonly _salesService: SalesServiceProxy
@@ -16,7 +16,28 @@ export class SalesReceiptReport {
 
     }
 
+    async loadAndPrintPDF() {
+        const { default: pdfMake } = await import('pdfmake/build/pdfmake');
+        const { default: pdfFonts } = await import('assets/vfs_fonts');
+        pdfMake.addFonts({
+            'TimesNewRoman': {
+                normal: 'times-Regular.ttf',
+                bold: 'Times New Roman Bold.ttf'
+            },
+            'LucidaGrande': {
+                bold: 'LucidaGrandeBold.ttf'
+            }
+        });
+
+        pdfMake.addVirtualFileSystem(pdfFonts);
+        return pdfMake;
+    }
+
+
     async generateSalesReceipt(saleId: number) {
+        if(!this.pdfMake)
+            this.pdfMake = await this.loadAndPrintPDF();
+        
         const data = await firstValueFrom(this._salesService.getSalesReceipt(saleId));
         const logo = await Utils.getImageDataUrl('assets/img/logo.png');
 
@@ -29,9 +50,7 @@ export class SalesReceiptReport {
                     table: {
                         widths: ['*'], // Two columns, equal width
                         body: [
-                            [
-                                { text: 'SALES INVOICE', bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'black', '', 'black'], fillColor: '#C4C4C4' },
-                            ]
+                            [{ text: 'SALES INVOICE', bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }]
                         ]
                     }
                 },
@@ -39,19 +58,27 @@ export class SalesReceiptReport {
                 {
                     layout: "noBorders",
                     table: {
-                        widths: [43, 2, 300, 35, 2, '*'], // Two columns, equal width
+                        widths: [43, 2, 360, 35, 2, '*'], // Two columns, equal width
                         body: [
                             [
                                 { text: 'Client', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: data.customerName, fontSize: 11 }, { text: 'Invoice', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: data.invoiceNumber, fontSize: 11 }
                             ],
                             [
-                                { text: 'Address', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: data.address, fontSize: 11 }, { text: 'Sales', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: data.saler, fontSize: 11 }
+                                { text: 'Address', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: data.address, fontSize: 11 }, { text: 'Date', fontSize: 11 }, { text: ':', fontSize: 11 }, { text: moment(data.invoiceDate).format('DD-MMM-YY').toString(), fontSize: 11 }
                             ],
                         ]
                     }
                 },
                 { text: ' ', fontSize: 10 },
+                { text: `Salesperson: ${data.saler}`, fontSize: 11 },
+                { text: ' ', fontSize: 10 },
                 {
+                    layout: {
+                        hLineColor: () => 'lightgrey',
+                        vLineColor: () => 'lightgrey',
+                        hLineWidth: () => 1,
+                        vLineWidth: () => 1,
+                    },
                     table: {
                         widths: [5, '*', 70, 70, 70],
                         body: this.getBody(data)
@@ -59,24 +86,31 @@ export class SalesReceiptReport {
                 },
                 { text: ' ', fontSize: 5 },
                 { text: `Amount in words:  ${Utils.capitalizeFirstLetter(Utils.inWords(data.totalAmount))}taka only.`, bold: true },
-                { text: ' ', fontSize: 5 },
+                { text: ' ', fontSize: 25 },
                 {
+                    layout: {
+                        hLineColor: () => 'lightgrey',
+                        vLineColor: () => 'lightgrey',
+                        hLineWidth: () => 1,
+                        vLineWidth: () => 1,
+                    },
                     table: {
                         widths: [100, 100],
                         body: [
-                            [{ text: 'Due Account', colSpan: 2, style: ['headerStyle', 'margin_1'] }, {text:''}],
+                            [{ text: 'Due Account', colSpan: 2, style: ['headerStyle', 'margin_1'], fillColor: 'lightgrey' }, { text: '' }],
                             [{ text: 'Previous Due' }, { text: `${Utils.thousandsSeparator(data.previousDue)}/-`, style: ['textRight'] }],
                             [{ text: 'Invoice Due' }, { text: `${Utils.thousandsSeparator(data.totalDue)}/-`, style: ['textRight'] }],
                             [{ text: 'Total Due' }, { text: `${Utils.thousandsSeparator(data.overallDue)}/-`, style: ['textRight'] }],
                         ]
                     }
                 },
-                { text: ' ', fontSize: 10 },
-                { text: 'Terms & Conditions', bold: true },
-                { text: '1. VAT & Taxes are not includer in the above price.', marginLeft: 30 },
-                { text: '2. Keep gas cylinders in a cool, dry and well-ventilated area.', marginLeft: 30 },
-                { text: '3. Keep the cylinders away from flames, sparks, and heat sources.', marginLeft: 30 },
-                { text: `4. Don't store oxygen cylinders with flammable materials like solvents or gas.`, marginLeft: 30, marginBottom: 50 },
+                { text: ' ', fontSize: 20 },
+                { text: 'Terms & Conditions', bold: true, fontSize: 13, marginBottom: 5 },
+                { text: '1. VAT & Taxes are not included in the above price. ' },
+                { text: '2. All payments are to be rendered in cash at the time of delivery.' },
+                { text: '3. Clients are responsible for safe handling and storage of medical oxygen. Cylinders must be secured upright.' },
+                { text: '4. Keep them in a cool & well-ventilated area and keep them away from flames, sparks, and heat sources.' },
+                { text: '5. Emergency or after-hours deliveries are subject to additional charges.', marginBottom: 50 },
                 {
                     layout: 'noBorders',
                     table: {
@@ -89,7 +123,7 @@ export class SalesReceiptReport {
                                         x1: 0, y1: 50, // Starting point
                                         x2: 150, y2: 50, // Ending point
                                         lineWidth: 1,
-                                        lineColor: 'black'
+                                        lineColor: 'grey'
                                     }
                                 ],
                             },
@@ -100,15 +134,18 @@ export class SalesReceiptReport {
                                         x1: 100, y1: 50, // Starting point
                                         x2: 250, y2: 50, // Ending point
                                         lineWidth: 1,
-                                        lineColor: 'black'
+                                        lineColor: 'grey'
                                     }
                                 ]
                             }],
-                            [{text: `Client’s Signature`, marginLeft: 25 }, {text: `Authorized Signature`, marginLeft: 118}]
+                            [{ text: `Client`, marginLeft: 57 }, { text: `Authorizer`, marginLeft: 150 }]
                         ]
                     }
                 },
             ],
+            defaultStyle: {
+                font: 'TimesNewRoman'
+            },
             styles: {
                 headerStyle: {
                     fontSize: 13,
@@ -128,7 +165,7 @@ export class SalesReceiptReport {
             }
 
         };
-        pdfMake.createPdf(dd).download('Sales invoice.pdf');
+        this.pdfMake.createPdf(dd).download('Sales invoice.pdf');
         //pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
@@ -142,7 +179,7 @@ export class SalesReceiptReport {
             body.push([
                 { text: (index + 1).toString(), style: ['margin_1'] },
                 { text: x.product, style: ['margin_1'] },
-                { text: Utils.thousandsSeparator(x.unitPrice), style: ['textRight', 'margin_1'] },
+                { text: Utils.thousandsSeparator(x.unitPrice), style: ['textCenter', 'margin_1'] },
                 { text: x.qty.toString(), style: ['textCenter', 'margin_1'] },
                 { text: `${Utils.thousandsSeparator(x.amount)}/-`, style: ['textRight', 'margin_1'] }
             ])
@@ -155,6 +192,6 @@ export class SalesReceiptReport {
         return body;
     }
 
-    
+
 }
 

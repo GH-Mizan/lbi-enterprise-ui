@@ -9,28 +9,34 @@
                         <th style="min-width: 100px">Payment Date</th>
                         <th>Invoice Number</th>
                         <th>Payment Status</th>
-                        <th>Grand Total</th>
-                        <th>Discount</th>
-                        <th>Net Total</th>
-                        <th>Total Paid</th>
+                        <!-- <th>Grand Total</th>
+                        <th>Discount</th> -->
+                        <th>Total</th>
+                        <th>Paid</th>
                         <th>Due</th>
                         <th>Default</th>
                         <th>Remarks</th>
+                        <th>Action</th>
                     </thead>
 
                     <tbody>
                         <tr *ngFor="let ph of histories">
-                            <td>{{ph.invoiceDate | date: 'dd MMM, yyyy'}}</td>
-                            <td>{{ph.paymentDate | date: 'dd MMM, yyyy'}}</td>
+                            <td>{{ph.invoiceDate | date: 'dd-MMM-yy'}}</td>
+                            <td>{{ph.paymentDate | date: 'dd-MMM-yy'}}</td>
                             <td>{{ph.invoiceNumber}}</td>
                             <td>{{ph.paymentStatus == 1 ? 'Paid' : ph.paymentStatus == 2 ? 'P. Paid' : 'Due'}}</td>
-                            <td class="text-right">{{ph.grandTotal | number: '1.2-2'}}</td>
-                            <td class="text-right">{{ph.discount | number: '1.2-2'}}</td>
+                            <!-- <td class="text-right">{{ph.grandTotal | number: '1.2-2'}}</td>
+                            <td class="text-right">{{ph.discount | number: '1.2-2'}}</td> -->
                             <td class="text-right">{{ph.netTotal | number: '1.2-2'}}</td>
                             <td class="text-right">{{ph.totalPaid | number: '1.2-2'}}</td>
                             <td class="text-right"><strong>{{ph.due | number: '1.2-2'}}</strong></td>
                             <td class="text-center"> <input type="checkbox" value="" [checked]="ph.default" disabled> </td>
                             <td>{{ph.remarks}}</td>
+                             <td>
+                                <button type="button" class="btn btn-sm bg-danger" (click)="delete(ph)" [disabled]="ph.default">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

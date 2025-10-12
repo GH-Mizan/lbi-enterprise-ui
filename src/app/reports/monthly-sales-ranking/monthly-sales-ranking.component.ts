@@ -1,14 +1,12 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ComboboxItemDto, CustomerDueReportDto, CustomerLedgerReportDto, CustomerServiceProxy, MonthlySalesRankingReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
-import { finalize } from "rxjs/operators";
-import moment, { invalid } from 'moment';
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
+import { ComboboxItemDto, MonthlySalesRankingReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
 import { Utils } from '@shared/helpers/Utils';
-pdfMake.addVirtualFileSystem(pdfFonts);
+import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
+import { Table } from 'primeng/table';
+import { LazyLoadEvent } from "primeng/api";
+import { finalize } from "rxjs/operators";
 
 @Component({
     selector: 'app-monthly-sales-ranking-report',
@@ -16,9 +14,10 @@ pdfMake.addVirtualFileSystem(pdfFonts);
     templateUrl: './monthly-sales-ranking.component.html',
     animations: [appModuleAnimation()]
 })
-export class MonthlySalesRankingReportComponent implements OnInit {
+export class MonthlySalesRankingReportComponent extends PagedListingComponentBase<MonthlySalesRankingReportDto> implements OnInit {
+    @ViewChild('dataTable', { static: true }) dataTable: Table;
 
-    data: MonthlySalesRankingReportDto[] = [];
+    pdfMake: any;
     monthId: number;
     yearId: number;
     loading: boolean = true;
@@ -26,12 +25,13 @@ export class MonthlySalesRankingReportComponent implements OnInit {
     years: ComboboxItemDto[] = [];
 
     constructor(
-        private cd: ChangeDetectorRef,
+        injector: Injector,
+        cd: ChangeDetectorRef,
         private _salesService: SalesServiceProxy
     ) {
-
+        super(injector, cd);
     }
-    ngOnInit(): void {
+    async ngOnInit() {
         const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         months.forEach((m, index) => {
             this.months = [...this.months, { value: (index + 1).toString(), displayText: m } as ComboboxItemDto];
@@ -44,26 +44,50 @@ export class MonthlySalesRankingReportComponent implements OnInit {
         this.monthId = new Date().getMonth() + 1;
         this.yearId = currentYear;
 
-        this.getReportData();
+        this.pdfMake = await this.loadAndPrintPDF();
     }
 
-    getReportData() {
-        this.loading = true;
+    async loadAndPrintPDF() {
+        const { default: pdfMake } = await import('pdfmake/build/pdfmake');
+        const { default: pdfFonts } = await import('assets/vfs_fonts');
+        pdfMake.addFonts({
+            'TimesNewRoman': {
+                normal: 'times-Regular.ttf',
+                bold: 'Times New Roman Bold.ttf'
+            },
+            'LucidaGrande': {
+                bold: 'LucidaGrandeBold.ttf'
+            }
+        });
+
+        pdfMake.addVirtualFileSystem(pdfFonts);
+        return pdfMake;
+    }
+
+
+    list(event?: LazyLoadEvent): void {
+        this.showLoading();
         this._salesService.getMonthlySalesRankingReport(this.monthId, this.yearId)
-            .pipe(
-                finalize(() => {
-                    this.loading = false;
-                    this.cd.detectChanges();
-                })
-            )
+            .pipe(finalize(() => {
+                this.hideLoading();
+            }))
             .subscribe((result) => {
-                this.data = result;
+                this.primengTableHelper.records = result;
+                this.primengTableHelper.totalRecordsCount = result.length;
                 this.cd.detectChanges();
             });
     }
 
+    delete() { }
+
     async print() {
+        this.showLoading();
         const data = await firstValueFrom(this._salesService.getMonthlySalesRankingReport(this.monthId, this.yearId));
+         if (!data || data.length == 0) {
+            abp.message.info("No record(s) found", "Sorry!");
+            this.hideLoading();
+            return;
+        }
         const logo = await Utils.getImageDataUrl('assets/img/logo.png');
         // let count = data.length + 1;
         // for (let i = count; i < 100 + count; i++) {
@@ -74,6 +98,9 @@ export class MonthlySalesRankingReportComponent implements OnInit {
             pageSize: 'A4',
             pageMargins: [30, 20, 30, 20],
             content: this.getContent(data, logo),
+            defaultStyle: {
+                font: 'TimesNewRoman'
+            },
             styles: {
                 headerStyle: {
                     fontSize: 12,
@@ -107,8 +134,9 @@ export class MonthlySalesRankingReportComponent implements OnInit {
             }
 
         };
+        this.hideLoading();
         // pdfMake.createPdf(dd).download('Customerledge.pdf');
-        pdfMake.createPdf(dd).open();
+        this.pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
 
@@ -119,7 +147,7 @@ export class MonthlySalesRankingReportComponent implements OnInit {
         let slicedData: MonthlySalesRankingReportDto[] = [];
         if (totalRows > 42) {
             hasNextpage = true;
-            const partition = Math.ceil(totalRows/41);
+            const partition = Math.ceil(totalRows / 41);
             for (let i = 0; i < partition; i++) {
                 slicedData = [];
                 const itemsToTransfer = data.slice(0, 41);
@@ -138,15 +166,15 @@ export class MonthlySalesRankingReportComponent implements OnInit {
                     table: {
                         widths: ['*'], // Two columns, equal width
                         body: [
-                            [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                            [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
                 { text: ' ', fontSize: 5 },
                 {
                     layout: {
-                        hLineColor: () => 'grey',
-                        vLineColor: () => 'grey',
+                        hLineColor: () => 'lightgrey',
+                        vLineColor: () => 'lightgrey',
                         hLineWidth: () => 1,
                         vLineWidth: () => 1,
                     },
@@ -165,15 +193,15 @@ export class MonthlySalesRankingReportComponent implements OnInit {
                         table: {
                             widths: ['*'], // Two columns, equal width
                             body: [
-                                [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                             ]
                         }
                     },
                     { text: ' ', fontSize: 5 },
                     {
                         layout: {
-                            hLineColor: () => 'grey',
-                            vLineColor: () => 'grey',
+                            hLineColor: () => 'lightgrey',
+                            vLineColor: () => 'lightgrey',
                             hLineWidth: () => 1,
                             vLineWidth: () => 1,
                         },
@@ -183,7 +211,7 @@ export class MonthlySalesRankingReportComponent implements OnInit {
                         }
                     },
                     { text: `Page: ${index + 1}`, fontSize: 7, alignment: 'right', marginTop: 3 },
-                    ...(metaData.length === index + 1 ? [] : [{ text: '', pageBreak: 'after' }] )
+                    ...(metaData.length === index + 1 ? [] : [{ text: '', pageBreak: 'after' }])
                 )
             });
             return content;

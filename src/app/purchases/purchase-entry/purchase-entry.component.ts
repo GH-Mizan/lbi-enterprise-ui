@@ -4,7 +4,8 @@ import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { ComboboxItemDto, DuePaymentHistoryDto, PaymentStatus, PurchaseDetailsEntryDto, PurchaseEntryDto, PurchaseEntryInput, PurchaseProductDto, PurchaseServiceProxy, SupplierServiceProxy, StockPointServiceProxy, EmployeeServiceProxy } from "@shared/service-proxies/service-proxies";
 import { ActivatedRoute, Router } from '@angular/router';
 import moment from "moment";
-import { NotifyService } from 'abp-ng2-module';
+import { NotifyService, PermissionCheckerService } from 'abp-ng2-module';
+import { NgxSpinnerService } from "ngx-spinner";
 
 
 @Component({
@@ -29,6 +30,15 @@ import { NotifyService } from 'abp-ng2-module';
             .invalid_cell {
                 background-color: red;
             }
+
+            table.table td {
+                padding-top: 3px;
+                padding-bottom: 3px;
+            }
+
+            .card-body {
+                padding-bottom: 0px;
+            }
         `
     ]
 })
@@ -50,7 +60,6 @@ export class PurchaseEntryComponent implements OnInit {
     id?: number;
     date = new Date();
     invalid: boolean = false;
-    loading: boolean = true;
 
     constructor(
         private readonly _purchaseService: PurchaseServiceProxy,
@@ -60,13 +69,16 @@ export class PurchaseEntryComponent implements OnInit {
         private readonly _activatedRoute: ActivatedRoute,
         private readonly _router: Router,
         private readonly _notifyService: NotifyService,
-        private readonly cd: ChangeDetectorRef
+        private readonly permission: PermissionCheckerService,
+        private readonly cd: ChangeDetectorRef,
+        private spinner: NgxSpinnerService
     ) {
 
     }
 
     async ngOnInit() {
         this.id = this._activatedRoute.snapshot.params['id'];
+        this.spinner.show();
         Promise.all([
             this.populateSuppliers(),
             this.populatePaymentStatuses(),
@@ -80,9 +92,8 @@ export class PurchaseEntryComponent implements OnInit {
 
     private async getModel() {
         if (!this.id) {
-            this.model.invoiceNumber = "#" + (parseInt((await firstValueFrom(this._purchaseService.getLastInvoiceNumber()))) + 1);
             this.products = await firstValueFrom(this._purchaseService.getAllProducts(undefined));
-            this.loading = false;
+            this.spinner.hide();
         }
         else {
             const purchaseInfo = await firstValueFrom(this._purchaseService.get(this.id));
@@ -102,7 +113,7 @@ export class PurchaseEntryComponent implements OnInit {
                 if (product.stock < 0) this.invalid = true;
             });
             this.calculateTotal();
-            this.loading = false;
+            this.spinner.hide();
         }
     }
 
@@ -267,7 +278,7 @@ export class PurchaseEntryComponent implements OnInit {
                 totalPrice: x.totalPrice
             } as PurchaseDetailsEntryDto);
         });
-        model.paymentStatus = model.dueAmount == 0 ? PaymentStatus._1 : model.totalAmount > model.dueAmount ? PaymentStatus._2 : PaymentStatus._3;
+        model.paymentStatus = model.dueAmount == 0 ? PaymentStatus._1 : model.netAmount == model.dueAmount ? PaymentStatus._3 : PaymentStatus._2;
         const input = {
             purchase: model,
             purchaseDetails: details
@@ -314,15 +325,19 @@ export class PurchaseEntryComponent implements OnInit {
 
     delete(): void {
         abp.message.confirm(`${this.model.invoiceNumber} will be deleted`,
-          undefined,
-          (result: boolean) => {
-            if (result) {
-              this._purchaseService.delete(this.model.id, this.model.stockPointId).subscribe(() => {
-                abp.notify.success("Successfully Deleted");
-                this._router.navigateByUrl('app/purchases');
-              });
+            undefined,
+            (result: boolean) => {
+                if (result) {
+                    this._purchaseService.purcahseRemove(this.model.id, this.model.stockPointId).subscribe(() => {
+                        abp.notify.success("Successfully Deleted");
+                        this._router.navigateByUrl('app/purchases');
+                    });
+                }
             }
-          }
         );
-      }
+    }
+
+    isGranted(permissionName: string): boolean {
+        return this.permission.isGranted(permissionName);
+    }
 }

@@ -46,7 +46,7 @@ export class PurchasesComponent extends PagedListingComponentBase<PurchaseOutput
       }
     }
 
-    this.primengTableHelper.showLoadingIndicator();
+    this.showLoading();
     this._purchaseService.getPaginatedPurchases(
       moment(new Date()), moment(new Date()),
       this.searchText,
@@ -54,7 +54,7 @@ export class PurchasesComponent extends PagedListingComponentBase<PurchaseOutput
       this.primengTableHelper.getMaxResultCount(this.paginator, event)
     ).pipe(
       finalize(() => {
-        this.primengTableHelper.hideLoadingIndicator();
+        this.hideLoading();
       })
     )
       .subscribe((result) => {
@@ -124,7 +124,8 @@ export class PurchasesComponent extends PagedListingComponentBase<PurchaseOutput
   }
 
   showDuePaymentHistory(id: number) {
-    this._modalService.show(
+    let duePaymentHistoryDialog: BsModalRef;
+    duePaymentHistoryDialog = this._modalService.show(
       DuePaymentHistoryComponent,
       {
         class: "modal-lg",
@@ -133,6 +134,9 @@ export class PurchasesComponent extends PagedListingComponentBase<PurchaseOutput
         },
       }
     );
+    duePaymentHistoryDialog.content.onDelete.subscribe(() => {
+      this.refresh();
+    });
   }
 
 

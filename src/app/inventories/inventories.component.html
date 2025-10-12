@@ -21,37 +21,93 @@
                     <div class="primeng-datatable-container">
                         <p-table #dataTable sortMode="multiple" (onLazyLoad)="list($event)"
                             [value]="primengTableHelper.records"
+                            showGridlines
                             rows="{{ primengTableHelper.defaultRecordsCountPerPage }}" [paginator]="false" [lazy]="true"
-                            [tableStyle]="{ 'min-width': '50rem' }">
+                            [tableStyle]="{ 'min-width': '50rem' }" [loading]="primengTableHelper.isLoading">
                             <ng-template pTemplate="header">
+                              
                                 <tr>
-                                    <th> StockPoint </th>
-                                    <th>
-                                        Stock
-                                    </th>
-                                    <th style="width: 60px; min-width: 60px" class="text-center">
-                                        {{ "Actions" }}
-                                    </th>
+                                    <th rowspan="2" class="text-center">#</th>
+                                    <th rowspan="2">Stock Point</th>
+                                    <th colspan="2" class="text-center">Medical Oxygen</th>
+                                    <th colspan="2" class="text-center">Medical Compressed Air</th>
+                                    <th colspan="3" class="text-center">Nitrous Oxide</th>
+                                    <th rowspan="2" class="text-center"> Total </th>
+                                </tr>
+                                <tr>
+                                    <th class="text-center">1.36</th>
+                                    <th class="text-center">9.80</th>
+                                    <th class="text-center">7.00</th>
+                                    <th class="text-center">9.80</th>
+                                    <th class="text-center">3 KG</th>
+                                    <th class="text-center">5 KG</th>
+                                    <th class="text-center">30 KG</th>
                                 </tr>
                             </ng-template>
 
-                            <ng-template pTemplate="body" let-record="$implicit">
+                            <ng-template pTemplate="body" let-rowIndex="rowIndex" let-record="$implicit">
                                 <tr>
+                                    <td class="text-center">
+                                        <span>{{ rowIndex + 1 }}</span>
+                                    </td>
                                     <td>
                                         <span>{{ record.stockPointName }}</span>
                                     </td>
-                                    <td>
-                                        <span>{{record.stock}}</span>
+                                    <td class="text-center">
+                                        <span>{{ record.medicalOxygen1_36Qty }}</span>
                                     </td>
-                                    <td class="text-center" style="width: 110px">
-                                        <button type="button" class="btn btn-sm bg-blue mx-1"
-                                            (click)="showBreakpoints(record)">
-                                            <i class="fas fa-external-link-square-alt"></i>
-                                        </button>
-                                        <!-- <button type="button" class="btn btn-sm bg-green"
-                                            (click)="showHistories(record.productId)">
-                                            <i class="fa fa-history"></i>
-                                        </button> -->
+                                    <td class="text-center">
+                                        <span>{{ record.medicalOxygen9_8Qty }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span>{{ record.medicalAir7Qty }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span>{{ record.medicalAir9_8Qty }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span>{{ record.nitros3KgQty }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span>{{ record.nitros5KgQty }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span>{{ record.nitros30KgQty }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span>{{ record.total }}</span>
+                                    </td>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="footer">
+                                <tr style="font-weight: bold;" *ngIf="summaryTotal">
+                                    <td colspan="2" class="text-right lightgrey" style="padding-right:5px">
+                                        <span>Total</span>
+                                    </td>
+                                    <td class="text-center lightgrey">
+                                        <span>{{ summaryTotal.medicalOxygen1_36Qty }}</span>
+                                    </td>
+                                    <td class="text-center lightgrey">
+                                        <span>{{ summaryTotal.medicalOxygen9_8Qty }}</span>
+                                    </td>
+                                    <td class="text-center lightgrey">
+                                        <span>{{ summaryTotal.medicalAir7Qty }}</span>
+                                    </td>
+                                    <td class="text-center lightgrey">
+                                        <span>{{ summaryTotal.medicalAir9_8Qty }}</span>
+                                    </td>
+                                    <td class="text-center lightgrey">
+                                        <span>{{ summaryTotal.nitros3KgQty }}</span>
+                                    </td>
+                                    <td class="text-center lightgrey">
+                                        <span>{{ summaryTotal.nitros5KgQty }}</span>
+                                    </td>
+                                    <td class="text-center lightgrey">
+                                        <span>{{ summaryTotal.nitros30KgQty }}</span>
+                                    </td>
+                                    <td class="text-center lightgrey">
+                                        <span>{{ summaryTotal.total }}</span>
                                     </td>
                                 </tr>
                             </ng-template>

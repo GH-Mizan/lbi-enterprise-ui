@@ -54,7 +54,7 @@
                   <th style="width: 68px">
                     Active
                   </th>
-                  <th style="width: 120px; min-width: 120px" class="text-center">
+                  <th class="text-center">
                     Actions
                   </th>
                 </tr>
@@ -83,11 +83,8 @@
                     <span> <input type="checkbox" value="" [checked]="record.activeStatus" disabled> </span>
                   </td>
                   <td class="text-center">
-                    <button type="button" class="btn btn-sm bg-secondary" (click)="edit(record.id)">
+                    <button type="button" class="btn btn-sm bg-secondary" (click)="edit(record.id)" *ngIf="isGranted('Pages.Client.Edit')">
                       <i class="fas fa-pencil-alt"></i>
-                    </button>
-                    <button type="button" class="btn btn-sm bg-danger mx-1" (click)="delete(record)">
-                      <i class="fas fa-trash"></i>
                     </button>
                     <!-- <button type="button" class="btn btn-sm bg-success" (click)="openCustomerPriceModal(record)">
                       <i class="fas fa-file-invoice-dollar"></i>

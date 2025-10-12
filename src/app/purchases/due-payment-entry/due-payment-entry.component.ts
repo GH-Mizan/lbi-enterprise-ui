@@ -75,6 +75,7 @@ export class DuePaymentEntryComponent extends AppComponentBase implements OnInit
     }
 
     totalPaidChanged() {
+        this.invalid = true;
         const payment = this.duePayment;
         if (!payment.totalPaid) payment.totalPaid = 0;
         if (payment.totalPaid < 0) {
@@ -87,6 +88,11 @@ export class DuePaymentEntryComponent extends AppComponentBase implements OnInit
             this.paidEditMode = false;
         }
         payment.due = payment.netTotal - payment.prevTotalPaid - payment.totalPaid;
+
+        setTimeout(() => {
+            this.invalid = false;
+            this.cd.detectChanges();
+        }, 200);
     }
 
     save() {

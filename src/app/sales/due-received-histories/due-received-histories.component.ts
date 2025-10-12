@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, EventEmitter, OnInit, Output } from "@angular/core";
 import { DueReceivedHistoryDto, SalesServiceProxy } from "@shared/service-proxies/service-proxies";
 import { BsModalRef } from 'ngx-bootstrap/modal';
 
@@ -9,6 +9,7 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
 })
 
 export class DueReceivedHistoryComponent implements OnInit {
+    @Output() onDelete = new EventEmitter<any>();
 
     salesId: number;
     histories: DueReceivedHistoryDto[] = [];
@@ -17,15 +18,29 @@ export class DueReceivedHistoryComponent implements OnInit {
         public bsModalRef: BsModalRef,
         private readonly _salesService: SalesServiceProxy,
         private cd: ChangeDetectorRef
-    ) {
-        
-    }
+    ) { }
 
     ngOnInit(): void {
-        this._salesService.getDueReceivedHistories(this.salesId).subscribe(res=> {
+        this._salesService.getDueReceivedHistories(this.salesId).subscribe(res => {
             this.histories = res;
             this.cd.detectChanges();
         });
+    }
+
+    delete(item: DueReceivedHistoryDto): void {
+        abp.message.confirm(`Amount ${item.totalPaid} will be removed`,
+            undefined,
+            (result: boolean) => {
+                if (result) {
+                    this._salesService.dueReceivedRemove(item.id).subscribe(() => {
+                        abp.notify.success("Successfully Deleted");
+                        this.histories = this.histories.filter(f => f.id != item.id);
+                        this.onDelete.emit();
+                        this.cd.detectChanges();
+                    });
+                }
+            }
+        );
     }
 
 }

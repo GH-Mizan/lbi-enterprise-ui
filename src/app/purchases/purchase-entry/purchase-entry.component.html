@@ -13,6 +13,7 @@
     </section>
     <section class="content">
         <div class="container-fluid">
+            <ngx-spinner type="ball-scale-multiple"></ngx-spinner>
             <div class="card">
                 <div class="card-body">
                     <div class="row">
@@ -105,7 +106,7 @@
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6">
                             <h2>Choose products</h2>
-                            <table class="table table-responsive table-bordered table-striped" *ngIf="!loading">
+                            <table class="table table-responsive table-bordered table-striped">
                                 <thead>
                                     <tr>
                                         <th>
@@ -181,7 +182,7 @@
                                 Cancel
                             </button>
                             <button type="button" class="btn btn-danger" (click)="delete()" [disabled]="invalid"
-                                *ngIf="!!id">
+                                *ngIf="!!id && isGranted('Pages.Purchase.Delete')">
                                 Delete
                             </button>
                         </div>

@@ -36,6 +36,7 @@
         "moment-timezone": "0.5.47",
         "ngx-bootstrap": "^19.0.2",
         "ngx-pagination": "^6.0.3",
+        "ngx-spinner": "^19.0.0",
         "pdfmake": "^0.2.20",
         "primeng": "^19.0.9",
         "push.js": "1.0.12",

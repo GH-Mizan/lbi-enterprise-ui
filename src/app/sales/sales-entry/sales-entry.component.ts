@@ -7,6 +7,8 @@ import { SalesProductDto } from "@shared/service-proxies/service-proxies";
 import { SalesReceiptReport } from "@shared/reports/sales-receipt-report";
 import { firstValueFrom } from "rxjs";
 import moment from "moment";
+import { Utils } from "@shared/helpers/Utils";
+import { NgxSpinnerService } from "ngx-spinner";
 
 @Component({
     selector: 'app-sales-entry',
@@ -30,6 +32,15 @@ import moment from "moment";
             .invalid_cell {
                 background-color: red;
             }
+
+            table.table td {
+                padding-top: 3px;
+                padding-bottom: 3px;
+            }
+
+            .card-body {
+                padding-bottom: 0px;
+            }
         `
     ]
 })
@@ -51,7 +62,6 @@ export class SalesEntryComponent implements OnInit {
     id?: number;
     date = new Date();
     invalid: boolean = false;
-    loading: boolean = true;
     viewMode: boolean = false;
 
     constructor(
@@ -64,7 +74,8 @@ export class SalesEntryComponent implements OnInit {
         private readonly _router: Router,
         private readonly _notifyService: NotifyService,
         private readonly cd: ChangeDetectorRef,
-        private readonly salesReceiptReport: SalesReceiptReport
+        private readonly salesReceiptReport: SalesReceiptReport,
+         private spinner: NgxSpinnerService
 
     ) {
     }
@@ -72,8 +83,8 @@ export class SalesEntryComponent implements OnInit {
     async ngOnInit() {
         const snapshot = this._activatedRoute.snapshot;
         this.id = snapshot.params['id'];
+        this.spinner.show();
         this.viewMode = snapshot.url.map(segment => segment.path)[0] == 'view';
-        debugger;
         Promise.all([
             this.populateCustomers(),
             this.populatePaymentStatuses(),
@@ -87,9 +98,17 @@ export class SalesEntryComponent implements OnInit {
 
     private async getModel() {
         if (!this.id) {
-            this.model.invoiceNumber = "#" + (parseInt((await firstValueFrom(this._salesService.getLastInvoiceNumber()))) + 1);
+            const lastInvoiceNumber = await firstValueFrom(this._salesService.getLastInvoiceNumber());
+            let parsedInvoiceNumber = parseInt(lastInvoiceNumber.slice(1));
+            const prefix = lastInvoiceNumber.charAt(0);
+            let nextPrefix = prefix;
+            if(parsedInvoiceNumber === 99999) {
+                nextPrefix = Utils.nextLetter(prefix);
+                parsedInvoiceNumber = 0;
+            }
+            this.model.invoiceNumber = nextPrefix + (parsedInvoiceNumber + 1).toString().padStart(5, "0");
             this.products = await firstValueFrom(this._salesService.getAllProducts(undefined));
-            this.loading = false;
+            this.spinner.hide();
         }
         else {
             const salesInfo = await firstValueFrom(this._salesService.get(this.id));
@@ -109,7 +128,7 @@ export class SalesEntryComponent implements OnInit {
                 if (product.stock < 0) this.invalid = true;
             });
             this.calculateTotal();
-            this.loading = false;
+            this.spinner.hide();
         }
     }
 
@@ -127,6 +146,17 @@ export class SalesEntryComponent implements OnInit {
 
     private async populatePaymentStatuses() {
         this.paymentStatuses = await firstValueFrom(this._purchaseService.getPaymentStatusSelectList());
+    }
+
+    referenceNumberChanged() {
+        if(this.model.referenceNumber) {
+            this._salesService.checkReferenceNumber(this.model.referenceNumber, this.model.id).subscribe(res=> {
+                if(res) {
+                    abp.message.error("Duplicate reference number detected", "Invalid");
+                    this.model.referenceNumber = "";
+                }
+            });
+        }
     }
 
     async stockPointChanged() {
@@ -289,7 +319,7 @@ export class SalesEntryComponent implements OnInit {
                 totalPrice: x.totalPrice
             } as SalesDetailsEntryDto);
         });
-        model.paymentStatus = model.dueAmount == 0 ? PaymentStatus._1 : model.totalAmount > model.dueAmount ? PaymentStatus._2 : PaymentStatus._3;
+        model.paymentStatus = model.dueAmount == 0 ? PaymentStatus._1 : model.netAmount == model.dueAmount ? PaymentStatus._3 : PaymentStatus._2;
         const input = {
             sales: model,
             salesDetails: details,
@@ -300,7 +330,7 @@ export class SalesEntryComponent implements OnInit {
             creationTime: moment(new Date()),
             invoiceDate: model.date,
             receiveDate: model.date,
-            invoiceNumber: model.invoiceNumber,
+            invoiceNumber: model.referenceNumber ? model.referenceNumber : model.invoiceNumber,
             paymentStatus: model.paymentStatus,
             grandTotal: model.totalAmount,
             discount: model.discount,

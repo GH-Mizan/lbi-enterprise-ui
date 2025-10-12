@@ -3,7 +3,7 @@
         <strong style="color: #5d4689">{{userName}}</strong>
     </a>
     <div class="dropdown-menu dropdown-menu-right" *dropdownMenu>
-        <a class="dropdown-item" [routerLink]="['update-password']">
+        <a class="dropdown-item" href="javascript:;" (click)="changePassword()">
             <i class="fas fa-user-edit"></i>
             {{ 'UpdatePassword' | localize }}
         </a>

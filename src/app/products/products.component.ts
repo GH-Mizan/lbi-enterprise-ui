@@ -82,7 +82,7 @@ export class ProductsComponent extends PagedListingComponentBase<ProductOutputDt
       undefined,
       (result: boolean) => {
         if (result) {
-          this._productService.delete(product.id).subscribe(() => {
+          this._productService.productRemove(product.id).subscribe(() => {
             abp.notify.success(this.l("SuccessfullyDeleted"));
             this.refresh();
           });

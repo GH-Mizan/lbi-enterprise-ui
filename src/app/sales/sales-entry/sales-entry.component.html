@@ -13,6 +13,7 @@
     </section>
     <section class="content">
         <div class="container-fluid">
+            <ngx-spinner type="ball-scale-multiple"></ngx-spinner>
             <div class="card">
                 <div class="card-body">
                     <div class="row">
@@ -32,9 +33,17 @@
                                     <label class="col-4 col-form-label" for="invoice">Invoice</label>
                                     <div class="col-8">
                                         <input type="text" class="form-control" name="invoice" id="invoice" required
-                                            [(ngModel)]="model.invoiceNumber" #invoiceModel="ngModel" #invoiceEl />
+                                            [(ngModel)]="model.invoiceNumber" #invoiceModel="ngModel" #invoiceEl disabled/>
                                         <abp-validation-summary [control]="invoiceModel"
                                             [controlEl]="invoiceEl"></abp-validation-summary>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row">
+                                    <label class="col-4 col-form-label" for="referenceNumber">Reference Number</label>
+                                    <div class="col-8">
+                                        <input type="text" class="form-control" name="referenceNumber" id="referenceNumber"
+                                            [(ngModel)]="model.referenceNumber" (ngModelChange)="referenceNumberChanged()" onlyNumber/>
                                     </div>
                                 </div>
 
@@ -91,7 +100,7 @@
                         </div>
                         <div class="col-sm-12 col-md-6 col-lg-6">
                             <h2>Choose products</h2>
-                            <table class="table table-responsive table-bordered table-striped" *ngIf="!loading">
+                            <table class="table table-responsive table-bordered table-striped">
                                 <thead>
                                     <tr>
                                         <th>
@@ -101,7 +110,7 @@
                                         </th>
                                         <th style="min-width: 150px;">Name</th>
                                         <th style="min-width:85px;">Unit Price</th>
-                                        <th>Quantity</th>
+                                        <th>Qty</th>
                                         <th>Stock</th>
                                         <th style="min-width:85px;">Total Price</th>
                                     </tr>

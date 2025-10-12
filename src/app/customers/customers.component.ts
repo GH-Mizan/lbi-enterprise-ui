@@ -86,7 +86,7 @@ export class CustomersComponent extends PagedListingComponentBase<CustomerOutput
       undefined,
       (result: boolean) => {
         if (result) {
-          this._customerService.delete(customer.id).subscribe(() => {
+          this._customerService.customerRemove(customer.id).subscribe(() => {
             abp.notify.success(this.l("SuccessfullyDeleted"));
             this.refresh();
           });

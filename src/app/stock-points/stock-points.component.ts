@@ -79,7 +79,7 @@ export class StockPointsComponent extends PagedListingComponentBase<StockPointOu
       undefined,
       (result: boolean) => {
         if (result) {
-          this._stockPointService.delete(stockPoint.id).subscribe(() => {
+          this._stockPointService.stockPointRemove(stockPoint.id).subscribe(() => {
             abp.notify.success(this.l("SuccessfullyDeleted"));
             this.refresh();
           });

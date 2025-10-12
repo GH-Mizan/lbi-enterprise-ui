@@ -40,7 +40,7 @@
                         <p-table #dataTable sortMode="multiple" (onLazyLoad)="list($event)"
                             [value]="primengTableHelper.records" [loading]="primengTableHelper.isLoading"
                             rows="{{ primengTableHelper.defaultRecordsCountPerPage }}" [paginator]="false" [lazy]="true"
-                            [tableStyle]="{ 'min-width': '50rem' }">
+                            [tableStyle]="{ 'min-width': '50rem' }" [loading]="primengTableHelper.isLoading">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th style="min-width: 110px"> Date </th>
@@ -60,7 +60,7 @@
                             <ng-template pTemplate="body" let-record="$implicit">
                                 <tr>
                                     <td>
-                                        <span>{{ record.date | date: 'dd MMM, yyyy' }}</span>
+                                        <span>{{ record.date | date: 'dd-MMM-yy' }}</span>
                                     </td>
                                     <td>
                                         <span>{{ record.invoiceNumber }}</span>
@@ -80,14 +80,13 @@
                                     <td>
                                         <span>{{record.dueAmount | number: '1.2-2'}}</span>
                                     </td>
-                                    <td *ngIf="record.paymentStatus == 1">
-                                        {{record.paymentStatusText}}
-                                    </td>
-                                    <td *ngIf="record.paymentStatus != 1">
-                                        <span [ngStyle]="{'color': record.paymentStatus == 2 ? '#F26868' : 'red'}" style="font-weight: bold; font-size: large;">{{record.paymentStatusText}}</span>
+                                    <td class="text-center">
+                                        <span *ngIf="record.paymentStatus == 1" class="badge badge-pill badge-success">{{record.paymentStatusText}}</span>
+                                        <span *ngIf="record.paymentStatus == 2" class="badge badge-pill badge-warning">{{record.paymentStatusText}}</span>
+                                        <span *ngIf="record.paymentStatus == 3" class="badge badge-pill badge-danger">{{record.paymentStatusText}}</span>
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm bg-green" (click)="edit(record.id)">
+                                        <button type="button" class="btn btn-sm bg-green" (click)="edit(record.id)"  *ngIf="isGranted('Pages.Sale.Edit')">
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
                                         <!-- <button type="button" class="btn btn-sm bg-blue" (click)="view(record.id)" *ngIf="record.locked">
@@ -97,15 +96,15 @@
                                             <i class="fa fa-history"></i>
                                         </button>
                                         
-                                         <button type="button" class="btn btn-sm btn-default"
+                                         <button type="button" class="btn btn-sm" style="background-color: #00ADEE;"
                                             (click)="generateReceipt(record.id)">
-                                            <img src="assets/img/download.jpg" width="15px" height="20px" />
+                                            <img src="assets/img/download.png" width="20px" height="20px" /> 
                                         </button>
-                                        <button *ngIf="paymentStatus != 1" type="button" class="btn btn-sm bg-purple mx-1" (click)="makePaymentReceive(record)">
+                                        
+                                        <button *ngIf="paymentStatus != 1" type="button" class="btn btn-sm bg-primary mx-1" (click)="makePaymentReceive(record)">
                                              <img src="assets/img/taka.svg" width="15px" height="20px" />
                                         </button>
-                                        <button type="button" class="btn btn-sm bg-danger"
-                                            (click)="delete(record)">
+                                        <button type="button" class="btn btn-sm bg-danger"  *ngIf="isGranted('Pages.Purchase.Delete')" (click)="delete(record)">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>

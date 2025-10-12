@@ -31,7 +31,7 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
     private readonly _router: Router,
     private readonly _modalService: BsModalService,
     private readonly salesReceiptReport: SalesReceiptReport,
-    
+
     cd: ChangeDetectorRef
   ) {
     super(injector, cd);
@@ -48,21 +48,15 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
         return;
       }
     }
-
-    //this.primengTableHelper.showLoadingIndicator();
-    this.primengTableHelper.isLoading = true;
+    this.showLoading();
     this._salesService.getPaginatedSales(
       moment(new Date()), moment(new Date()),
       this.searchText,
       this.primengTableHelper.getSkipCount(this.paginator, event),
-      this.primengTableHelper.getMaxResultCount(this.paginator, event)
-    ).pipe(
-      finalize(() => {
-        //this.primengTableHelper.hideLoadingIndicator();
-        this.primengTableHelper.isLoading = false;
-        this.cd.detectChanges();
-      })
-    )
+      this.primengTableHelper.getMaxResultCount(this.paginator, event))
+      .pipe(finalize(() => {
+        this.hideLoading();
+      }))
       .subscribe((result) => {
         this.primengTableHelper.records = result.items;
         this.primengTableHelper.totalRecordsCount = result.totalCount;
@@ -88,7 +82,7 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
       undefined,
       (result: boolean) => {
         if (result) {
-          this._salesService.delete(item.id, item.stockPointId).subscribe(() => {
+          this._salesService.saleRemove(item.id, item.stockPointId).subscribe(() => {
             abp.notify.success(this.l("SuccessfullyDeleted"));
             this.refresh();
           });
@@ -135,7 +129,8 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
   }
 
   showPaymentHistory(id: number) {
-    this._modalService.show(
+    let dueReceivedHistoryDialog: BsModalRef;
+    dueReceivedHistoryDialog = this._modalService.show(
       DueReceivedHistoryComponent,
       {
         class: "modal-lg",
@@ -144,10 +139,15 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
         },
       }
     );
+    dueReceivedHistoryDialog.content.onDelete.subscribe(() => {
+      this.refresh();
+    });
   }
 
   async generateReceipt(id: number) {
-     await this.salesReceiptReport.generateSalesReceipt(id);
+    this.showLoading();
+    await this.salesReceiptReport.generateSalesReceipt(id);
+    this.hideLoading();
   }
 
 

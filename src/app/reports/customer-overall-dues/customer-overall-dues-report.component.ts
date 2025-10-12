@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
 import { CustomerOverallDueReportDto, SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { Table } from 'primeng/table';
@@ -6,12 +6,8 @@ import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
 import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
 import { Utils } from '@shared/helpers/Utils';
-pdfMake.addVirtualFileSystem(pdfFonts);
 
 @Component({
     selector: 'app-customer-overall-dues-report',
@@ -26,9 +22,10 @@ pdfMake.addVirtualFileSystem(pdfFonts);
         `
     ]
 })
-export class CustomerOverallDuesReportComponent extends PagedListingComponentBase<SalesCollectionDueReportDto> {
+export class CustomerOverallDuesReportComponent extends PagedListingComponentBase<SalesCollectionDueReportDto> implements OnInit {
     @ViewChild('dataTable', { static: true }) dataTable: Table;
 
+    pdfMake: any;
     endDate = new Date();
     startDate = (moment().subtract(31, 'days')).toDate();
     maxDate = this.endDate;
@@ -38,7 +35,6 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
     currentPaymnet: number;
     currentDue: number;
 
-
     constructor(
         injector: Injector,
         cd: ChangeDetectorRef,
@@ -47,12 +43,33 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
         super(injector, cd);
     }
 
+    async ngOnInit() {
+        this.pdfMake = await this.loadAndPrintPDF();
+    }
+
+    async loadAndPrintPDF() {
+        const { default: pdfMake } = await import('pdfmake/build/pdfmake');
+        const { default: pdfFonts } = await import('assets/vfs_fonts');
+        pdfMake.addFonts({
+            'TimesNewRoman': {
+                normal: 'times-Regular.ttf',
+                bold: 'Times New Roman Bold.ttf'
+            },
+            'LucidaGrande': {
+                bold: 'LucidaGrandeBold.ttf'
+            }
+        });
+
+        pdfMake.addVirtualFileSystem(pdfFonts);
+        return pdfMake;
+    }
+
     list(event?: LazyLoadEvent): void {
-        this.primengTableHelper.showLoadingIndicator();
+        this.showLoading();
         this._salesService.getCustomersOverallDueReport(moment(this.startDate), moment(this.endDate))
             .pipe(
                 finalize(() => {
-                    this.primengTableHelper.hideLoadingIndicator();
+                    this.hideLoading();
                 })
             )
             .subscribe((result) => {
@@ -71,8 +88,6 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                 this.currentSales = values.currentSales;
                 this.currentPaymnet = values.currentPaymnet;
                 this.currentDue = values.currentDue;
-
-                this.primengTableHelper.hideLoadingIndicator();
                 this.cd.detectChanges();
             });
     }
@@ -89,9 +104,15 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
     }
 
     async print() {
+        this.showLoading();
         const items = await firstValueFrom(this._salesService.getCustomersOverallDueReport(
             moment(this.startDate), moment(this.endDate)
         ));
+        if (!items || items.length == 0) {
+            abp.message.info("No record(s) found", "Sorry!");
+            this.hideLoading();
+            return;
+        }
         const logo = await Utils.getImageDataUrl('assets/img/logo.png');
         // let count = items.length + 1;
         // for (let i = count; i < 123 + count; i++) {
@@ -102,6 +123,9 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
             pageSize: 'A4',
             pageMargins: [30, 20, 30, 20],
             content: this.getContent(items, logo),
+            defaultStyle: {
+                font: 'TimesNewRoman'
+            },
             styles: {
                 headerStyle: {
                     fontSize: 11,
@@ -126,8 +150,9 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
             }
 
         };
+        this.hideLoading();
         //pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
-        pdfMake.createPdf(dd).open();
+        this.pdfMake.createPdf(dd).open();
         //pdfMake.createPdf(docDefinition).print();
     }
 
@@ -163,15 +188,15 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                     table: {
                         widths: ['*'], // Two columns, equal width
                         body: [
-                            [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                            [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
                 { text: ' ', fontSize: 5 },
                 {
                     layout: {
-                        hLineColor: () => 'grey',
-                        vLineColor: () => 'grey',
+                        hLineColor: () => 'lightgrey',
+                        vLineColor: () => 'lightgrey',
                         hLineWidth: () => 1,
                         vLineWidth: () => 1,
                     },
@@ -192,15 +217,15 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -218,15 +243,15 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -244,15 +269,15 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -270,15 +295,15 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },

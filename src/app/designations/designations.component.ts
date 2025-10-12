@@ -79,7 +79,7 @@ export class DesignationsComponent extends PagedListingComponentBase<Designation
       undefined,
       (result: boolean) => {
         if (result) {
-          this._designationService.delete(designation.id).subscribe(() => {
+          this._designationService.designationRemove(designation.id).subscribe(() => {
             abp.notify.success(this.l("SuccessfullyDeleted"));
             this.refresh();
           });

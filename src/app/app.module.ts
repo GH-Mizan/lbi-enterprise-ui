@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientJsonpModule } from '@angular/common/http';
@@ -21,6 +21,7 @@ import { SidebarLogoComponent } from './layout/sidebar-logo.component';
 import { SidebarMenuComponent } from './layout/sidebar-menu.component';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { MenuModule } from 'primeng/menu';
+import { ChangePasswordComponent } from './layout/change-password/change-password.component';
 
 @NgModule({
     imports: [
@@ -46,8 +47,10 @@ import { MenuModule } from 'primeng/menu';
         SidebarLogoComponent,
         SidebarMenuComponent,
         BsDatepickerModule,
-        MenuModule
+        MenuModule,
+        ChangePasswordComponent
     ],
     providers: [],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class AppModule {}

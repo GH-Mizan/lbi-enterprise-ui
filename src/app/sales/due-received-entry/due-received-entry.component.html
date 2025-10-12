@@ -1,5 +1,5 @@
 <form class="form-horizontal" autocomplete="off" #dueReceivedEntryModal="ngForm" (ngSubmit)="save()">
-    <abp-modal-header title="Make Payment Receive" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+    <abp-modal-header title="Due Receive" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
     <div class="modal-body">
         <div class="row">
             <div class="col-6">
@@ -84,6 +84,6 @@
 
         </div>
     </div>
-    <abp-modal-footer [cancelDisabled]="saving" [saveDisabled]="!dueReceivedEntryModal.form.valid || saving || invalid || dueReceived.totalPaid == 0"
+    <abp-modal-footer [cancelDisabled]="saving" [saveDisabled]="!dueReceivedEntryModal.form.valid || saving || invalid || paidEditMode || dueReceived.totalPaid == 0"
         (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
 </form>

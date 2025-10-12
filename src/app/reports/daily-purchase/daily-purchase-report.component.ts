@@ -1,15 +1,14 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
-import { Table } from 'primeng/table';
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { finalize } from "rxjs/operators";
 import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
-import { DailyPurchaseReportDto, PurchaseServiceProxy } from '../../../shared/service-proxies/service-proxies';
+import { DailyPurchaseReportDetailsDto, DailyPurchaseReportDto, PurchaseServiceProxy } from '../../../shared/service-proxies/service-proxies';
 import { Utils } from '@shared/helpers/Utils';
-pdfMake.addVirtualFileSystem(pdfFonts);
+import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
+import { Table } from 'primeng/table';
+import { LazyLoadEvent } from "primeng/api";
 
 @Component({
     selector: 'app-daily-purchase-report',
@@ -24,40 +23,89 @@ pdfMake.addVirtualFileSystem(pdfFonts);
     `
     ]
 })
-export class DailyPurchaseReportComponent implements OnInit {
+export class DailyPurchaseReportComponent extends PagedListingComponentBase<DailyPurchaseReportDetailsDto> implements OnInit {
     @ViewChild('dataTable', { static: true }) dataTable: Table;
 
-    data: DailyPurchaseReportDto;
+    pdfMake: any;
+    data: any;
     date = new Date();
     loading: boolean = false;
 
     constructor(
-        private cd: ChangeDetectorRef,
+        injector: Injector,
+        cd: ChangeDetectorRef,
         private _purchaseService: PurchaseServiceProxy
     ) {
-
+        super(injector, cd);
     }
-    ngOnInit(): void {
+    async ngOnInit() {
         this.loading = true;
-        this.getReportData();
+        this.pdfMake = await this.loadAndPrintPDF();
     }
 
-    getReportData() {
+    async loadAndPrintPDF() {
+        const { default: pdfMake } = await import('pdfmake/build/pdfmake');
+        const { default: pdfFonts } = await import('assets/vfs_fonts');
+        pdfMake.addFonts({
+            'TimesNewRoman': {
+                normal: 'times-Regular.ttf',
+                bold: 'Times New Roman Bold.ttf'
+            },
+            'CourierBold': {
+                normal: 'Courier BOLD.ttf',
+                bold: 'Courier BOLD.ttf'
+            },
+            'LucidaGrande': {
+                bold: 'LucidaGrandeBold.ttf'
+            }
+        });
+
+        pdfMake.addVirtualFileSystem(pdfFonts);
+        return pdfMake;
+    }
+
+    list(event?: LazyLoadEvent): void {
+        this.showLoading();
         this._purchaseService.getDailyPurchaseReport(moment(this.date))
-            .pipe(
-                finalize(() => {
-                    this.loading = false;
-                    this.cd.detectChanges();
-                })
-            )
+            .pipe(finalize(() => {
+                this.hideLoading();
+            }))
             .subscribe((result) => {
-                this.data = result;
-                this.cd.detectChanges();
+                if (result && result.details) {
+                    this.data = this.getTotal(result);
+                    this.primengTableHelper.records = result.details;
+                    this.primengTableHelper.totalRecordsCount = result.details.length;
+                    this.cd.detectChanges();
+                }
             });
     }
 
+    delete() { }
+
+    getTotal(data: DailyPurchaseReportDto) {
+        return {
+            medicalOxygen9_8TotalQty: data.medicalOxygen9_8TotalQty,
+            medicalOxygen1_36TotalQty: data.medicalOxygen1_36TotalQty,
+            medicalAir9_8TotalQty: data.medicalAir9_8TotalQty,
+            medicalAir7TotalQty: data.medicalAir7TotalQty,
+            nitros30KgTotalQty: data.nitros30KgTotalQty,
+            nitros5KgTotalQty: data.nitros5KgTotalQty,
+            nitros3KgTotalQty: data.nitros3KgTotalQty,
+            netTotal: data.netTotal,
+            cashPayment: data.cashPayment,
+            duePayment: data.duePayment,
+            due: data.due
+        };
+    }
+
     async print() {
+        this.showLoading();
         const data = await firstValueFrom(this._purchaseService.getDailyPurchaseReport(moment(this.date)));
+        if (!data || !data.details) {
+            abp.message.info("No record(s) found", "Sorry!");
+            this.hideLoading();
+            return;
+        }
         const logo = await Utils.getImageDataUrl('assets/img/logo.png');
         var dd = {
             pageSize: 'A4',
@@ -68,15 +116,15 @@ export class DailyPurchaseReportComponent implements OnInit {
                     table: {
                         widths: ['*'],
                         body: [
-                            [{ text: `DAILY PURCHASE (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                            [{ text: `DAILY PURCHASE (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
                 { text: ' ', fontSize: 5 },
                 {
                     layout: {
-                        hLineColor: () => 'grey',
-                        vLineColor: () => 'grey',
+                        hLineColor: () => 'lightgrey',
+                        vLineColor: () => 'lightgrey',
                         hLineWidth: () => 1,
                         vLineWidth: () => 1,
                     },
@@ -86,6 +134,9 @@ export class DailyPurchaseReportComponent implements OnInit {
                     }
                 }
             ],
+            defaultStyle: {
+                font: 'TimesNewRoman'
+            },
             styles: {
                 headerStyle: {
                     fontSize: 12,
@@ -121,7 +172,8 @@ export class DailyPurchaseReportComponent implements OnInit {
             }
         };
         // pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
-        pdfMake.createPdf(dd).open();
+        this.hideLoading();
+        this.pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
 

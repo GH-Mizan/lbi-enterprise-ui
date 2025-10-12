@@ -6,14 +6,12 @@ import { InventoriesComponent } from './inventories.component';
 import { SharedModule } from '@shared/shared.module';
 import { ProductTransferComponent } from './product-transfer/product-transfer.component';
 import { ProductTransferHistoriesComponent } from './transfer-histories/product-transfer-history.component';
-import { InventoriesBreakpointComponent } from './breakpoints/inventories-breakpoint.component';
 
 @NgModule({
   declarations: [
     InventoriesComponent,
     ProductTransferComponent,
-    ProductTransferHistoriesComponent,
-    InventoriesBreakpointComponent
+    ProductTransferHistoriesComponent
   ],
   imports: [
     SharedModule,

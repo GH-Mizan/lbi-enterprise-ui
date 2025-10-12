@@ -59,35 +59,40 @@ export class DueReceivedEntryComponent extends AppComponentBase implements OnIni
     }
 
     totalDiscountChanged() {
-        const paymentReceive = this.dueReceived;
-        if(!paymentReceive.discount) paymentReceive.discount = 0;
-        if (paymentReceive.discount < 0) {
+        const dueReceived = this.dueReceived;
+        if(!dueReceived.discount) dueReceived.discount = 0;
+        if (dueReceived.discount < 0) {
             abp.message.info("Discount can't be less than 0", "Invalid Paid!");
-            paymentReceive.discount = 0;
-        } else if (paymentReceive.grandTotal < paymentReceive.prevDiscount + paymentReceive.discount) {
+            dueReceived.discount = 0;
+        } else if (dueReceived.grandTotal < dueReceived.prevDiscount + dueReceived.discount) {
             abp.message.info("Discount can't be greater than the grand total", "Invalid Discount!");
-            paymentReceive.discount = 0;
+            dueReceived.discount = 0;
         } else {
-            paymentReceive.netTotal = paymentReceive.grandTotal - paymentReceive.prevDiscount - paymentReceive.discount;
-            paymentReceive.due = paymentReceive.netTotal - paymentReceive.prevTotalPaid - paymentReceive.totalPaid;
+            dueReceived.netTotal = dueReceived.grandTotal - dueReceived.prevDiscount - dueReceived.discount;
+            dueReceived.due = dueReceived.netTotal - dueReceived.prevTotalPaid - dueReceived.totalPaid;
             this.discountEditMode = false;
         }
     }
 
     totalPaidChanged() {
-        const paymentReceive = this.dueReceived;
-        if(!paymentReceive.totalPaid) paymentReceive.totalPaid = 0;
-        if (paymentReceive.totalPaid < 0) {
+        this.invalid = true;
+        const dueReceived = this.dueReceived;
+        if(!dueReceived.totalPaid) dueReceived.totalPaid = 0;
+        if (dueReceived.totalPaid < 0) {
             abp.message.info("Paid amount can't be less than 0", "Invalid Paid!");
-            paymentReceive.totalPaid = 0;
-        } else if (paymentReceive.netTotal < paymentReceive.prevTotalPaid + paymentReceive.totalPaid) {
+            dueReceived.totalPaid = 0;
+        } else if (dueReceived.netTotal < dueReceived.prevTotalPaid + dueReceived.totalPaid) {
             abp.message.info("Paid amount can't be greater than the net total", "Invalid Paid!");
-            paymentReceive.totalPaid = 0;
+            dueReceived.totalPaid = 0;
         } else {
             this.dueReceived.due = this.dueReceived.netTotal - this.dueReceived.prevTotalPaid - this.dueReceived.totalPaid;
             this.paidEditMode = false;
-
         }
+
+        setTimeout(() => {
+            this.invalid = false;
+            this.cd.detectChanges();
+        }, 200);
     }
 
     save() {

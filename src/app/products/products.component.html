@@ -49,7 +49,7 @@
                                     <th> Purchase Price </th>
                                     <th> Sale Price </th>
                                     <th style="width: 68px"> Active </th>
-                                    <th style="width: 120px; min-width: 180px" class="text-center">
+                                    <th style="width: 120px;" class="text-center">
                                         {{ "Actions" }}
                                     </th>
                                 </tr>
@@ -76,15 +76,11 @@
                                         <span> <input type="checkbox" value="" [checked]="record.activeStatus" disabled> </span>
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm bg-secondary" (click)="edit(record.id)">
+                                        <button type="button" class="btn btn-sm bg-secondary" (click)="edit(record.id)" *ngIf="isGranted('Pages.Product.Edit')">
                                             <i class="fas fa-pencil-alt"></i>
                                         </button>
                                         <button type="button" class="btn btn-sm bg-secondary mx-1" (click)="showHistories(record.id)">
                                             <i class="fa fa-history"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm bg-danger"
-                                            (click)="delete(record)">
-                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>

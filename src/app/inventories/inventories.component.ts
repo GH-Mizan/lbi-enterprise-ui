@@ -1,27 +1,32 @@
 import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { Table } from 'primeng/table';
-import { Paginator } from "primeng/paginator";
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { InventoryServiceProxy, ProductTransferDto, StockQuantityOutputDto, SupplierCreateOrUpdateDto, SupplierOutputDto, SupplierServiceProxy } from '@shared/service-proxies/service-proxies';
+import { InventoryOutputDto, InventoryServiceProxy } from '@shared/service-proxies/service-proxies';
 import { BsModalService, BsModalRef } from "ngx-bootstrap/modal";
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
 import { ProductTransferComponent } from './product-transfer/product-transfer.component';
 import { ProductTransferHistoriesComponent } from './transfer-histories/product-transfer-history.component';
-import { InventoriesBreakpointComponent } from './breakpoints/inventories-breakpoint.component';
-//import { SupplierEntryComponent } from './inventory-entry/inventory-entry.component';
 
 @Component({
   selector: 'app-inventories',
   standalone: false,
   templateUrl: './inventories.component.html',
   animations: [appModuleAnimation()],
+  styles: [
+    `
+      .lightgrey {
+        background-color: lightgrey
+      }
+    `
+  ]
 })
-export class InventoriesComponent extends PagedListingComponentBase<StockQuantityOutputDto> {
+export class InventoriesComponent extends PagedListingComponentBase<InventoryOutputDto> {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
 
   searchText: string = "";
+  summaryTotal: any = null;
 
   constructor(
     injector: Injector,
@@ -33,17 +38,26 @@ export class InventoriesComponent extends PagedListingComponentBase<StockQuantit
   }
 
   list(event?: LazyLoadEvent): void {
-    this.primengTableHelper.showLoadingIndicator();
+    this.showLoading();
     this._inventoryService.getInventories(
-    ).pipe(
-      finalize(() => {
-        this.primengTableHelper.hideLoadingIndicator();
-      })
-    )
+    ).pipe(finalize(() => {
+      this.hideLoading();
+    }))
       .subscribe((result) => {
         this.primengTableHelper.records = result;
         this.primengTableHelper.totalRecordsCount = result.length;
         this.primengTableHelper.hideLoadingIndicator();
+        this.summaryTotal = result.reduce((accumulator, item) => {
+          accumulator.medicalOxygen1_36Qty += item.medicalOxygen1_36Qty;
+          accumulator.medicalOxygen9_8Qty += item.medicalOxygen9_8Qty;
+          accumulator.medicalAir7Qty += item.medicalAir7Qty;
+          accumulator.medicalAir9_8Qty += item.medicalAir9_8Qty;
+          accumulator.nitros3KgQty += item.nitros3KgQty;
+          accumulator.nitros5KgQty += item.nitros5KgQty;
+          accumulator.nitros30KgQty += item.nitros30KgQty;
+          accumulator.total += item.total;
+          return accumulator;
+        }, { medicalOxygen1_36Qty: 0, medicalOxygen9_8Qty: 0, medicalAir7Qty: 0, medicalAir9_8Qty: 0, nitros3KgQty: 0, nitros5KgQty: 0, nitros30KgQty: 0, total: 0 });
         this.cd.detectChanges();
       });
 
@@ -55,10 +69,6 @@ export class InventoriesComponent extends PagedListingComponentBase<StockQuantit
 
   showHistories(productId: number) {
     this.showProductTransferHistoryDialog(productId);
-  }
-
-  showBreakpoints(record: StockQuantityOutputDto) {
-    this.showInventoriesBerakpointDialog(record);
   }
 
   delete(): void {
@@ -79,28 +89,17 @@ export class InventoriesComponent extends PagedListingComponentBase<StockQuantit
   }
 
   private showProductTransferHistoryDialog(productId: number): void {
-   this._modalService.show(
+    this._modalService.show(
       ProductTransferHistoriesComponent,
       {
         class: "modal-lg",
-         initialState: {
+        initialState: {
           productId: productId,
         },
       }
     );
   }
 
-  private showInventoriesBerakpointDialog(record: StockQuantityOutputDto): void {
-   this._modalService.show(
-      InventoriesBreakpointComponent,
-      {
-        class: "modal-lg",
-         initialState: {
-          stockPointId: record.stockPointId,
-          stockPointName: record.stockPointName
-        },
-      }
-    );
-  }
+
 
 }

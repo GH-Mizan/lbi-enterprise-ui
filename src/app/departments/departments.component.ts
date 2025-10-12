@@ -79,7 +79,7 @@ export class DepartmentsComponent extends PagedListingComponentBase<DepartmentOu
       undefined,
       (result: boolean) => {
         if (result) {
-          this._departmentService.delete(department.id).subscribe(() => {
+          this._departmentService.departmentRemove(department.id).subscribe(() => {
             abp.notify.success(this.l("SuccessfullyDeleted"));
             this.refresh();
           });

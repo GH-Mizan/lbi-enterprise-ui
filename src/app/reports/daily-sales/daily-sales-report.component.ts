@@ -1,15 +1,14 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { DailySalesReportDetailsDto, DailySalesReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
-import { Table } from 'primeng/table';
-import { finalize } from "rxjs/operators";
 import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
 import { Utils } from '@shared/helpers/Utils';
-pdfMake.addVirtualFileSystem(pdfFonts);
+import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
+import { Table } from 'primeng/table';
+import { LazyLoadEvent } from "primeng/api";
+import { finalize } from "rxjs/operators";
 
 @Component({
     selector: 'app-daily-sales-report',
@@ -24,40 +23,69 @@ pdfMake.addVirtualFileSystem(pdfFonts);
     `
     ]
 })
-export class DailySalesReportComponent implements OnInit {
+export class DailySalesReportComponent extends PagedListingComponentBase<DailySalesReportDetailsDto> implements OnInit {
     @ViewChild('dataTable', { static: true }) dataTable: Table;
 
+    pdfMake: any;
     data: DailySalesReportDto;
     date = new Date();
     loading: boolean = false;
 
     constructor(
-        private cd: ChangeDetectorRef,
+        injector: Injector,
+        cd: ChangeDetectorRef,
         private _salesService: SalesServiceProxy
     ) {
-
+        super(injector, cd);
     }
-    ngOnInit(): void {
+
+    async ngOnInit() {
         this.loading = true;
-        this.getReportData();
+        this.pdfMake = await this.loadAndPrintPDF();
     }
 
-    getReportData() {
+    async loadAndPrintPDF() {
+        const { default: pdfMake } = await import('pdfmake/build/pdfmake');
+        const { default: pdfFonts } = await import('assets/vfs_fonts');
+        pdfMake.addFonts({
+            'TimesNewRoman': {
+                normal: 'times-Regular.ttf',
+                bold: 'Times New Roman Bold.ttf'
+            },
+            'LucidaGrande': {
+                bold: 'LucidaGrandeBold.ttf'
+            }
+        });
+        pdfMake.addVirtualFileSystem(pdfFonts);
+        return pdfMake;
+    }
+
+    list(event?: LazyLoadEvent): void {
+        this.showLoading();
         this._salesService.getDailySalesReport(moment(this.date))
-            .pipe(
-                finalize(() => {
-                    this.loading = false;
-                    this.cd.detectChanges();
-                })
-            )
+            .pipe(finalize(() => {
+                this.hideLoading();
+            }))
             .subscribe((result) => {
-                this.data = result;
-                this.cd.detectChanges();
+                if (result && result.details) {
+                    this.data = result;
+                    this.primengTableHelper.records = result.details;
+                    this.primengTableHelper.totalRecordsCount = result.details.length;
+                    this.cd.detectChanges();
+                }
             });
     }
 
+    delete() { }
+
     async print() {
+        this.showLoading();
         const data = await firstValueFrom(this._salesService.getDailySalesReport(moment(this.date)));
+        if (!data || !data.details) {
+            abp.message.info("No record(s) found", "Sorry!");
+            this.hideLoading();
+            return;
+        }
         // let count = data.details.length + 1;
         // for (let i = count; i < 118 + count; i++) {
         //     data.details.push({ customerName: i.toString(), netAmount: 0, dueCollection: 0 } as DailySalesReportDetailsDto);
@@ -67,6 +95,9 @@ export class DailySalesReportComponent implements OnInit {
             pageSize: 'A4',
             pageMargins: [30, 20, 30, 20],
             content: this.getContent(data, logo),
+            defaultStyle: {
+                font: 'TimesNewRoman'
+            },
             styles: {
                 headerStyle: {
                     fontSize: 12,
@@ -110,7 +141,8 @@ export class DailySalesReportComponent implements OnInit {
 
         };
         // pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
-        pdfMake.createPdf(dd).open();
+        this.hideLoading();
+        this.pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
 
@@ -154,15 +186,15 @@ export class DailySalesReportComponent implements OnInit {
                     table: {
                         widths: ['*'],
                         body: [
-                            [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                            [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
                 { text: ' ', fontSize: 5 },
                 {
                     layout: {
-                        hLineColor: () => 'grey',
-                        vLineColor: () => 'grey',
+                        hLineColor: () => 'lightgrey',
+                        vLineColor: () => 'lightgrey',
                         hLineWidth: () => 1,
                         vLineWidth: () => 1,
                     },
@@ -183,15 +215,15 @@ export class DailySalesReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -209,15 +241,15 @@ export class DailySalesReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -236,15 +268,15 @@ export class DailySalesReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -262,15 +294,15 @@ export class DailySalesReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `DAILY SALES (${moment(this.date).format('D-MMM-YY').toString()})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -292,15 +324,15 @@ export class DailySalesReportComponent implements OnInit {
     private getTotal(totalValues: any) {
         const body = [
             [{ text: 'Client', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Due Col.', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Status', rowSpan: 3, style: ['subHeader'], marginTop: 18 }] as any,
-            [{ text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'], fillColor: '#E6E6E6' }, { text: '' }, { text: 'NO (KG)', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['subHeader'] }, { text: '' }, { text: '' }],
-            [{ text: '' }, { text: '9.8', style: ['particularHeader'] }, { text: '1.36', style: ['particularHeader136'], marginTop: 1 }, { text: '9.8', style: ['particularHeader'], fillColor: '#E6E6E6' }, { text: '7.0', style: ['particularHeader'], fillColor: '#E6E6E6' }, { text: '30', style: ['particularHeader'] }, { text: '5', style: ['particularHeader'] }, { text: '3', style: ['particularHeader'] }, { text: '', colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }],
+            [{ text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'NO (KG)', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['subHeader'] }, { text: '' }, { text: '' }],
+            [{ text: '' }, { text: '9.8', style: ['particularHeader'] }, { text: '1.36', style: ['particularHeader136'], marginTop: 1 }, { text: '9.8', style: ['particularHeader'] }, { text: '7.0', style: ['particularHeader'] }, { text: '30', style: ['particularHeader'] }, { text: '5', style: ['particularHeader'] }, { text: '3', style: ['particularHeader'] }, { text: '', colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }],
         ];
         body.push([
             { text: 'Total Sale', style: ['footerStyle'] },
             { text: totalValues.medicalOxygen9_8TotalQty, style: ['footerParticular'] },
             { text: totalValues.medicalOxygen1_36TotalQty, style: ['footerParticular'] },
-            { text: totalValues.medicalAir9_8TotalQty, style: ['footerParticular'], fillColor: '#E6E6E6' },
-            { text: totalValues.medicalAir7TotalQty, style: ['footerParticular'], fillColor: '#E6E6E6' },
+            { text: totalValues.medicalAir9_8TotalQty, style: ['footerParticular'] },
+            { text: totalValues.medicalAir7TotalQty, style: ['footerParticular'] },
             { text: totalValues.nitros30KgTotalQty, style: ['footerParticular'] },
             { text: totalValues.nitros5KgTotalQty, style: ['footerParticular'] },
             { text: totalValues.nitros3KgTotalQty, style: ['footerParticular'] },
@@ -330,8 +362,8 @@ export class DailySalesReportComponent implements OnInit {
     private getData(data: DailySalesReportDetailsDto[], showTotal: boolean, totalValues?: any) {
         const body = [
             [{ text: 'Client', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Bill No.', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Due Col.', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Status', rowSpan: 3, style: ['subHeader'], marginTop: 18 }] as any,
-            [{ text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'], fillColor: '#E6E6E6' }, { text: '' }, { text: 'NO (KG)', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['subHeader'] }, { text: '' }, { text: '' }],
-            [{ text: '' }, { text: '9.8', style: ['particularHeader'] }, { text: '1.36', style: ['particularHeader136'], marginTop: 1 }, { text: '9.8', style: ['particularHeader'], fillColor: '#E6E6E6' }, { text: '7.0', style: ['particularHeader'], fillColor: '#E6E6E6' }, { text: '30', style: ['particularHeader'] }, { text: '5', style: ['particularHeader'] }, { text: '3', style: ['particularHeader'] }, { text: '', colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }],
+            [{ text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'NO (KG)', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '', colSpan: 4 }, { text: '', style: ['subHeader'] }, { text: '' }, { text: '' }],
+            [{ text: '' }, { text: '9.8', style: ['particularHeader'] }, { text: '1.36', style: ['particularHeader136'], marginTop: 1 }, { text: '9.8', style: ['particularHeader'] }, { text: '7.0', style: ['particularHeader'] }, { text: '30', style: ['particularHeader'] }, { text: '5', style: ['particularHeader'] }, { text: '3', style: ['particularHeader'] }, { text: '', colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }],
         ];
         data.forEach(item => {
             body.push(
@@ -339,8 +371,8 @@ export class DailySalesReportComponent implements OnInit {
                     { text: item.customerName, fontSize: 9 },
                     { text: item.medicalOxygen9_8Qty, style: ['cell_style'] },
                     { text: item.medicalOxygen1_36Qty, style: ['cell_style'] },
-                    { text: item.medicalAir9_8Qty, style: ['cell_style'], fillColor: '#E6E6E6' },
-                    { text: item.medicalAir7Qty, style: ['cell_style'], fillColor: '#E6E6E6' },
+                    { text: item.medicalAir9_8Qty, style: ['cell_style'] },
+                    { text: item.medicalAir7Qty, style: ['cell_style'] },
                     { text: item.nitros30KgQty, style: ['cell_style'] },
                     { text: item.nitros5KgQty, style: ['cell_style'] },
                     { text: item.nitros3KgQty, style: ['cell_style'] },
@@ -357,8 +389,8 @@ export class DailySalesReportComponent implements OnInit {
                 { text: 'Total Sale', style: ['footerStyle'] },
                 { text: totalValues.medicalOxygen9_8TotalQty, style: ['footerParticular'] },
                 { text: totalValues.medicalOxygen1_36TotalQty, style: ['footerParticular'] },
-                { text: totalValues.medicalAir9_8TotalQty, style: ['footerParticular'], fillColor: '#E6E6E6' },
-                { text: totalValues.medicalAir7TotalQty, style: ['footerParticular'], fillColor: '#E6E6E6' },
+                { text: totalValues.medicalAir9_8TotalQty, style: ['footerParticular'] },
+                { text: totalValues.medicalAir7TotalQty, style: ['footerParticular'] },
                 { text: totalValues.nitros30KgTotalQty, style: ['footerParticular'] },
                 { text: totalValues.nitros5KgTotalQty, style: ['footerParticular'] },
                 { text: totalValues.nitros3KgTotalQty, style: ['footerParticular'] },

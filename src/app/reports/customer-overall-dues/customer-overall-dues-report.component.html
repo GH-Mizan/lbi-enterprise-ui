@@ -54,8 +54,8 @@
                 <div class="card-body table-responsive table-striped table-bordered">
                     <!--<Primeng-TurboTable-Start>-->
                     <div class="primeng-datatable-container">
-                        <p-table #dataTable (onLazyLoad)="list($event)" [value]="primengTableHelper.records"
-                            rows="{{ primengTableHelper.defaultRecordsCountPerPage }}" [paginator]="false" [lazy]="true"
+                        <p-table #dataTable (onLazyLoad)="list($event)" [value]="primengTableHelper.records" [scrollable]="true" scrollHeight="700px"
+                            rows="{{ primengTableHelper.defaultRecordsCountPerPage }}" [paginator]="false" [lazy]="true" [loading]="primengTableHelper.isLoading"
                             [showGridlines]="true" [tableStyle]="{ 'min-width': '50rem' }">
                             <ng-template pTemplate="header">
                                 <tr>

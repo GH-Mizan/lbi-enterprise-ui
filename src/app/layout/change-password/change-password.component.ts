@@ -1,4 +1,4 @@
-import { Component, Injector } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Injector, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { AbpValidationSummaryComponent } from '../../../shared/components/validation/abp-validation.summary.component';
 import { EqualValidator } from '../../../shared/directives/equal-validator.directive';
 import { LocalizePipe } from '@shared/pipes/localize.pipe';
+import { BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
     templateUrl: './change-password.component.html',
@@ -17,6 +18,7 @@ import { LocalizePipe } from '@shared/pipes/localize.pipe';
     imports: [FormsModule, AbpValidationSummaryComponent, EqualValidator, LocalizePipe],
 })
 export class ChangePasswordComponent extends AppComponentBase {
+    @Output() onSave = new EventEmitter<any>();
     saving = false;
     changePasswordDto = new ChangePasswordDto();
     newPasswordValidationErrors: Partial<AbpValidationError>[] = [
@@ -35,7 +37,8 @@ export class ChangePasswordComponent extends AppComponentBase {
     constructor(
         injector: Injector,
         private userServiceProxy: UserServiceProxy,
-        private router: Router
+        private cd: ChangeDetectorRef,
+        public bsModalRef: BsModalRef
     ) {
         super(injector);
     }
@@ -48,12 +51,13 @@ export class ChangePasswordComponent extends AppComponentBase {
             .pipe(
                 finalize(() => {
                     this.saving = false;
+                    this.cd.detectChanges();
                 })
             )
             .subscribe((success) => {
                 if (success) {
                     abp.message.success('Password changed successfully', 'Success');
-                    this.router.navigate(['/']);
+                    this.bsModalRef.hide();
                 }
             });
     }

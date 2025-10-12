@@ -31,6 +31,8 @@ import { SelectOnFocusDirective } from './directives/select-on-focus.directive';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SalesReceiptReport } from './reports/sales-receipt-report';
+import { OnlyNumberDirective } from './directives/only-numbers.directive';
+import { NgxSpinnerModule } from "ngx-spinner";
 
 @NgModule({
     imports: [
@@ -57,6 +59,8 @@ import { SalesReceiptReport } from './reports/sales-receipt-report';
         CheckboxModule,
         DatePickerModule,
         SelectOnFocusDirective,
+        OnlyNumberDirective,
+        NgxSpinnerModule
     ],
     exports: [
         AbpPaginationControlsComponent,
@@ -77,7 +81,9 @@ import { SalesReceiptReport } from './reports/sales-receipt-report';
         AutofocusDirective,
         CheckboxModule,
         DatePickerModule,
-        SelectOnFocusDirective
+        SelectOnFocusDirective,
+        OnlyNumberDirective,
+        NgxSpinnerModule
     ],
 })
 export class SharedModule {

@@ -1,14 +1,13 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ComboboxItemDto, CustomerDueDetailsDto, CustomerDueReportDto, CustomerLedgerReportDto, CustomerServiceProxy, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
-import { finalize } from "rxjs/operators";
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
+import { ComboboxItemDto, CustomerDueDetailsDto, CustomerDueReportDto, CustomerServiceProxy, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
 import { Utils } from '@shared/helpers/Utils';
-pdfMake.addVirtualFileSystem(pdfFonts);
+import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
+import { Table } from 'primeng/table';
+import { LazyLoadEvent } from "primeng/api";
+import { finalize } from "rxjs/operators";
 
 @Component({
     selector: 'app-customer-due-report',
@@ -23,13 +22,13 @@ pdfMake.addVirtualFileSystem(pdfFonts);
     `
     ]
 })
-export class CustomerDueReportComponent implements OnInit {
+export class CustomerDueReportComponent extends PagedListingComponentBase<CustomerDueDetailsDto> implements OnInit {
+    @ViewChild('dataTable', { static: true }) dataTable: Table;
 
+    pdfMake: any;
     data: CustomerDueReportDto;
     endDate = new Date();
     startDate = (moment().subtract(31, 'days')).toDate();
-    maxDate = this.endDate;
-
     loading: boolean = true;
     customerId: string = "";
     customerName: string = "";
@@ -37,40 +36,56 @@ export class CustomerDueReportComponent implements OnInit {
     invalidParam: boolean = true;
 
     constructor(
-        private cd: ChangeDetectorRef,
+        injector: Injector,
+        cd: ChangeDetectorRef,
         private _salesService: SalesServiceProxy,
         private readonly _customerService: CustomerServiceProxy,
     ) {
-
+        super(injector, cd);
     }
-    ngOnInit(): void {
+
+    async ngOnInit() {
         this._customerService.getCustomersSelectList().subscribe(res => {
             this.customers = res;
             this.cd.detectChanges();
-        })
+        });
+        this.pdfMake = await this.loadAndPrintPDF();
     }
 
-    startDateChanged() {
-        this.endDate = new Date(this.startDate);
-        this.endDate.setDate(this.endDate.getDate() + 31);
-        this.maxDate = this.endDate;
-        this.cd.detectChanges();
+    async loadAndPrintPDF() {
+        const { default: pdfMake } = await import('pdfmake/build/pdfmake');
+        const { default: pdfFonts } = await import('assets/vfs_fonts');
+        pdfMake.addFonts({
+            'TimesNewRoman': {
+                normal: 'times-Regular.ttf',
+                bold: 'Times New Roman Bold.ttf'
+            },
+            'LucidaGrande': {
+                bold: 'LucidaGrandeBold.ttf'
+            }
+        });
+
+        pdfMake.addVirtualFileSystem(pdfFonts);
+        return pdfMake;
     }
 
-    getReportData() {
-        this.loading = true;
-        this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate))
-            .pipe(
-                finalize(() => {
-                    this.loading = false;
+    list(event?: LazyLoadEvent): void {
+        if (this.customerId) {
+            this.showLoading();
+            this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate))
+                .pipe(finalize(() => {
+                    this.hideLoading();
+                }))
+                .subscribe((result) => {
+                    this.data = result;
+                    this.primengTableHelper.records = result.details;
+                    this.primengTableHelper.totalRecordsCount = result.details.length;
                     this.cd.detectChanges();
-                })
-            )
-            .subscribe((result) => {
-                this.data = result;
-                this.cd.detectChanges();
-            });
+                });
+        }
     }
+
+    delete() { }
 
     onCustomerChanged() {
         if (this.customerId) {
@@ -83,7 +98,13 @@ export class CustomerDueReportComponent implements OnInit {
     }
 
     async print() {
+        this.showLoading();
         const data = await firstValueFrom(this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate)));
+        if (!data || !data.details || data.details.length == 0) {
+            abp.message.info("No record(s) found", "Sorry!");
+            this.hideLoading();
+            return;
+        }
         // let count = data.details.length + 1;
         // for (let i = count; i < 123 + count; i++) {
         //     data.details.push({ invoiceNo: i.toString(), totalDue: 0, balance: 0 } as CustomerDueDetailsDto);
@@ -93,6 +114,9 @@ export class CustomerDueReportComponent implements OnInit {
             pageSize: 'A4',
             pageMargins: [30, 20, 30, 20],
             content: this.getContent(data, logo),
+            defaultStyle: {
+                font: 'TimesNewRoman'
+            },
             styles: {
                 headerStyle: {
                     fontSize: 12,
@@ -119,8 +143,9 @@ export class CustomerDueReportComponent implements OnInit {
                 }
             }
         };
+        this.hideLoading();
         // pdfMake.createPdf(dd).download('Customerledge.pdf');
-        pdfMake.createPdf(dd).open();
+        this.pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
 
@@ -137,7 +162,8 @@ export class CustomerDueReportComponent implements OnInit {
             nitros3KgTotalQty: data.nitros3KgTotalQty,
             overallDue: data.overallDue,
             overallBalance: data.overallBalance,
-            actualDue: data.actualDue
+            actualDue: data.actualDue,
+            initialDue: data.initialDue
         };
 
         let hasNextpage = false;
@@ -162,15 +188,15 @@ export class CustomerDueReportComponent implements OnInit {
                     table: {
                         widths: ['*'],
                         body: [
-                            [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                            [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
                 { text: ' ', fontSize: 5 },
                 {
                     layout: {
-                        hLineColor: () => 'grey',
-                        vLineColor: () => 'grey',
+                        hLineColor: () => 'lightgrey',
+                        vLineColor: () => 'lightgrey',
                         hLineWidth: () => 1,
                         vLineWidth: () => 1,
                     },
@@ -192,15 +218,15 @@ export class CustomerDueReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -218,15 +244,15 @@ export class CustomerDueReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -244,15 +270,15 @@ export class CustomerDueReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -270,15 +296,15 @@ export class CustomerDueReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `DUE BILLS of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -313,11 +339,11 @@ export class CustomerDueReportComponent implements OnInit {
             { text: totalValues.nitros3KgTotalQty, style: ['footerParticular'] },
             { text: '' },
             { text: `${Utils.thousandsSeparator(totalValues.overallDue)}/-`, style: ['cellAmount'], bold: true },
-            { text: `${Utils.thousandsSeparator(totalValues.overallBalance)}/-`, style: ['cellAmount'], bold: true }
+            { text: '' }
         ]);
         body.push([
             { text: 'Actual Due', bold: true, alignment: 'right', fontSize: 9 },
-            { text: '', colSpan: 8 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' },
+            { text: `${totalValues.initialDue ? 'Initial Due: ' + Utils.thousandsSeparator(totalValues.initialDue) + '/-' : ''}`, colSpan: 8, style: ['cellAmount'] }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' },
             { text: `${Utils.thousandsSeparator(totalValues.actualDue)}/-`, style: ['cellAmount'], bold: true },
             { text: '' }
         ]);
@@ -359,11 +385,11 @@ export class CustomerDueReportComponent implements OnInit {
                 { text: totalValues.nitros3KgTotalQty, style: ['footerParticular'] },
                 { text: '' },
                 { text: `${Utils.thousandsSeparator(totalValues.overallDue)}/-`, style: ['cellAmount'], bold: true },
-                { text: `${Utils.thousandsSeparator(totalValues.overallBalance)}/-`, style: ['cellAmount'], bold: true }
+                { text: '' }
             ]);
             body.push([
                 { text: 'Actual Due', bold: true, alignment: 'right', fontSize: 9 },
-                { text: '', colSpan: 8 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' },
+                { text: `${totalValues.initialDue ? 'Initial Due: ' + Utils.thousandsSeparator(totalValues.initialDue) + '/-' : ''}`, colSpan: 8, style: ['cellAmount'] }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' },
                 { text: `${Utils.thousandsSeparator(totalValues.actualDue)}/-`, style: ['cellAmount'], bold: true },
                 { text: '' }
             ]);

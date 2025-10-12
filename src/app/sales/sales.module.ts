@@ -8,7 +8,6 @@ import { SalesEntryComponent } from './sales-entry/sales-entry.component';
 import { DueReceivedEntryComponent } from './due-received-entry/due-received-entry.component';
 import { DueReceivedHistoryComponent } from './due-received-histories/due-received-histories.component';
 
-
 @NgModule({
   declarations: [
     SalesComponent,

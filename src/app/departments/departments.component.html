@@ -45,7 +45,7 @@
                                 <tr>
                                     <th style="min-width: 150px"> Name </th>
                                     <th style="width: 68px"> Active </th>
-                                    <th style="width: 120px; min-width: 120px" class="text-center">
+                                    <th class="text-center">
                                         {{ "Actions" }}
                                     </th>
                                 </tr>
@@ -60,12 +60,8 @@
                                         <span> <input type="checkbox" value="" [checked]="record.activeStatus" disabled> </span>
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm bg-secondary" (click)="edit(record.id)">
+                                        <button type="button" class="btn btn-sm bg-secondary" (click)="edit(record.id)" *ngIf="isGranted('Pages.Department.Edit')">
                                             <i class="fas fa-pencil-alt"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm bg-danger mx-2"
-                                            (click)="delete(record)">
-                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>

@@ -84,6 +84,6 @@
 
         </div>
     </div>
-    <abp-modal-footer [cancelDisabled]="saving" [saveDisabled]="!duePaymentEntryModal.form.valid || saving || invalid || duePayment.totalPaid == 0"
+    <abp-modal-footer [cancelDisabled]="saving" [saveDisabled]="!duePaymentEntryModal.form.valid || saving || invalid || paidEditMode || duePayment.totalPaid == 0"
         (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
 </form>

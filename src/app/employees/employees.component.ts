@@ -79,7 +79,7 @@ export class EmployeesComponent extends PagedListingComponentBase<EmployeeOutput
       undefined,
       (result: boolean) => {
         if (result) {
-          this._employeeService.delete(employee.id).subscribe(() => {
+          this._employeeService.employeeRemove(employee.id).subscribe(() => {
             abp.notify.success(this.l("SuccessfullyDeleted"));
             this.refresh();
           });

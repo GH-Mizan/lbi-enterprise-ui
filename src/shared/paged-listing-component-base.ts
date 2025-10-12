@@ -26,6 +26,17 @@ export abstract class PagedListingComponentBase<TEntityDto> extends AppComponent
         this.list(event);
     }
 
+    showLoading() {
+        this.primengTableHelper.isLoading = true;
+        this.cd.detectChanges();
+    }
+
+    hideLoading() {
+        this.primengTableHelper.isLoading = false;
+        this.cd.detectChanges();
+    }
+
     protected abstract list(event?: LazyLoadEvent): void;
     protected abstract delete(entity: TEntityDto): void;
+
 }

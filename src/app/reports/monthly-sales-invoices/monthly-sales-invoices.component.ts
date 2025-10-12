@@ -1,14 +1,13 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ComboboxItemDto, CustomerServiceProxy, MonthlySalesInvoiceReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
-import { finalize } from "rxjs/operators";
-import moment, { invalid } from 'moment';
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
+import { ComboboxItemDto, CustomerServiceProxy, MonthlySalesInvoiceDetailsReportDto, MonthlySalesInvoiceReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { Utils } from '@shared/helpers/Utils';
-
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
-pdfMake.addVirtualFileSystem(pdfFonts);
+import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
+import { Table } from 'primeng/table';
+import { LazyLoadEvent } from "primeng/api";
+import { finalize } from "rxjs/operators";
 
 @Component({
     selector: 'app-monthly-sales-invoice-report',
@@ -16,8 +15,11 @@ pdfMake.addVirtualFileSystem(pdfFonts);
     templateUrl: './monthly-sales-invoices.component.html',
     animations: [appModuleAnimation()]
 })
-export class MonthlySalesInvoiceReportComponent implements OnInit {
 
+export class MonthlySalesInvoiceReportComponent extends PagedListingComponentBase<MonthlySalesInvoiceDetailsReportDto> implements OnInit {
+    @ViewChild('dataTable', { static: true }) dataTable: Table;
+
+    pdfMake: any;
     data: MonthlySalesInvoiceReportDto;
     customerId: string = "";
     customers: ComboboxItemDto[] = [];
@@ -28,13 +30,15 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
     years: ComboboxItemDto[] = [];
 
     constructor(
-        private cd: ChangeDetectorRef,
+        injector: Injector,
+        cd: ChangeDetectorRef,
         private _salesService: SalesServiceProxy,
         private readonly _customerService: CustomerServiceProxy,
     ) {
-
+        super(injector, cd);
     }
-    ngOnInit(): void {
+
+    async ngOnInit() {
         const currentYear: number = new Date().getFullYear();
         this.months = Utils.getMonths();
         this.years = Utils.getYears(currentYear);
@@ -44,27 +48,52 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
             this.customers = res;
             this.cd.detectChanges();
         })
-
-        //this.getReportData();
+        this.pdfMake = await this.loadAndPrintPDF();
     }
 
-    getReportData() {
-        this.loading = true;
-        this._salesService.getMonthlySalesInvoiceReport(this.monthId, this.yearId, parseInt(this.customerId))
-            .pipe(
-                finalize(() => {
-                    this.loading = false;
+    async loadAndPrintPDF() {
+        const { default: pdfMake } = await import('pdfmake/build/pdfmake');
+        const { default: pdfFonts } = await import('assets/vfs_fonts');
+        pdfMake.addFonts({
+            'TimesNewRoman': {
+                normal: 'times-Regular.ttf',
+                bold: 'Times New Roman Bold.ttf'
+            },
+            'LucidaGrande': {
+                bold: 'LucidaGrandeBold.ttf'
+            }
+        });
+
+        pdfMake.addVirtualFileSystem(pdfFonts);
+        return pdfMake;
+    }
+
+    list(event?: LazyLoadEvent): void {
+        if (this.customerId) {
+            this.showLoading();
+            this._salesService.getMonthlySalesInvoiceReport(this.monthId, this.yearId, parseInt(this.customerId))
+                .pipe(finalize(() => {
+                    this.hideLoading();
+                }))
+                .subscribe((result) => {
+                    this.data = result;
+                    this.primengTableHelper.records = result.details;
+                    this.primengTableHelper.totalRecordsCount = result.details.length;
                     this.cd.detectChanges();
-                })
-            )
-            .subscribe((result) => {
-                this.data = result;
-                this.cd.detectChanges();
-            });
+                });
+        }
     }
+
+    delete() { }
 
     async print() {
+        this.showLoading()
         const data = await firstValueFrom(this._salesService.getMonthlySalesInvoiceReport(this.monthId, this.yearId, parseInt(this.customerId)));
+        if (!data || !data.details || data.details.length == 0) {
+            abp.message.info("No record(s) found", "Sorry!");
+            this.hideLoading();
+            return;
+        }
         const logo = await Utils.getImageDataUrl('assets/img/logo.png');
         const selectedMonth = this.months.find(f => f.value == this.monthId.toString()).displayText;
         const selectedYear = this.years.find(f => f.value == this.yearId.toString()).displayText;
@@ -77,7 +106,7 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
                     table: {
                         widths: ['*'],
                         body: [
-                            [{ text: `SALES INVOICE (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                            [{ text: `SALES INVOICE (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
@@ -99,8 +128,8 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
                 { text: ' ', fontSize: 3 },
                 {
                     layout: {
-                        hLineColor: () => 'grey',
-                        vLineColor: () => 'grey',
+                        hLineColor: () => 'lightgrey',
+                        vLineColor: () => 'lightgrey',
                         hLineWidth: () => 1,
                         vLineWidth: () => 1,
                     },
@@ -123,7 +152,7 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
                                         x1: 0, y1: 50, // Starting point
                                         x2: 150, y2: 50, // Ending point
                                         lineWidth: 1,
-                                        lineColor: 'grey'
+                                        lineColor: 'lightgrey'
                                     }
                                 ],
                             },
@@ -134,7 +163,7 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
                                         x1: 100, y1: 50, // Starting point
                                         x2: 250, y2: 50, // Ending point
                                         lineWidth: 1,
-                                        lineColor: 'grey'
+                                        lineColor: 'lightgrey'
                                     }
                                 ]
                             }],
@@ -143,6 +172,9 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
                     }
                 }
             ],
+            defaultStyle: {
+                font: 'TimesNewRoman'
+            },
             styles: {
                 headerStyle: {
                     fontSize: 12,
@@ -154,14 +186,16 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
                     alignment: 'center'
                 },
                 footerParticular: {
+                    fontSize: 9,
                     bold: true,
                     alignment: 'center'
                 },
             }
 
         };
+        this.hideLoading();
         // pdfMake.createPdf(dd).download('Customerledge.pdf');
-        pdfMake.createPdf(dd).open();
+        this.pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
 
@@ -183,7 +217,7 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
                     { text: item.nitros30KgQty.toString(), style: ['cell_style'] },
                     { text: item.nitros5KgQty.toString(), style: ['cell_style'] },
                     { text: item.nitros3KgQty.toString(), style: ['cell_style'] },
-                    { text: Utils.thousandsSeparator(item.amount), alignment: 'right', fontSize: 9 }
+                    { text: `${Utils.thousandsSeparator(item.amount)}/-`, alignment: 'right', fontSize: 9 }
                 ]
             );
         });
@@ -203,7 +237,7 @@ export class MonthlySalesInvoiceReportComponent implements OnInit {
             { text: data.nitros30KgTotalQty.toString(), style: ['footerParticular'] },
             { text: data.nitros5KgTotalQty.toString(), style: ['footerParticular'] },
             { text: data.nitros3KgTotalQty.toString(), style: ['footerParticular'] },
-            { text: Utils.thousandsSeparator(data.totalAmount), bold: true, alignment: 'right' },
+            { text: `${Utils.thousandsSeparator(data.totalAmount)}/-`, bold: true, alignment: 'right', fontSize: 9 },
         ]);
 
         return body;

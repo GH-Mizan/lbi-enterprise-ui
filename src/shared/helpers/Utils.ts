@@ -71,7 +71,7 @@ export class Utils {
                             height: 60,
                             alignment: 'center'
                         },
-                        { text: 'LBI Enterprise', bold: true, fontSize: 18, marginTop: 5 },
+                        { text: 'LBI Enterprise', bold: true, font: 'LucidaGrande', fontSize: 18, marginTop: 5 },
                     ],
                     [{ text: '' }, { text: '3/2 Ishwar Chandraghosh Street, Babu Bazar, Dhaka-1100', fontSize: 10 }],
                     [{ text: '' }, { text: 'Contact: 01912776389, 01401212419    E-mail: lbienterprise6@gmail.com', fontSize: 10 }]
@@ -79,5 +79,16 @@ export class Utils {
             }
         };
         return header;
+    }
+
+    static nextLetter(s) {
+        return s.replace(/([a-zA-Z])[^a-zA-Z]*$/, function (a) {
+            var c = a.charCodeAt(0);
+            switch (c) {
+                case 90: return 'A';
+                case 122: return 'a';
+                default: return String.fromCharCode(++c);
+            }
+        });
     }
 }

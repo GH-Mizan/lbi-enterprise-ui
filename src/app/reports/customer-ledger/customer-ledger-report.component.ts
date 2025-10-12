@@ -1,14 +1,13 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { ComboboxItemDto, CustomerLedgerDetailsDto, CustomerLedgerReportDto, CustomerServiceProxy, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
-import { finalize } from "rxjs/operators";
 import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { firstValueFrom } from 'rxjs';
 import { Utils } from '@shared/helpers/Utils';
-pdfMake.addVirtualFileSystem(pdfFonts);
+import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
+import { Table } from 'primeng/table';
+import { LazyLoadEvent } from "primeng/api";
+import { finalize } from "rxjs/operators";
 
 @Component({
     selector: 'app-customer-ledger-report',
@@ -17,14 +16,18 @@ pdfMake.addVirtualFileSystem(pdfFonts);
     animations: [appModuleAnimation()],
     styles: [
         `
-     :host ::ng-deep .p-inputtext {
-        min-width: 110px !important;
-      }
+        :host ::ng-deep .p-inputtext {
+            min-width: 110px !important;
+        }
+
+        
     `
     ]
 })
-export class CustomerLedgerReportComponent implements OnInit {
+export class CustomerLedgerReportComponent extends PagedListingComponentBase<CustomerLedgerDetailsDto> implements OnInit {
+    @ViewChild('dataTable', { static: true }) dataTable: Table;
 
+    pdfMake: any;
     data: CustomerLedgerReportDto;
     endDate = new Date();
     startDate = (moment().subtract(31, 'days')).toDate();
@@ -37,17 +40,37 @@ export class CustomerLedgerReportComponent implements OnInit {
     invalidParam: boolean = true;
 
     constructor(
-        private cd: ChangeDetectorRef,
+        injector: Injector,
+        cd: ChangeDetectorRef,
         private _salesService: SalesServiceProxy,
         private readonly _customerService: CustomerServiceProxy,
     ) {
-
+        super(injector, cd);
     }
-    ngOnInit(): void {
+
+    async ngOnInit() {
         this._customerService.getCustomersSelectList().subscribe(res => {
             this.customers = res;
             this.cd.detectChanges();
-        })
+        });
+        this.pdfMake = await this.loadAndPrintPDF();
+    }
+
+    async loadAndPrintPDF() {
+        const { default: pdfMake } = await import('pdfmake/build/pdfmake');
+        const { default: pdfFonts } = await import('assets/vfs_fonts');
+        pdfMake.addFonts({
+            'TimesNewRoman': {
+                normal: 'times-Regular.ttf',
+                bold: 'Times New Roman Bold.ttf'
+            },
+            'LucidaGrande': {
+                bold: 'LucidaGrandeBold.ttf'
+            }
+        });
+
+        pdfMake.addVirtualFileSystem(pdfFonts);
+        return pdfMake;
     }
 
     startDateChanged() {
@@ -57,20 +80,24 @@ export class CustomerLedgerReportComponent implements OnInit {
         this.cd.detectChanges();
     }
 
-    getReportData() {
-        this.loading = true;
-        this._salesService.getCustomerLedgerReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate))
-            .pipe(
-                finalize(() => {
-                    this.loading = false;
+    list(event?: LazyLoadEvent): void {
+        if (this.customerId) {
+            this.showLoading();
+            this._salesService.getCustomerLedgerReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate))
+                .pipe(finalize(() => {
+                    this.hideLoading();
+                }))
+                .subscribe((result) => {
+                    this.data = result;
+                    this.primengTableHelper.records = result.details;
+                    this.primengTableHelper.totalRecordsCount = result.details.length;
+                    this.primengTableHelper.hideLoadingIndicator();
                     this.cd.detectChanges();
-                })
-            )
-            .subscribe((result) => {
-                this.data = result;
-                this.cd.detectChanges();
-            });
+                });
+        }
     }
+
+    delete() { }
 
     onCustomerChanged() {
         if (this.customerId) {
@@ -83,7 +110,13 @@ export class CustomerLedgerReportComponent implements OnInit {
     }
 
     async print() {
+        this.showLoading();
         const data = await firstValueFrom(this._salesService.getCustomerLedgerReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate)));
+        if (!data || !data.details || data.details.length == 0) {
+            abp.message.info("No record(s) found", "Sorry!");
+            this.hideLoading();
+            return;
+        }
         // let count = data.details.length + 1;
         // for (let i = count; i < 120 + count; i++) {
         //     data.details.push({ creditTotal: i, debitTotal: 0, balance: 0 } as CustomerLedgerDetailsDto);
@@ -93,6 +126,9 @@ export class CustomerLedgerReportComponent implements OnInit {
             pageSize: 'A4',
             pageMargins: [30, 20, 30, 20],
             content: this.getContent(data, logo),
+            defaultStyle: {
+                font: 'TimesNewRoman'
+            },
             styles: {
                 headerStyle: {
                     fontSize: 12,
@@ -120,8 +156,9 @@ export class CustomerLedgerReportComponent implements OnInit {
             }
 
         };
+        this.hideLoading();
         // pdfMake.createPdf(dd).download('Customerledge.pdf');
-        pdfMake.createPdf(dd).open();
+        this.pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
 
@@ -142,6 +179,7 @@ export class CustomerLedgerReportComponent implements OnInit {
             overallBalance: data.overallBalance,
             actualCreditTotal: data.actualCreditTotal,
             actualDebitTotal: data.actualDebitTotal,
+            initialDue: data.initialDue
         };
 
         let hasNextpage = false;
@@ -166,15 +204,15 @@ export class CustomerLedgerReportComponent implements OnInit {
                     table: {
                         widths: ['*'],
                         body: [
-                            [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                            [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
                 { text: ' ', fontSize: 5 },
                 {
                     layout: {
-                        hLineColor: () => 'grey',
-                        vLineColor: () => 'grey',
+                        hLineColor: () => 'lightgrey',
+                        vLineColor: () => 'lightgrey',
                         hLineWidth: () => 1,
                         vLineWidth: () => 1,
                     },
@@ -196,15 +234,15 @@ export class CustomerLedgerReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -222,15 +260,15 @@ export class CustomerLedgerReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -248,15 +286,15 @@ export class CustomerLedgerReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -274,15 +312,15 @@ export class CustomerLedgerReportComponent implements OnInit {
                             table: {
                                 widths: ['*'],
                                 body: [
-                                    [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', border: [false, true, false, true], borderColor: ['', 'grey', '', 'grey'], fillColor: '#C4C4C4' }],
+                                    [{ text: `LEDGER of ${this.customerName}`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
                         { text: ' ', fontSize: 5 },
                         {
                             layout: {
-                                hLineColor: () => 'grey',
-                                vLineColor: () => 'grey',
+                                hLineColor: () => 'lightgrey',
+                                vLineColor: () => 'lightgrey',
                                 hLineWidth: () => 1,
                                 vLineWidth: () => 1,
                             },
@@ -321,14 +359,13 @@ export class CustomerLedgerReportComponent implements OnInit {
         ]);
         body.push([
             { text: 'Actual total', bold: true, alignment: 'right', fontSize: 9 },
-            { text: '', colSpan: 7 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' },
+            { text: `${totalValues.initialDue ? 'Initial Due: ' + Utils.thousandsSeparator(totalValues.initialDue) + '/-' : ''}`, colSpan: 7, style: ['cellAmount'] }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' },
             { text: `${Utils.thousandsSeparator(totalValues.actualCreditTotal)}/-`, style: ['cellAmount'], bold: true },
             { text: `${Utils.thousandsSeparator(totalValues.actualDebitTotal)}/-`, style: ['cellAmount'], bold: true },
             { text: '' }
         ]);
         return body;
     }
-
 
     private getData(data: CustomerLedgerDetailsDto[], showTotal: boolean, totalValues?: any) {
         const body = [
@@ -365,14 +402,15 @@ export class CustomerLedgerReportComponent implements OnInit {
                 { text: totalValues.nitros3KgTotalQty, style: ['footerParticular'] },
                 { text: `${Utils.thousandsSeparator(totalValues.overallCreditTotal)}/-`, style: ['cellAmount'], bold: true },
                 { text: `${Utils.thousandsSeparator(totalValues.overallDebitTotal)}/-`, style: ['cellAmount'], bold: true },
-                { text: `${Utils.thousandsSeparator(totalValues.overallBalance)}/-`, style: ['cellAmount'], bold: true }
+                { text: '' }
+                //{ text: `${Utils.thousandsSeparator(totalValues.overallBalance)}/-`, style: ['cellAmount'], bold: true }
             ]);
             body.push([
-                { text: 'Actual total', bold: true, alignment: 'right', fontSize: 9 },
-                { text: '', colSpan: 7 }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' },
+                { text: 'Lifetime Total', bold: true, alignment: 'right', fontSize: 9 },
+                { text: `${totalValues.initialDue ? 'Initial Due: ' + Utils.thousandsSeparator(totalValues.initialDue) + '/-' : ''}`, colSpan: 7, style: ['cellAmount'] }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' }, { text: '' },
                 { text: `${Utils.thousandsSeparator(totalValues.actualCreditTotal)}/-`, style: ['cellAmount'], bold: true },
                 { text: `${Utils.thousandsSeparator(totalValues.actualDebitTotal)}/-`, style: ['cellAmount'], bold: true },
-                { text: '' }
+                { text: `${Utils.thousandsSeparator(totalValues.overallBalance)}/-`, style: ['cellAmount'], bold: true }
             ]);
         }
 
