@@ -2,7 +2,7 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-6">
+                <div class="col-12">
                     <h1>DAILY PURCHASE ({{date | date: 'dd-MMM-yy' }}) </h1>
                 </div>
             </div>
@@ -13,7 +13,7 @@
             <div class="card table-wrapper">
                 <div class="card-header">
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-9">
                             <div class="float-left">
                                 <div class="input-group">
                                     <p-datepicker [(ngModel)]="date" [readonlyInput]="true" dateFormat="dd/M/yy" />
@@ -25,9 +25,9 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-3">
                             <div class="float-right">
-                                <button type="button" class="btn bg-green" (click)="print()">
+                                <button type="button" class="btn bg-green ptb-9" (click)="print()">
                                     Print
                                 </button>
                             </div>

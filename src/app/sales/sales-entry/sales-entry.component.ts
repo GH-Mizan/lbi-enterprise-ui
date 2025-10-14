@@ -85,7 +85,7 @@ export class SalesEntryComponent implements OnInit {
         this.id = snapshot.params['id'];
         this.spinner.show();
         this.viewMode = snapshot.url.map(segment => segment.path)[0] == 'view';
-        Promise.all([
+        await Promise.all([
             this.populateCustomers(),
             this.populatePaymentStatuses(),
             this.getModel(),

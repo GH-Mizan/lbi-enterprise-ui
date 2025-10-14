@@ -12,9 +12,12 @@ import {
 
 import { AppSessionService } from '@shared/session/app-session.service';
 import { PrimengTableHelper } from 'shared/helpers/PrimengTableHelper';
+import { LayoutStoreService } from './layout/layout-store.service';
+import { firstValueFrom } from 'rxjs';
 
 export abstract class AppComponentBase {
     localizationSourceName = AppConsts.localization.defaultLocalizationSourceName;
+    mobileView: boolean;
 
     localization: LocalizationService;
     permission: PermissionCheckerService;
@@ -26,6 +29,7 @@ export abstract class AppComponentBase {
     appSession: AppSessionService;
     elementRef: ElementRef;
     primengTableHelper: PrimengTableHelper;
+    layoutStore: LayoutStoreService
 
     constructor(injector: Injector) {
         this.localization = injector.get(LocalizationService);
@@ -37,7 +41,10 @@ export abstract class AppComponentBase {
         this.multiTenancy = injector.get(AbpMultiTenancyService);
         this.appSession = injector.get(AppSessionService);
         this.elementRef = injector.get(ElementRef);
+        this.layoutStore = injector.get(LayoutStoreService);
         this.primengTableHelper = new PrimengTableHelper();
+
+        this.layoutStore.mobileView$.subscribe(res => this.mobileView = res);
     }
 
     l(key: string, ...args: any[]): string {
@@ -58,4 +65,8 @@ export abstract class AppComponentBase {
     isGranted(permissionName: string): boolean {
         return this.permission.isGranted(permissionName);
     }
+
+    // async isMobileView(): Promise<boolean> {
+    //     return await firstValueFrom(this.layoutStore.mobileView$);
+    // }
 }

@@ -30,7 +30,7 @@ export class ProductTransferComponent extends AppComponentBase implements OnInit
     }
 
     async ngOnInit() {
-        Promise.all([
+        await Promise.all([
             this.loadProducts(),
             this.loadStockPoints()
         ]).then(() => {

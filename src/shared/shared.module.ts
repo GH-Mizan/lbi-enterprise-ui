@@ -33,6 +33,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { SalesReceiptReport } from './reports/sales-receipt-report';
 import { OnlyNumberDirective } from './directives/only-numbers.directive';
 import { NgxSpinnerModule } from "ngx-spinner";
+import { ImageModule } from 'primeng/image';
 
 @NgModule({
     imports: [
@@ -60,7 +61,8 @@ import { NgxSpinnerModule } from "ngx-spinner";
         DatePickerModule,
         SelectOnFocusDirective,
         OnlyNumberDirective,
-        NgxSpinnerModule
+        NgxSpinnerModule,
+        ImageModule
     ],
     exports: [
         AbpPaginationControlsComponent,
@@ -83,7 +85,8 @@ import { NgxSpinnerModule } from "ngx-spinner";
         DatePickerModule,
         SelectOnFocusDirective,
         OnlyNumberDirective,
-        NgxSpinnerModule
+        NgxSpinnerModule,
+        ImageModule
     ],
 })
 export class SharedModule {

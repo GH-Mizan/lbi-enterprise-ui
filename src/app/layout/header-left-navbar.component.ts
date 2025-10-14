@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, OnInit } from '@angular/core';
 import { LayoutStoreService } from '@shared/layout/layout-store.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
     selector: 'header-left-navbar',
@@ -11,9 +12,15 @@ import { LayoutStoreService } from '@shared/layout/layout-store.service';
 export class HeaderLeftNavbarComponent implements OnInit {
     sidebarExpanded: boolean;
 
-    constructor(private _layoutStore: LayoutStoreService) {}
+    constructor(
+        private _layoutStore: LayoutStoreService,
+        private breakpointObserver: BreakpointObserver
+    ) { }
 
     ngOnInit(): void {
+        this.sidebarExpanded = true;
+        this._layoutStore.setSidebarExpanded(this.sidebarExpanded);
+        
         this._layoutStore.sidebarExpanded.subscribe((value) => {
             this.sidebarExpanded = value;
         });

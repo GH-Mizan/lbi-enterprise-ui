@@ -16,6 +16,7 @@ import { Utils } from '@shared/helpers/Utils';
   templateUrl: './sales-collection-due.component.html',
   animations: [appModuleAnimation()]
 })
+
 export class SalesColllectionDueReportComponent extends PagedListingComponentBase<SalesCollectionDueReportDto> implements OnInit {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
 
@@ -23,6 +24,7 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
   endDate = new Date();
   startDate = (moment().subtract(31, 'days')).toDate();
   maxDate = this.endDate;
+  //mobileView: boolean = false;
 
   constructor(
     injector: Injector,
@@ -34,6 +36,7 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
   }
 
   async ngOnInit() {
+    //this.mobileView = await this.isMobileView();
     this.pdfMake = await this.loadAndPrintPDF();
   }
 

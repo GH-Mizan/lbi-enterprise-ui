@@ -5,6 +5,7 @@ import { LayoutStoreService } from '@shared/layout/layout-store.service';
 import { HeaderComponent } from './layout/header.component';
 import { SidebarComponent } from './layout/sidebar.component';
 import { RouterOutlet } from '@angular/router';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 @Component({
     templateUrl: './app.component.html',
@@ -17,7 +18,8 @@ export class AppComponent extends AppComponentBase implements OnInit {
     constructor(
         injector: Injector,
         private renderer: Renderer2,
-        private _layoutStore: LayoutStoreService
+        private _layoutStore: LayoutStoreService,
+        private breakpointObserver: BreakpointObserver
     ) {
         super(injector);
     }
@@ -45,6 +47,11 @@ export class AppComponent extends AppComponentBase implements OnInit {
         this._layoutStore.sidebarExpanded.subscribe((value) => {
             this.sidebarExpanded = value;
         });
+
+        this.breakpointObserver.observe(Breakpoints.Handset)
+            .subscribe(result => {
+                this._layoutStore.setIsMobileView(result.matches);
+            });
     }
 
     toggleSidebar(): void {

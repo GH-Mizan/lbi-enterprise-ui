@@ -6,6 +6,7 @@ import { filter } from 'rxjs/operators';
 import { MenuItem } from '@shared/layout/menu-item';
 import { NgTemplateOutlet } from '@angular/common';
 import { CollapseDirective } from 'ngx-bootstrap/collapse';
+import { LayoutStoreService } from '@shared/layout/layout-store.service';
 
 @Component({
     selector: 'sidebar-menu',
@@ -22,7 +23,8 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
 
     constructor(
         injector: Injector,
-        private router: Router
+        private router: Router,
+        private _layoutStore: LayoutStoreService,
     ) {
         super(injector);
     }
@@ -138,5 +140,11 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             return true;
         }
         return this.permission.isGranted(item.permissionName);
+    }
+
+    onMenuItemClicked() {
+        this._layoutStore.mobileView$.subscribe((value) => {
+            if(value) this._layoutStore.setSidebarExpanded(true);
+        });
     }
 }

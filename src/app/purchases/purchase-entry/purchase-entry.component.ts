@@ -79,7 +79,7 @@ export class PurchaseEntryComponent implements OnInit {
     async ngOnInit() {
         this.id = this._activatedRoute.snapshot.params['id'];
         this.spinner.show();
-        Promise.all([
+        await Promise.all([
             this.populateSuppliers(),
             this.populatePaymentStatuses(),
             this.getModel(),

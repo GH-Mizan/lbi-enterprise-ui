@@ -2,7 +2,7 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row">
-                <div class="col-6">
+                <div class="col-12">
                     <h1>Clients' Balance </h1>
                 </div>
             </div>
@@ -14,8 +14,7 @@
                 <div class="card-header">
                     <form class="form" autocomplete="off">
                         <div class="row">
-
-                            <div class="col-3">
+                            <div class="col-sm-12 col-md-3 col-lg-3">
                                 <div class="form-group row">
                                     <label class="col-4 col-form-label" for="name">Start Date</label>
                                     <div class="col-8">
@@ -26,7 +25,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-3">
+                            <div class="col-sm-12 col-md-3 col-lg-3">
                                 <div class="form-group row">
                                     <label class="col-4 col-form-label" for="name">End Date</label>
                                     <div class="col-8">
@@ -36,15 +35,29 @@
                                 </div>
                             </div>
 
-                            <div class="col-6">
+                            <div class="col-6" *ngIf="!mobileView">
                                 <div class="float-right">
                                     <button type="button" class="btn bg-blue mx-1" (click)="list()">
                                         Search
                                     </button>
-                                    
                                     <button type="button" class="btn bg-green" (click)="print()">
                                         Print
                                     </button>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12" *ngIf="mobileView">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <button type="button" class="btn bg-blue w-100" (click)="list()">
+                                        Search
+                                    </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="button" class="btn bg-green w-100" (click)="print()">
+                                        Print
+                                    </button>
+                                    </div>
                                 </div>
                             </div>
 

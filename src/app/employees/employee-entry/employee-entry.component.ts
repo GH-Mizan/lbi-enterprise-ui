@@ -36,7 +36,7 @@ export class EmployeeEntryComponent extends AppComponentBase implements OnInit {
             this.joiningDate = this.employee.joiningDate.toDate();
             this.birthDate = this.employee.birthDate.toDate();
         }
-        Promise.all(
+        await Promise.all(
             [
                 this.loadDepartments(),
                 this.loadDesignations()

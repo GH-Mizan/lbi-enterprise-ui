@@ -14,7 +14,7 @@
     @if (isMenuItemVisible(item)) {
         <li class="nav-item" [class.menu-open]="!item.isCollapsed" [class.has-treeview]="item.children">
             @if (item.route && item.route.indexOf('http') != 0) {
-                <a class="nav-link" [routerLink]="item.route" [class.active]="item.isActive">
+                <a class="nav-link" [routerLink]="item.route" [class.active]="item.isActive" (click)="onMenuItemClicked()">
                     <i class="nav-icon {{ item.icon }}"></i>
                     <p>
                         {{ item.label }}
