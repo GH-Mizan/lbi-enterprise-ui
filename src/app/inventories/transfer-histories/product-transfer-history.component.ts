@@ -1,11 +1,12 @@
-import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Injector, OnInit, Output, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { Table } from 'primeng/table';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { InventoryServiceProxy, ProductOutputDto } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, InventoryServiceProxy, ProductOutputDto, ProductTransferDto } from '@shared/service-proxies/service-proxies';
 import { BsModalRef } from "ngx-bootstrap/modal";
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
+import moment from 'moment';
 
 @Component({
   selector: 'app-product-transfer-histories',
@@ -13,9 +14,13 @@ import { finalize } from "rxjs/operators";
   templateUrl: './product-transfer-history.component.html',
   animations: [appModuleAnimation()],
 })
-export class ProductTransferHistoriesComponent extends PagedListingComponentBase<ProductOutputDto> {
+export class ProductTransferHistoriesComponent extends PagedListingComponentBase<ProductTransferDto> implements OnInit {
+  @Output() onDelete = new EventEmitter<any>();
   @ViewChild('dataTable', { static: true }) dataTable: Table;
-  productId: number = null;
+
+  products: ComboboxItemDto[] = [];
+  productId: number;
+  date = new Date();
 
   constructor(
     injector: Injector,
@@ -26,27 +31,46 @@ export class ProductTransferHistoriesComponent extends PagedListingComponentBase
     super(injector, cd);
   }
 
-  list(event?: LazyLoadEvent): void {
-    this.primengTableHelper.showLoadingIndicator();
-    this._inventoryService.getProductTransferHistories(
-        this.productId
-    ).pipe(
-      finalize(() => {
-        this.primengTableHelper.hideLoadingIndicator();
-      })
-    )
-      .subscribe((result) => {
-        this.primengTableHelper.records = result;
-        this.primengTableHelper.totalRecordsCount = result.length;
-        this.primengTableHelper.hideLoadingIndicator();
-        this.cd.detectChanges();
-      });
-
-
+  ngOnInit(): void {
+    this._inventoryService.getInventoryProducts().subscribe(res => {
+      this.products = res;
+      this.cd.detectChanges();
+    })
   }
 
-  delete(): void {}
+  list(event?: LazyLoadEvent): void {
+    if (this.productId) {
+      this.primengTableHelper.showLoadingIndicator();
+      this._inventoryService.getProductTransferHistories(
+        this.productId, moment(this.date)
+      ).pipe(
+        finalize(() => {
+          this.primengTableHelper.hideLoadingIndicator();
+        })
+      )
+        .subscribe((result) => {
+          this.primengTableHelper.records = result;
+          this.primengTableHelper.totalRecordsCount = result.length;
+          this.primengTableHelper.hideLoadingIndicator();
+          this.cd.detectChanges();
+        });
+    }
+  }
 
-  
+  delete(item: ProductTransferDto) {
+    abp.message.confirm(`This history will be deleted`,
+      undefined,
+      (result: boolean) => {
+        if (result) {
+          this._inventoryService.productTransferRemove(item.id).subscribe(() => {
+            this.refresh();
+            this.notify.success("Successfully Deleted");
+            this.onDelete.emit();
+          });
+        }
+      }
+    );
+  }
+
 
 }

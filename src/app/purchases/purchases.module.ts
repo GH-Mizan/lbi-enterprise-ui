@@ -7,6 +7,7 @@ import { PurchasesComponent } from './purchases.component';
 import { PurchaseEntryComponent } from './purchase-entry/purchase-entry.component';
 import { DuePaymentEntryComponent } from './due-payment-entry/due-payment-entry.component';
 import { DuePaymentHistoryComponent } from './due-payment-histories/due-payment-histories.component';
+import { PurchaseDetailsComponent } from './details/purchase-details.component';
 
 
 @NgModule({
@@ -14,7 +15,8 @@ import { DuePaymentHistoryComponent } from './due-payment-histories/due-payment-
     PurchasesComponent,
     PurchaseEntryComponent,
     DuePaymentEntryComponent,
-    DuePaymentHistoryComponent
+    DuePaymentHistoryComponent,
+    PurchaseDetailsComponent
   ],
   imports: [
     SharedModule,

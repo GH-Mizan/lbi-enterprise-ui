@@ -1,0 +1,58 @@
+<abp-modal-header title="Purchase Info" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-12">
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Date</td>
+                        <td>:</td>
+                        <td class="px-2">{{purchase.date | date: 'dd-MMM-yy'}}</td>
+                    </tr>
+                    <tr>
+                        <td>Invoice</td>
+                        <td>:</td>
+                        <td class="px-2">{{purchase.invoiceNumber}}</td>
+                    </tr>
+                    <tr>
+                        <td>Stock Point</td>
+                        <td>:</td>
+                        <td class="px-2">{{purchase.stockPointName}}</td>
+                    </tr>
+                    <tr>
+                        <td>Supplier</td>
+                        <td>:</td>
+                        <td class="px-2">{{purchase.supplierName}}</td>
+                    </tr>
+                    <tr>
+                        <td>Amount</td>
+                        <td>:</td>
+                        <td class="px-2">{{purchase.netAmount | number: '1.2-2'}}</td>
+                    </tr>
+                    <tr>
+                        <td>Paid</td>
+                        <td>:</td>
+                        <td class="px-2">{{purchase.paidAmount | number: '1.2-2'}}</td>
+                    </tr>
+                    <tr>
+                        <td>Due</td>
+                        <td>:</td>
+                        <td class="px-2">{{purchase.dueAmount | number: '1.2-2'}}</td>
+                    </tr>
+                    <tr>
+                        <td>Payment Status</td>
+                        <td>:</td>
+                        <td class="px-2">
+                            <span *ngIf="purchase.paymentStatus == 1"
+                                class="badge badge-pill badge-success">{{purchase.paymentStatusText}}</span>
+                            <span *ngIf="purchase.paymentStatus == 2"
+                                class="badge badge-pill badge-warning">{{purchase.paymentStatusText}}</span>
+                            <span *ngIf="purchase.paymentStatus == 3"
+                                class="badge badge-pill badge-danger">{{purchase.paymentStatusText}}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

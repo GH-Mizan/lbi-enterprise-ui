@@ -1,11 +1,15 @@
-import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { ComboboxItemDto, DuePaymentHistoryDto, PaymentStatus, PurchaseDetailsEntryDto, PurchaseEntryDto, PurchaseEntryInput, PurchaseProductDto, PurchaseServiceProxy, SupplierServiceProxy, StockPointServiceProxy, EmployeeServiceProxy } from "@shared/service-proxies/service-proxies";
 import { ActivatedRoute, Router } from '@angular/router';
 import moment from "moment";
-import { NotifyService, PermissionCheckerService } from 'abp-ng2-module';
+import { NotifyService } from 'abp-ng2-module';
 import { NgxSpinnerService } from "ngx-spinner";
+
+import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
+import { Table } from 'primeng/table';
+import { LazyLoadEvent } from "primeng/api";
 
 
 @Component({
@@ -37,15 +41,30 @@ import { NgxSpinnerService } from "ngx-spinner";
             }
 
             .card-body {
-                padding-bottom: 0px;
+                padding-bottom: 5px;
+            }
+
+            :host ::ng-deep .p-datatable-tbody > tr > td, th {
+                padding-left: 5px !important;
+                padding-right: 5px !important;
+                
+            }
+
+            :host ::ng-deep .p-datatable-tfoot > tr > td {
+                padding-top: 3px;
+                padding-bottom: 3px;
+            }
+            
+            .fs {
+                font-size: smaller;
             }
         `
     ]
 })
 
-export class PurchaseEntryComponent implements OnInit {
+export class PurchaseEntryComponent extends PagedListingComponentBase<PurchaseProductDto> implements OnInit {
+    @ViewChild('dataTable', { static: true }) dataTable: Table;
 
-    products: PurchaseProductDto[] = [];
     checkedAll: boolean = false;
     checkedAllIndeterminate: boolean = false;
 
@@ -60,8 +79,11 @@ export class PurchaseEntryComponent implements OnInit {
     id?: number;
     date = new Date();
     invalid: boolean = false;
+    saving: boolean = false;
 
     constructor(
+        injector: Injector,
+        cd: ChangeDetectorRef,
         private readonly _purchaseService: PurchaseServiceProxy,
         private readonly _supplierService: SupplierServiceProxy,
         private readonly _stockPointService: StockPointServiceProxy,
@@ -69,11 +91,9 @@ export class PurchaseEntryComponent implements OnInit {
         private readonly _activatedRoute: ActivatedRoute,
         private readonly _router: Router,
         private readonly _notifyService: NotifyService,
-        private readonly permission: PermissionCheckerService,
-        private readonly cd: ChangeDetectorRef,
         private spinner: NgxSpinnerService
     ) {
-
+        super(injector, cd);
     }
 
     async ngOnInit() {
@@ -90,19 +110,26 @@ export class PurchaseEntryComponent implements OnInit {
         })
     }
 
+    list(event?: LazyLoadEvent) {}
+
     private async getModel() {
         if (!this.id) {
-            this.products = await firstValueFrom(this._purchaseService.getAllProducts(undefined));
+            //this.products = await firstValueFrom(this._purchaseService.getAllProducts(undefined));
+            this.primengTableHelper.records = await firstValueFrom(this._purchaseService.getAllProducts(undefined));
+            this.primengTableHelper.totalRecordsCount = this.primengTableHelper.records.length;
+            this.hideLoading();
+            this.cd.detectChanges();
             this.spinner.hide();
         }
         else {
             const purchaseInfo = await firstValueFrom(this._purchaseService.get(this.id));
             this.model = purchaseInfo.purchase;
             this.date = (this.model.date).toDate();
-            this.products = await firstValueFrom(this._purchaseService.getAllProducts(this.model.stockPointId));
+            //this.products = await firstValueFrom(this._purchaseService.getAllProducts(this.model.stockPointId));
+            const products = await firstValueFrom(this._purchaseService.getAllProducts(this.model.stockPointId));
 
             purchaseInfo.purchaseDetails.forEach(x => {
-                const product = this.products.find(f => f.productId == x.productId);
+                const product = products.find(f => f.productId == x.productId);
                 product.selected = true;
                 product.purchasePriceDisabled = false;
                 product.qtyDisabled = false;
@@ -112,7 +139,14 @@ export class PurchaseEntryComponent implements OnInit {
                 product.stock = product.stock - x.quantity;
                 if (product.stock < 0) this.invalid = true;
             });
+
+            this.primengTableHelper.records = products;
+            this.primengTableHelper.totalRecordsCount = products.length;
+
             this.calculateTotal();
+            this.hideLoading();
+            this.cd.detectChanges();
+
             this.spinner.hide();
         }
     }
@@ -122,7 +156,7 @@ export class PurchaseEntryComponent implements OnInit {
     }
 
     private async populateEmployees() {
-        this.employees = await firstValueFrom(this._employeeService.getEmployees());
+        this.employees = await firstValueFrom(this._employeeService.getEmployees(undefined));
     }
 
     private async populateStockPoints() {
@@ -134,7 +168,8 @@ export class PurchaseEntryComponent implements OnInit {
     }
 
     async stockPointChanged() {
-        this.products = await firstValueFrom(this._purchaseService.getAllProducts(this.model.stockPointId));
+        this.primengTableHelper.records = await firstValueFrom(this._purchaseService.getAllProducts(this.model.stockPointId));
+        this.primengTableHelper.totalRecordsCount = this.primengTableHelper.records.length;
         this.cd.detectChanges();
     }
 
@@ -178,7 +213,7 @@ export class PurchaseEntryComponent implements OnInit {
 
     private calculateTotal() {
         let grandTotal = 0;
-        this.products.forEach(p => {
+        this.primengTableHelper.records.forEach(p => {
             grandTotal += p.totalPrice;
         });
         this.model.totalAmount = parseFloat(grandTotal.toFixed(2));
@@ -224,13 +259,13 @@ export class PurchaseEntryComponent implements OnInit {
 
     checkedAllChanged() {
         if (this.checkedAll) {
-            this.products.map(x => {
+            this.primengTableHelper.records.map(x => {
                 x.selected = true;
                 x.purchasePriceDisabled = false;
                 x.qtyDisabled = false;
             })
         } else {
-            this.products.map(x => {
+            this.primengTableHelper.records.map(x => {
                 x.selected = false;
                 x.purchasePriceDisabled = true;
                 x.qtyDisabled = true;
@@ -251,10 +286,12 @@ export class PurchaseEntryComponent implements OnInit {
             product.quantity = 0;
         }
 
-        if (this.products.find(x => x.selected) && this.products.length != this.products.filter(x => x.selected).length) {
+        const products = this.primengTableHelper.records;
+
+        if (products.find(x => x.selected) && products.length != products.filter(x => x.selected).length) {
             this.checkedAllIndeterminate = true;
             this.checkedAll = false;
-        } else if (this.products.find(x => x.selected) && this.products.length == this.products.filter(x => x.selected).length) {
+        } else if (products.find(x => x.selected) && products.length == products.filter(x => x.selected).length) {
             this.checkedAllIndeterminate = false;
             this.checkedAll = true;
         }
@@ -265,11 +302,13 @@ export class PurchaseEntryComponent implements OnInit {
     }
 
     save() {
+        this.saving = true;
+        this.spinner.show();
         const model = this.model;
         model.date = moment(this.date);
         model.supplierName = this.suppliers.find(f => f.value == model.supplierId.toString()).displayText;
         const details: PurchaseDetailsEntryDto[] = [];
-        this.products.filter(f => f.selected && f.quantity > 0 && f.totalPrice > 0).forEach(x => {
+        this.primengTableHelper.records.filter(f => f.selected && f.quantity > 0 && f.totalPrice > 0).forEach(x => {
             details.push({
                 productId: x.productId,
                 productName: x.name,
@@ -300,8 +339,11 @@ export class PurchaseEntryComponent implements OnInit {
         } as DuePaymentHistoryDto;
 
         this._purchaseService.createOrUpdate(input).subscribe(() => {
+            this.spinner.hide();
             this._notifyService.success("Successfully " + this.id ? 'Saved' : 'Updated' + "");
             this._router.navigateByUrl('app/purchases');
+            this.saving = false;
+            this.cd.detectChanges();
         });
     }
 
@@ -328,7 +370,9 @@ export class PurchaseEntryComponent implements OnInit {
             undefined,
             (result: boolean) => {
                 if (result) {
+                    this.spinner.show();
                     this._purchaseService.purcahseRemove(this.model.id, this.model.stockPointId).subscribe(() => {
+                        this.spinner.hide();
                         abp.notify.success("Successfully Deleted");
                         this._router.navigateByUrl('app/purchases');
                     });

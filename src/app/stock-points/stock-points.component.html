@@ -44,6 +44,7 @@
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th style="min-width: 150px"> Name </th>
+                                    <th> Short Name </th>
                                     <th> Type </th>
                                     <th> Number </th>
                                     <!-- <th> Gps Tracker </th> -->
@@ -59,6 +60,9 @@
                                 <tr>
                                     <td>
                                         <span>{{ record.name }}</span>
+                                    </td>
+                                    <td>
+                                        <span>{{ record.shortName }}</span>
                                     </td>
                                     <td>
                                         <span>{{ record.stockPointTypeText }}</span>

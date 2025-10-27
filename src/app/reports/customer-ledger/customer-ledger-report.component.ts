@@ -33,7 +33,6 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
     startDate = (moment().subtract(31, 'days')).toDate();
     maxDate = this.endDate;
 
-    loading: boolean = true;
     customerId: string = "";
     customerName: string = "";
     customers: ComboboxItemDto[] = [];
@@ -91,7 +90,6 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
                     this.data = result;
                     this.primengTableHelper.records = result.details;
                     this.primengTableHelper.totalRecordsCount = result.details.length;
-                    this.primengTableHelper.hideLoadingIndicator();
                     this.cd.detectChanges();
                 });
         }

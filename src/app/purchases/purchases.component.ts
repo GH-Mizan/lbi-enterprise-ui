@@ -11,13 +11,41 @@ import { Router } from '@angular/router';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { DuePaymentEntryComponent } from './due-payment-entry/due-payment-entry.component';
 import { DuePaymentHistoryComponent } from './due-payment-histories/due-payment-histories.component';
+import { PurchaseDetailsComponent } from './details/purchase-details.component';
+import { PurchaseReceiptReport } from '@shared/reports/purchase-receipt-report';
 
 @Component({
   selector: 'app-purchases',
   standalone: false,
   templateUrl: './purchases.component.html',
   animations: [appModuleAnimation()],
+  styles: [
+    `
+      .mobile-view > td:not(:first-child) {
+          padding-left: 0px !important;
+          padding-right: 0px !important;
+      }
+
+      .mobile-view > th:not(:first-child) {
+          padding-left: 0px !important;
+          padding-right: 0px !important;
+      }
+
+      .mobile-view > td:first-child {
+          padding-left: 5px !important;
+      }
+
+      .mobile-view > th:first-child {
+          padding-left: 5px !important;
+      }
+
+      .fs {
+          font-size: smaller !important;
+      }
+    `
+  ]
 })
+
 export class PurchasesComponent extends PagedListingComponentBase<PurchaseOutputDto> {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
   @ViewChild('paginator', { static: true }) paginator: Paginator;
@@ -29,6 +57,7 @@ export class PurchasesComponent extends PagedListingComponentBase<PurchaseOutput
     private readonly _purchaseService: PurchaseServiceProxy,
     private readonly _router: Router,
     private readonly _modalService: BsModalService,
+    private readonly _purchaseReceiptReport: PurchaseReceiptReport,
     cd: ChangeDetectorRef
   ) {
     super(injector, cd);
@@ -73,19 +102,7 @@ export class PurchasesComponent extends PagedListingComponentBase<PurchaseOutput
     this._router.navigateByUrl(`app/purchases/edit/${id}`);
   }
 
-  delete(): void {
-    // abp.message.confirm(`${customer.name} will be deleted`,
-    //   undefined,
-    //   (result: boolean) => {
-    //     if (result) {
-    //       this._customerService.delete(customer.id).subscribe(() => {
-    //         abp.notify.success(this.l("SuccessfullyDeleted"));
-    //         this.refresh();
-    //       });
-    //     }
-    //   }
-    // );
-  }
+  delete(): void {}
 
   makePayment(purchase: PurchaseOutputDto) {
     const duePaymentDto = {
@@ -137,6 +154,24 @@ export class PurchasesComponent extends PagedListingComponentBase<PurchaseOutput
     duePaymentHistoryDialog.content.onDelete.subscribe(() => {
       this.refresh();
     });
+  }
+
+  showPurchaseDetails(purchase: PurchaseOutputDto) {
+    this._modalService.show(
+      PurchaseDetailsComponent,
+      {
+        class: "modal-md",
+        initialState: {
+          purchase: purchase,
+        },
+      }
+    );
+  }
+
+  async generateReceipt(id: number) {
+    this.showLoading();
+    await this._purchaseReceiptReport.generatePurchaseReceipt(id);
+    this.hideLoading();
   }
 
 

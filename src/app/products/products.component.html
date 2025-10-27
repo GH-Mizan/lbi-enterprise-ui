@@ -35,7 +35,6 @@
 
                 </div>
                 <div class="card-body table-responsive table-striped table-bordered">
-                    <!--<Primeng-TurboTable-Start>-->
                     <div class="primeng-datatable-container">
                         <p-table #dataTable sortMode="multiple" (onLazyLoad)="list($event)"
                             [value]="primengTableHelper.records"
@@ -44,8 +43,7 @@
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th style="min-width: 150px"> Name </th>
-                                    <!-- <th> Type </th>
-                                    <th> Size </th> -->
+                                    <th> Short Name </th>
                                     <th> Purchase Price </th>
                                     <th> Sale Price </th>
                                     <th style="width: 68px"> Active </th>
@@ -60,12 +58,9 @@
                                     <td>
                                         <span>{{ record.name }}</span>
                                     </td>
-                                    <!-- <td>
-                                        <span>{{ record.typeText }}</span>
-                                    </td>
                                     <td>
-                                        <span>{{record.sizeText}}</span>
-                                    </td> -->
+                                        <span>{{ record.shortName }}</span>
+                                    </td>
                                     <td>
                                         <span>{{record.purchasePrice | number: '1.2-2'}}</span>
                                     </td>
@@ -91,7 +86,6 @@
                         </div>
                         <div class="ui-table-footer"></div>
                     </div>
-                    <!--<Primeng-TurboTable-End>-->
                 </div>
                 <div class="card-footer table-card-footer bg-white border-top">
                     <div class="row">

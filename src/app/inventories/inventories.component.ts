@@ -60,15 +60,14 @@ export class InventoriesComponent extends PagedListingComponentBase<InventoryOut
         }, { medicalOxygen1_36Qty: 0, medicalOxygen9_8Qty: 0, medicalAir7Qty: 0, medicalAir9_8Qty: 0, nitros3KgQty: 0, nitros5KgQty: 0, nitros30KgQty: 0, total: 0 });
         this.cd.detectChanges();
       });
-
   }
 
   openTransferModal() {
     this.showProductTransferDialog();
   }
 
-  showHistories(productId: number) {
-    this.showProductTransferHistoryDialog(productId);
+  openTransferHistory() {
+    this.showProductTransferHistoryDialog();
   }
 
   delete(): void {
@@ -88,16 +87,17 @@ export class InventoriesComponent extends PagedListingComponentBase<InventoryOut
     });
   }
 
-  private showProductTransferHistoryDialog(productId: number): void {
-    this._modalService.show(
+  private showProductTransferHistoryDialog(): void {
+    let historyDialog: BsModalRef;
+    historyDialog = this._modalService.show(
       ProductTransferHistoriesComponent,
       {
-        class: "modal-lg",
-        initialState: {
-          productId: productId,
-        },
+        class: "modal-lg"
       }
     );
+    historyDialog.content.onDelete.subscribe(()=> {
+      this.refresh();
+    })
   }
 
 

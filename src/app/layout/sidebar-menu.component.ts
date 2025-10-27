@@ -60,6 +60,13 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                 new MenuItem('Stock Points', '/app/stock-points', 'fas fa-warehouse', '', false),
                 new MenuItem('Settings', '/app/lbi-settings', 'fas fa-wrench', '', false),
             ]),
+            new MenuItem('Virtual Stocks', '', 'fas fa-store-alt', '', true, [
+                new MenuItem('Items', '/app/virtual-stocks/items', 'fa-brands fa-product-hunt', '', false),
+                new MenuItem('Inventories', '/app/virtual-stocks/', 'fa-brands fa-product-hunt', '', false),
+                new MenuItem('Client Inventories', '/app/virtual-stocks/client', 'fas fa-store', '', false),
+                new MenuItem('Plant Inventories', '/app/virtual-stocks/plant', 'fas fa-store-slash', '', false),
+                new MenuItem('General Stoccks', '/app/virtual-stocks/general', 'fas fa-warehouse', '', false),
+            ]),
             new MenuItem('Reports', '', 'far fa-file-alt', '', true, [
                 new MenuItem('Sale, Collection & Due', '/app/reports/sales-collection-due', 'fas fa-toilet-paper', 'Reports.SaleCollectionDue', false),
                 new MenuItem('Daily Purchase', '/app/reports/daily-purchase', 'fas fa-toilet-paper', 'Reports.DailyPurchase', false),

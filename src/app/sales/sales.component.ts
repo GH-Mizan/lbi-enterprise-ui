@@ -12,13 +12,40 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { DueReceivedHistoryComponent } from './due-received-histories/due-received-histories.component';
 import { DueReceivedEntryComponent } from './due-received-entry/due-received-entry.component';
 import { SalesReceiptReport } from '@shared/reports/sales-receipt-report';
+import { SaleDetailsComponent } from './details/sale-details.component';
 
 @Component({
   selector: 'app-sales',
   standalone: false,
   templateUrl: './sales.component.html',
   animations: [appModuleAnimation()],
+  styles: [
+    `
+      .mobile-view > td:not(:first-child) {
+          padding-left: 0px !important;
+          padding-right: 0px !important;
+      }
+
+      .mobile-view > th:not(:first-child) {
+          padding-left: 0px !important;
+          padding-right: 0px !important;
+      }
+
+      .mobile-view > td:first-child {
+          padding-left: 5px !important;
+      }
+
+      .mobile-view > th:first-child {
+          padding-left: 5px !important;
+      }
+
+      .fs {
+          font-size: smaller !important;
+      }
+    `
+  ]
 })
+
 export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
   @ViewChild('paginator', { static: true }) paginator: Paginator;
@@ -82,6 +109,7 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
       undefined,
       (result: boolean) => {
         if (result) {
+          this.showLoading();
           this._salesService.saleRemove(item.id, item.stockPointId).subscribe(() => {
             abp.notify.success(this.l("SuccessfullyDeleted"));
             this.refresh();
@@ -143,6 +171,18 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
       this.refresh();
     });
   }
+
+  showSaleDetails(sale: SalesOutputDto) {
+      this._modalService.show(
+        SaleDetailsComponent,
+        {
+          class: "modal-md",
+          initialState: {
+            sale: sale,
+          },
+        }
+      );
+    }
 
   async generateReceipt(id: number) {
     this.showLoading();

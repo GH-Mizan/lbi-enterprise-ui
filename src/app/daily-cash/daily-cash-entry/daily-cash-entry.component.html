@@ -108,10 +108,10 @@
                         <button type="button" class="btn btn-default" (click)="addRows()">
                             Add New Rows
                         </button>
-                        <button *ngIf="!id" type="button" class="btn btn-primary" (click)="save()">
+                        <button *ngIf="!id" type="button" class="btn btn-primary" (click)="save()" [disabled]="saving">
                             Save
                         </button>
-                        <button *ngIf="id" type="button" class="btn btn-primary" (click)="update()">
+                        <button *ngIf="id" type="button" class="btn btn-primary" (click)="update()" [disabled]="saving">
                             Update
                         </button>
                     </div>

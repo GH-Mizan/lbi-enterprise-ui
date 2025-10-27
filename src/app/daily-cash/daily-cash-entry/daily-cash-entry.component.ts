@@ -66,6 +66,7 @@ export class DailyCashEntryComponent implements OnInit {
 
     isLoading: boolean = true;
     editMode = false;
+    saving: boolean = false;
 
     constructor(
         private readonly _activatedRoute: ActivatedRoute,
@@ -195,6 +196,7 @@ export class DailyCashEntryComponent implements OnInit {
     }
 
     createOrUpdate(id?: number) {
+        this.saving = true;
         const data: DailyCashSummaryType[] = [];
         this.dailyCashAccounts.forEach(x => {
             data.push({
@@ -225,6 +227,7 @@ export class DailyCashEntryComponent implements OnInit {
         } as DailyCashEntryDto;
         this._dailyCashService.createOrUpdateDailyCash({ dailyCashInfo: input, prevCashInfo: null } as CreateOrUpdateDailyCashInput).subscribe(id => {
             this.id = id;
+            this.saving = false;
             this.cd.detectChanges();
             this._notifyService.success("Successfully " + id ? 'Saved' : 'Updated' + "");
         });

@@ -31,6 +31,7 @@ import { SelectOnFocusDirective } from './directives/select-on-focus.directive';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DatePickerModule } from 'primeng/datepicker';
 import { SalesReceiptReport } from './reports/sales-receipt-report';
+import { PurchaseReceiptReport } from './reports/purchase-receipt-report';
 import { OnlyNumberDirective } from './directives/only-numbers.directive';
 import { NgxSpinnerModule } from "ngx-spinner";
 import { ImageModule } from 'primeng/image';
@@ -93,7 +94,7 @@ export class SharedModule {
     static forRoot(): ModuleWithProviders<SharedModule> {
         return {
             ngModule: SharedModule,
-            providers: [AppSessionService, AppUrlService, AppAuthService, AppRouteGuard, LayoutStoreService, SalesReceiptReport],
+            providers: [AppSessionService, AppUrlService, AppAuthService, AppRouteGuard, LayoutStoreService, SalesReceiptReport, PurchaseReceiptReport],
         };
     }
 }

@@ -2,8 +2,16 @@
     <abp-modal-header title="Transfer products" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
     <div class="modal-body">
         <div class="form-group row required">
-            <label class="col-3 col-form-label" for="product">Product</label>
-            <div class="col-9">
+            <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="date">Date</label>
+            <div class="col-sm-12 col-md-9 col-lg-9">
+                <p-datepicker [(ngModel)]="date" [showIcon]="true" inputId="buttondisplay" [showOnFocus]="false"
+                    dateFormat="dd-M-yy" [ngModelOptions]="{standalone: true}"/>
+            </div>
+        </div>
+
+        <div class="form-group row required">
+            <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="product">Product</label>
+            <div class="col-sm-12 col-md-9 col-lg-9">
                 <select class="form-select form-control" name="product" id="product" #productModel="ngModel" #productEl
                     [(ngModel)]="model.productId">
                     <option *ngFor="let p of products" [value]="p.value">{{p.displayText}}</option>
@@ -13,8 +21,8 @@
         </div>
 
         <div class="form-group row required">
-            <label class="col-md-3 col-form-label" for="fromPoint">From Stock</label>
-            <div class="col-md-9">
+            <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="fromPoint">From Stock</label>
+            <div class="col-sm-12 col-md-9 col-lg-9">
                 <select class="form-select form-control" name="fromPoint" id="fromPoint" #fromPointModel="ngModel"
                     #fromPointEl [(ngModel)]="model.fromStockPointId">
                     <option *ngFor="let sp of fromStockPoints" [value]="sp.value">{{sp.displayText}}</option>
@@ -24,8 +32,8 @@
         </div>
 
         <div class="form-group row required">
-            <label class="col-md-3 col-form-label" for="toPoint">To Stock</label>
-            <div class="col-md-9">
+            <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="toPoint">To Stock</label>
+            <div class="col-sm-12 col-md-9 col-lg-9">
                 <select class="form-select form-control" name="toPoint" id="toPoint" #toPointModel="ngModel" #toPointEl
                     [(ngModel)]="model.toStockPointId">
                     <option *ngFor="let sp of toStockPoints" [value]="sp.value">{{sp.displayText}}</option>
@@ -35,8 +43,8 @@
         </div>
 
         <div class="form-group row required">
-            <label class="col-md-3 col-form-label" for="transferQty">Transfer Quantity</label>
-            <div class="col-md-9">
+            <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="transferQty">Transfer Quantity</label>
+            <div class="col-sm-12 col-md-9 col-lg-9">
                 <input type="number" class="form-control" name="transferQty" id="transferQty" required
                     [(ngModel)]="model.transferQuantity" #transferQtyModel="ngModel" #transferQtyEl />
                 <abp-validation-summary [control]="transferQtyModel"
@@ -44,9 +52,8 @@
             </div>
         </div>
 
-
-
     </div>
-    <abp-modal-footer [cancelDisabled]="saving" saveLabel="Transfer" [saveDisabled]="!transferProductModal.form.valid || saving" 
+    <abp-modal-footer [cancelDisabled]="saving" saveLabel="Transfer"
+        [saveDisabled]="!transferProductModal.form.valid || saving"
         (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
 </form>

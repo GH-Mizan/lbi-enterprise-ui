@@ -11,6 +11,13 @@
         </div>
 
         <div class="form-group row required">
+            <label class="col-md-3 col-form-label" for="shortName">Short Name</label>
+            <div class="col-md-9">
+                <input type="text" class="form-control" name="shortName" id="shortName" [(ngModel)]="stockPoint.shortName"/>
+            </div>
+        </div>
+
+        <div class="form-group row required">
             <label class="col-md-3 col-form-label" for="type"> Type </label>
             <div class="col-md-9">
                 <select class="form-select form-control" name="type" id="type" #typeModel="ngModel"
