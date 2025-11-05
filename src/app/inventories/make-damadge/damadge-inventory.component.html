@@ -1,0 +1,46 @@
+<form class="form-horizontal" autocomplete="off" #makeDamadgeModal="ngForm" (ngSubmit)="save()">
+    <abp-modal-header [title]="edit ? 'Edit Damadge' : 'Make Damadge'" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+
+    <div class="modal-body">
+        <div class="form-group row required">
+            <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="product">Product</label>
+            <div class="col-sm-12 col-md-9 col-lg-9">
+                <select class="form-select form-control" name="product" id="product" #productModel="ngModel" #productEl
+                    [(ngModel)]="model.productId" (ngModelChange)="getCurrentStcok()">
+                    <option *ngFor="let p of products" [value]="p.value">{{p.displayText}}</option>
+                </select>
+                <abp-validation-summary [control]="productModel" [controlEl]="productEl"></abp-validation-summary>
+            </div>
+        </div>
+
+        <div class="form-group row required">
+            <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="stockPoint">Stock Point</label>
+            <div class="col-sm-12 col-md-9 col-lg-9">
+                <select class="form-select form-control" name="stockPoint" id="stockPoint" #stockPointModel="ngModel"
+                    #stockPointEl [(ngModel)]="model.stockPointId" (ngModelChange)="getCurrentStcok()">
+                    <option *ngFor="let sp of stockPoints" [value]="sp.value">{{sp.displayText}}</option>
+                </select>
+                <abp-validation-summary [control]="stockPointModel" [controlEl]="stockPointEl"></abp-validation-summary>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-12 col-md-3 col-lg-3 col-form-label">Current {{edit? 'Damadged' : 'Stock'}}</label>
+            <div class="col-sm-12 col-md-9 col-lg-9">
+                <input type="number" class="form-control" name="currentStock" [(ngModel)]="currentStock" disabled />
+            </div>
+        </div>
+
+        <div class="form-group row required">
+            <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="damadgeQty">Damadge Quantity</label>
+            <div class="col-sm-12 col-md-9 col-lg-9">
+                <input type="number" class="form-control" name="damadgeQty" id="damadgeQty" required
+                    [(ngModel)]="model.damadgeQty" #damadgeQtyModel="ngModel" #damadgeQtyEl />
+                <abp-validation-summary [control]="damadgeQtyModel" [controlEl]="damadgeQtyEl"></abp-validation-summary>
+            </div>
+        </div>
+    </div>
+
+    <abp-modal-footer [cancelDisabled]="saving" [saveLabel]="edit ? 'Update' : 'Make Damadge'"
+        [saveDisabled]="!makeDamadgeModal.form.valid || saving || (edit ? model.damadgeQty < 0 : model.damadgeQty > currentStock)" (onCancelClick)="bsModalRef.hide()"></abp-modal-footer>
+</form>

@@ -19,13 +19,21 @@
                                 <div class="form-group row">
                                     <label class="col-4 col-form-label">{{isClient ? 'Client' : 'Plant'}}</label>
                                     <div class="col-8">
-                                        <select class="form-select form-control" name="customer" id="customer"
-                                            [(ngModel)]="customerId" (ngModelChange)="onCustomerChanged()"
-                                            style="height: calc(2.25rem + 6px)" *ngIf="isClient">
-                                            <option *ngFor="let c of customers" [value]="c.value">
-                                                {{c.displayText}}
-                                            </option>
-                                        </select>
+                                        <p-select [options]="customers" [(ngModel)]="warehouseObj" *ngIf="isClient"
+                                            optionLabel="displayText" name="warehouse" id="warehouse" [filter]="true"
+                                            filterBy="displayText" class="w-full w-100"
+                                            (ngModelChange)="onCustomerChanged()">
+                                            <ng-template #selectedItem let-selectedOption>
+                                                <div class="flex items-center gap-2">
+                                                    <div>{{ selectedOption.displayText }}</div>
+                                                </div>
+                                            </ng-template>
+                                            <ng-template let-client #item>
+                                                <div class="flex items-center gap-2">
+                                                    <div>{{ client.displayText }}</div>
+                                                </div>
+                                            </ng-template>
+                                        </p-select>
 
                                         <select class="form-select form-control" name="supplier" id="supplier"
                                             [(ngModel)]="supplierId" (ngModelChange)="onSupplierChanged()"
@@ -92,8 +100,8 @@
                                     </div>
                                     <div class="col-2">
                                         <a href="javascript:;" class="btn bg-blue" (click)="create()">
-                                        <i class="fa fa-plus-square"></i>
-                                    </a>
+                                            <i class="fa fa-plus-square"></i>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -140,10 +148,11 @@
                             <ng-template pTemplate="body" let-record="$implicit" let-rowIndex="rowIndex">
                                 <tr>
                                     <td class="text-center">
-                                        <span>{{ record.date | date: 'dd-MMM-yy' }}</span>
+                                        <span>{{ record.date | date: 'dd-MMM-yy hh:mm:ss a' }}</span>
                                     </td>
                                     <td>
-                                        <span [ngClass]="{'text-blue': record.stockPointId == -1}">{{ record.stockPoint }}</span>
+                                        <span [ngClass]="{'text-blue': record.stockPointId == -1}">{{ record.stockPoint
+                                            }}</span>
                                     </td>
 
                                     <td class="text-center">
@@ -186,7 +195,8 @@
                                         <span>{{ record.nitrousStock }}</span>
                                     </td>
                                     <td class="text-center">
-                                        <button type="button" class="btn btn-sm bg-danger" (click)="delete(record)" *ngIf="rowIndex == 0">
+                                        <button type="button" class="btn btn-sm bg-danger" (click)="delete(record)"
+                                            *ngIf="rowIndex == primengTableHelper.records.length - 1">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>

@@ -19,39 +19,38 @@
                                 <div class="form-group row">
                                     <label class="col-4 col-form-label" for="name">Customer</label>
                                     <div class="col-8">
-                                        <select class="form-select form-control" name="customer" id="customer"
-                                            [(ngModel)]="customerId" (ngModelChange)="onCustomerChanged()"
-                                            style="height: calc(2.25rem + 6px)">
-                                            <option *ngFor="let s of customers" [value]="s.value">
-                                                {{s.displayText}}
+                                        <p-select [options]="customers" [(ngModel)]="customerObj"
+                                            optionLabel="displayText" name="customer" id="customer" [filter]="true"
+                                            filterBy="displayText" class="w-full w-100"
+                                            (ngModelChange)="onCustomerChanged()">
+                                            <ng-template #selectedItem let-selectedOption>
+                                                <div class="flex items-center gap-2">
+                                                    <div>{{ selectedOption.displayText }}</div>
+                                                </div>
+                                            </ng-template>
+                                            <ng-template let-customer #item>
+                                                <div class="flex items-center gap-2">
+                                                    <div>{{ customer.displayText }}</div>
+                                                </div>
+                                            </ng-template>
+                                        </p-select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 col-md-3 col-lg-3">
+                                <div class="form-group row">
+                                    <div class="col-12">
+                                        <select class="form-select form-control" name="yearId" id="yearId"
+                                            [(ngModel)]="yearId" style="height: calc(2.25rem + 6px)">
+                                            <option *ngFor="let y of years" [value]="y.value">{{y.displayText}}
                                             </option>
                                         </select>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-sm-12 col-md-3 col-lg-3">
-                                <div class="form-group row">
-                                    <label class="col-4 col-form-label" for="name">Start Date</label>
-                                    <div class="col-8">
-                                        <p-datepicker [(ngModel)]="startDate" [readonlyInput]="true"
-                                            dateFormat="dd/M/yy" [showIcon]="true"
-                                            [ngModelOptions]="{standalone: true}" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-12 col-md-3 col-lg-3">
-                                <div class="form-group row">
-                                    <label class="col-4 col-form-label" for="name">End Date</label>
-                                    <div class="col-8">
-                                        <p-datepicker [(ngModel)]="endDate" [readonlyInput]="true" dateFormat="dd/M/yy"
-                                            [showIcon]="true" [ngModelOptions]="{standalone: true}" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-md-3 col-lg-3" *ngIf="!mobileView">
+                            <div class="col-md-6 col-lg-6" *ngIf="!mobileView">
                                 <div class="float-right">
                                     <button type="button" class="btn bg-blue mx-1" (click)="list()"
                                         [disabled]="invalidParam">

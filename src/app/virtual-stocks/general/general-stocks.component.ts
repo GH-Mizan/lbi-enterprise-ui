@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { CustomerOverallDueReportDto, GeneralStockDetailsDto, GeneralStockOutputDto, VirtualStocksServiceProxy } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, CustomerOverallDueReportDto, GeneralStockDetailsDto, GeneralStockOutputDto, VirtualStocksServiceProxy } from '@shared/service-proxies/service-proxies';
 import { Table } from 'primeng/table';
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
@@ -34,6 +34,9 @@ export class GeneralStocksComponent extends PagedListingComponentBase<GeneralSto
     nitrousOxideTotal: number;
     grandTotal: number;
 
+    typeId: number;
+    warehouseTypes: ComboboxItemDto[];
+
     constructor(
         injector: Injector,
         cd: ChangeDetectorRef,
@@ -44,6 +47,8 @@ export class GeneralStocksComponent extends PagedListingComponentBase<GeneralSto
 
     async ngOnInit() {
         this.pdfMake = await this.loadAndPrintPDF();
+        this.warehouseTypes = await firstValueFrom(this._virtualStocksService.getStockTypesSelectList());
+         this.cd.detectChanges();
     }
 
     async loadAndPrintPDF() {
@@ -65,7 +70,7 @@ export class GeneralStocksComponent extends PagedListingComponentBase<GeneralSto
 
     list(event?: LazyLoadEvent): void {
         this.showLoading();
-        this._virtualStocksService.getGeneralStocksReport(moment(this.date))
+        this._virtualStocksService.getGeneralStocksReport(moment(this.date), this.typeId)
             .pipe(
                 finalize(() => {
                     this.hideLoading();
@@ -88,7 +93,7 @@ export class GeneralStocksComponent extends PagedListingComponentBase<GeneralSto
 
     async print() {
         this.showLoading();
-        const data = await firstValueFrom(this._virtualStocksService.getGeneralStocksReport(moment(this.date)));
+        const data = await firstValueFrom(this._virtualStocksService.getGeneralStocksReport(moment(this.date), this.typeId));
         if (!data || !data.details || data.details.length == 0) {
             abp.message.info("No record(s) found", "Sorry!");
             this.hideLoading();
@@ -309,11 +314,11 @@ export class GeneralStocksComponent extends PagedListingComponentBase<GeneralSto
         ];
         body.push([
             { text: "Total", style: ['cellTotal', 'cellLightGrey'] },
-            { text: Utils.thousandsSeparator(totalValues.oxygen136Total), style: ['cellAmount', 'cellLightGrey'], bold: true },
-            { text: Utils.thousandsSeparator(totalValues.oxygen98Total), style: ['cellAmount', 'cellLightGrey'], bold: true },
-            { text: Utils.thousandsSeparator(totalValues.medicalAirTotal), style: ['cellAmount', 'cellLightGrey'], bold: true },
-            { text: Utils.thousandsSeparator(totalValues.nitrousOxideTotal), style: ['cellAmount', 'cellLightGrey'], bold: true },
-            { text: Utils.thousandsSeparator(totalValues.grandTotal), style: ['cellAmount', 'cellLightGrey'], bold: true }
+            { text: totalValues.oxygen136Total, style: ['cellAmount', 'cellLightGrey'], bold: true },
+            { text: totalValues.oxygen98Total, style: ['cellAmount', 'cellLightGrey'], bold: true },
+            { text: totalValues.medicalAirTotal, style: ['cellAmount', 'cellLightGrey'], bold: true },
+            { text: totalValues.nitrousOxideTotal, style: ['cellAmount', 'cellLightGrey'], bold: true },
+            { text: totalValues.grandTotal, style: ['cellAmount', 'cellLightGrey'], bold: true }
         ]);
         return body;
     }
@@ -326,11 +331,11 @@ export class GeneralStocksComponent extends PagedListingComponentBase<GeneralSto
             body.push(
                 [
                     { text: item.warehouseName, fontSize: 9 },
-                    { text: Utils.thousandsSeparator(item.oxygen136), style: ['cellAmount'] },
-                    { text: Utils.thousandsSeparator(item.oxygen98), style: ['cellAmount'] },
-                    { text: Utils.thousandsSeparator(item.medicalAir), style: ['cellAmount'] },
-                    { text: Utils.thousandsSeparator(item.nitrousOxide), style: ['cellAmount'] },
-                    { text: Utils.thousandsSeparator(item.total), style: ['cellAmount'] }
+                    { text: item.oxygen136, style: ['cellAmount'] },
+                    { text: item.oxygen98, style: ['cellAmount'] },
+                    { text: item.medicalAir, style: ['cellAmount'] },
+                    { text: item.nitrousOxide, style: ['cellAmount'] },
+                    { text: item.total, style: ['cellAmount'] }
                 ]
             );
         });
@@ -339,11 +344,11 @@ export class GeneralStocksComponent extends PagedListingComponentBase<GeneralSto
             body.push(
                 [
                     { text: "Total", style: ['cellTotal', 'cellLightGrey'] },
-                    { text: Utils.thousandsSeparator(totalValues.oxygen136Total), style: ['cellAmount', 'cellLightGrey'], bold: true },
-                    { text: Utils.thousandsSeparator(totalValues.oxygen98Total), style: ['cellAmount', 'cellLightGrey'], bold: true },
-                    { text: Utils.thousandsSeparator(totalValues.medicalAirTotal), style: ['cellAmount', 'cellLightGrey'], bold: true },
-                    { text: Utils.thousandsSeparator(totalValues.nitrousOxideTotal), style: ['cellAmount', 'cellLightGrey'], bold: true },
-                    { text: Utils.thousandsSeparator(totalValues.grandTotal), style: ['cellAmount', 'cellLightGrey'], bold: true }
+                    { text: totalValues.oxygen136Total, style: ['cellAmount', 'cellLightGrey'], bold: true },
+                    { text: totalValues.oxygen98Total, style: ['cellAmount', 'cellLightGrey'], bold: true },
+                    { text: totalValues.medicalAirTotal, style: ['cellAmount', 'cellLightGrey'], bold: true },
+                    { text: totalValues.nitrousOxideTotal, style: ['cellAmount', 'cellLightGrey'], bold: true },
+                    { text: totalValues.grandTotal, style: ['cellAmount', 'cellLightGrey'], bold: true }
                 ]
             );
         }

@@ -9,7 +9,7 @@ import { SharedModule } from '@shared/shared.module';
 import { VirtualItemEntryComponent } from './virtual-item-entry/virtual-item-entry.component';
 import { GeneralStocksComponent } from './general/general-stocks.component';
 import { VirtualInventoriesComponent } from './virtual-inventories/virtual-inventories.component';
-
+import { InventoriesCrossCheckComponent } from './cross-check/iventories-cross-check.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +18,8 @@ import { VirtualInventoriesComponent } from './virtual-inventories/virtual-inven
     VirtualItemsComponent,
     VirtualItemEntryComponent,
     GeneralStocksComponent,
-    VirtualInventoriesComponent
+    VirtualInventoriesComponent,
+    InventoriesCrossCheckComponent
   ],
   imports: [
     SharedModule,

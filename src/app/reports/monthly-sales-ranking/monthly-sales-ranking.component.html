@@ -3,7 +3,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12">
-                    <h1>MONTHLY SALES RANKING</h1>
+                    <h1>MONTHLY SALES</h1>
                 </div>
             </div>
         </div>
@@ -110,9 +110,10 @@
                             [tableStyle]="{ 'min-width': '50rem' }">
                             <ng-template pTemplate="header">
                                 <tr>
-                                    <th rowspan="3" class="text-center">Rank</th>
+                                    <th rowspan="3" class="text-center">#</th>
                                     <th rowspan="3" class="text-center" style="min-width: 160px;">Client</th>
                                     <th colspan="7" class="text-center">Particular</th>
+                                    <th rowspan="3" class="text-center" style="width: 120px;">Amount</th>
                                     <th rowspan="3" class="text-center" style="width: 120px;">Revenue</th>
                                 </tr>
                                 <tr>
@@ -159,6 +160,9 @@
                                     </td>
                                     <td class="text-center">
                                         <span>{{ record.nitros3KgQty }}</span>
+                                    </td>
+                                    <td class="text-right" style="min-width: 110px;">
+                                        <span>{{record.amount | number: '1.2-2' }}</span>
                                     </td>
                                     <td class="text-right" style="min-width: 110px;">
                                         <span>{{record.revenue | number: '1.2-2' }}</span>

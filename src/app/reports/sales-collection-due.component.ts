@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { Table } from 'primeng/table';
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
@@ -21,10 +21,10 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
   @ViewChild('dataTable', { static: true }) dataTable: Table;
 
   pdfMake: any;
-  endDate = new Date();
-  startDate = (moment().subtract(31, 'days')).toDate();
-  maxDate = this.endDate;
-  //mobileView: boolean = false;
+  monthId: number;
+  yearId: number;
+  months: ComboboxItemDto[] = [];
+  years: ComboboxItemDto[] = [];
 
   constructor(
     injector: Injector,
@@ -36,7 +36,12 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
   }
 
   async ngOnInit() {
-    //this.mobileView = await this.isMobileView();
+    this.months = Utils.getMonths();
+    const currentYear: number = new Date().getFullYear();
+    this.years = Utils.getYears(currentYear);
+    this.monthId = new Date().getMonth() + 1;
+    this.yearId = currentYear;
+    this.cd.detectChanges();
     this.pdfMake = await this.loadAndPrintPDF();
   }
 
@@ -59,9 +64,7 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
 
   list(event?: LazyLoadEvent): void {
     this.showLoading();
-    this._salesService.getSalesCollectionDueReport(
-      moment(this.startDate), moment(this.endDate)
-    ).pipe(
+    this._salesService.getSalesCollectionDueReport(this.monthId, this.yearId).pipe(
       finalize(() => {
         this.hideLoading();
       })
@@ -78,9 +81,7 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
 
   async print() {
     this.showLoading();
-    const items = await firstValueFrom(this._salesService.getSalesCollectionDueReport(
-      moment(this.startDate), moment(this.endDate)
-    ));
+    const items = await firstValueFrom(this._salesService.getSalesCollectionDueReport(this.monthId, this.yearId));
     if (!items || items.length == 0) {
       abp.message.info("No record(s) found", "Sorry!");
       this.hideLoading();
@@ -149,26 +150,19 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
     ];
     items.filter(f => !f.empty).forEach(item => {
       body.push(
-        [{ text: moment(item.date).format('DD-MMM-YY').toString(), style: ['subHeader'], },
-        { text: Utils.thousandsSeparator(item.totalSales), style: ['cell_style'] },
-        { text: Utils.thousandsSeparator(item.currentBalance), style: ['cell_style'] },
-        { text: Utils.thousandsSeparator(item.cashCollection), style: ['cell_style'] },
-        { text: Utils.thousandsSeparator(item.dueCollection), style: ['cell_style'] },
-        { text: Utils.thousandsSeparator(item.totalCollection), style: ['cell_style'] },
-        { text: Utils.thousandsSeparator(item.collectedBalance), style: ['cell_style'] },
-        { text: Utils.thousandsSeparator(item.currenctDue), style: ['cell_style'] },
-        { text: Utils.thousandsSeparator(item.detuctedDue), style: ['cell_style'] },
-        { text: Utils.thousandsSeparator(item.dueBalance), style: ['cell_style'] }]
+        [{ text: moment(item.date).format('DD-MMM-YY').toString(), style: ['subHeader'] },
+        { text: Utils.thousandsSeparator(item.totalSales, true), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.currentBalance, true), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.cashCollection, true), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.dueCollection, true), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.totalCollection, true), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.collectedBalance, true), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.currenctDue, true), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.detuctedDue, true), style: ['cell_style'] },
+        { text: Utils.thousandsSeparator(item.dueBalance, true), style: ['cell_style'] }]
       );
     });
     return body;
-  }
-
-  startDateChanged() {
-    this.endDate = new Date(this.startDate);
-    this.endDate.setDate(this.endDate.getDate() + 31);
-    this.maxDate = this.endDate;
-    this.cd.detectChanges();
   }
 
 }

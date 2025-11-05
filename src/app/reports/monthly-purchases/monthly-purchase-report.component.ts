@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
-import { ComboboxItemDto, MonthlySalesRankingReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, MonthlyPurchaseReportDto, PurchaseServiceProxy } from '@shared/service-proxies/service-proxies';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { firstValueFrom } from 'rxjs';
 import { Utils } from '@shared/helpers/Utils';
@@ -9,12 +9,12 @@ import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
 
 @Component({
-    selector: 'app-monthly-sales-ranking-report',
+    selector: 'app-monthly-purchase-report',
     standalone: false,
-    templateUrl: './monthly-sales-ranking.component.html',
+    templateUrl: './monthly-purchase-report.component.html',
     animations: [appModuleAnimation()]
 })
-export class MonthlySalesRankingReportComponent extends PagedListingComponentBase<MonthlySalesRankingReportDto> implements OnInit {
+export class MonthlyPurchaseReportComponent extends PagedListingComponentBase<MonthlyPurchaseReportDto> implements OnInit {
     @ViewChild('dataTable', { static: true }) dataTable: Table;
 
     pdfMake: any;
@@ -23,27 +23,22 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
     loading: boolean = true;
     months: ComboboxItemDto[] = [];
     years: ComboboxItemDto[] = [];
+    totalValues: any;
 
     constructor(
         injector: Injector,
         cd: ChangeDetectorRef,
-        private _salesService: SalesServiceProxy
+        private _purchaseService: PurchaseServiceProxy
     ) {
         super(injector, cd);
     }
     async ngOnInit() {
-        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-        months.forEach((m, index) => {
-            this.months = [...this.months, { value: (index + 1).toString(), displayText: m } as ComboboxItemDto];
-        });
-
+        this.months = Utils.getMonths();
         const currentYear: number = new Date().getFullYear();
-        for (let i = currentYear - 5; i <= currentYear; i++) {
-            this.years = [...this.years, { value: i.toString(), displayText: i.toString() } as ComboboxItemDto];
-        }
+        this.years = Utils.getYears(currentYear);
         this.monthId = new Date().getMonth() + 1;
         this.yearId = currentYear;
-
+        this.cd.detectChanges();
         this.pdfMake = await this.loadAndPrintPDF();
     }
 
@@ -67,13 +62,24 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
 
     list(event?: LazyLoadEvent): void {
         this.showLoading();
-        this._salesService.getMonthlySalesRankingReport(this.monthId, this.yearId)
+        this._purchaseService.getMonthlyPurchaseReport(this.monthId, this.yearId)
             .pipe(finalize(() => {
                 this.hideLoading();
             }))
             .subscribe((result) => {
                 this.primengTableHelper.records = result;
                 this.primengTableHelper.totalRecordsCount = result.length;
+                this.totalValues = result.reduce((accumulator, item) => {
+                    accumulator.medicalOxygen9_8Qty += item.medicalOxygen9_8Qty;
+                    accumulator.medicalOxygen1_36Qty += item.medicalOxygen1_36Qty;
+                    accumulator.medicalAir9_8Qty += item.medicalAir9_8Qty;
+                    accumulator.medicalAir7Qty += item.medicalAir7Qty;
+                    accumulator.nitros30KgQty += item.nitros30KgQty;
+                    accumulator.nitros5KgQty += item.nitros5KgQty;
+                    accumulator.nitros3KgQty += item.nitros3KgQty;
+                    accumulator.amount += item.amount ?? 0;
+                    return accumulator;
+                }, { medicalOxygen9_8Qty: 0, medicalOxygen1_36Qty: 0, medicalAir9_8Qty: 0, medicalAir7Qty: 0, nitros30KgQty: 0, nitros5KgQty: 0, nitros3KgQty: 0, amount: 0 });
                 this.cd.detectChanges();
             });
     }
@@ -82,7 +88,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
 
     async print() {
         this.showLoading();
-        const data = await firstValueFrom(this._salesService.getMonthlySalesRankingReport(this.monthId, this.yearId));
+        const data = await firstValueFrom(this._purchaseService.getMonthlyPurchaseReport(this.monthId, this.yearId));
         if (!data || data.length == 0) {
             abp.message.info("No record(s) found", "Sorry!");
             this.hideLoading();
@@ -91,7 +97,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
         const logo = await Utils.getImageDataUrl('assets/img/logo.png');
         // let count = data.length + 1;
         // for (let i = count; i < 11 + count; i++) {
-        //     data.push({ rank: i } as MonthlySalesRankingReportDto);
+        //     data.push({ serial: i } as MonthlyPurchaseReportDto);
         // }
 
         var dd = {
@@ -153,12 +159,12 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
 
         };
         this.hideLoading();
-        // pdfMake.createPdf(dd).download('Customerledge.pdf');
+        // pdfMake.createPdf(dd).download('Monthly Purchase Report.pdf');
         this.pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
 
-    private getContent(data: MonthlySalesRankingReportDto[], logo: any) {
+    private getContent(data: MonthlyPurchaseReportDto[], logo: any) {
         const totalRows = data.length;
 
         const totalValues = data.reduce((accumulator, item) => {
@@ -170,13 +176,12 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
             accumulator.nitros5KgQty += item.nitros5KgQty;
             accumulator.nitros3KgQty += item.nitros3KgQty;
             accumulator.amount += item.amount ?? 0;
-            accumulator.revenue += item.revenue ?? 0;
             return accumulator;
-        }, { medicalOxygen9_8Qty: 0, medicalOxygen1_36Qty: 0, medicalAir9_8Qty: 0, medicalAir7Qty: 0, nitros30KgQty: 0, nitros5KgQty: 0, nitros3KgQty: 0, amount: 0, revenue: 0 });
+        }, { medicalOxygen9_8Qty: 0, medicalOxygen1_36Qty: 0, medicalAir9_8Qty: 0, medicalAir7Qty: 0, nitros30KgQty: 0, nitros5KgQty: 0, nitros3KgQty: 0, amount: 0 });
 
         let hasNextpage = false;
-        const metaData: MonthlySalesRankingReportDto[][] = [];
-        let slicedData: MonthlySalesRankingReportDto[] = [];
+        const metaData: MonthlyPurchaseReportDto[][] = [];
+        let slicedData: MonthlyPurchaseReportDto[] = [];
         if (totalRows > 42) {
             hasNextpage = true;
             const partition = Math.ceil(totalRows / 42);
@@ -198,7 +203,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                     table: {
                         widths: ['*'], // Two columns, equal width
                         body: [
-                            [{ text: `MONTHLY SALES (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                            [{ text: `MONTHLY PURCHASE (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
@@ -211,7 +216,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                         vLineWidth: () => 1,
                     },
                     table: {
-                        widths: [15, '*', 25, 21, 24, 24, 24, 24, 21, 55, 55],
+                        widths: [30, '*', 25, 21, 24, 24, 24, 24, 21, 55],
                         body: this.getData(data, true, totalValues)
                     }
                 }
@@ -227,7 +232,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: `MONTHLY PURCHASE (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -240,7 +245,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                                 vLineWidth: () => 1,
                             },
                             table: {
-                                widths: [15, '*', 25, 21, 24, 24, 24, 24, 21, 55, 55],
+                                widths: [30, '*', 25, 21, 24, 24, 24, 24, 21, 55],
                                 body: this.getData(items, false)
                             }
                         },
@@ -253,7 +258,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: `MONTHLY PURCHASE (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -266,7 +271,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                                 vLineWidth: () => 1,
                             },
                             table: {
-                                widths: [10, '*', 25, 21, 24, 24, 24, 24, 21, 55, 55],
+                                widths: [30, '*', 25, 21, 24, 24, 24, 24, 21, 55],
                                 body: this.getTotal(totalValues)
                             }
                         },
@@ -277,9 +282,9 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                         Utils.getReportHeaders(logo),
                         {
                             table: {
-                                widths: ['*'], // Two columns, equal width
+                                widths: ['*'],
                                 body: [
-                                    [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: `MONTHLY PURCHASE (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -292,7 +297,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                                 vLineWidth: () => 1,
                             },
                             table: {
-                                widths: [15, '*', 25, 21, 24, 24, 24, 24, 21, 55, 55],
+                                widths: [30, '*', 25, 21, 24, 24, 24, 24, 21, 55],
                                 body: this.getData(items, true, totalValues)
                             }
                         },
@@ -303,11 +308,11 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                         Utils.getReportHeaders(logo),
                         {
                             table: {
-                            widths: ['*'], // Two columns, equal width
-                            body: [
-                                [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
-                            ]
-                        }
+                                widths: ['*'],
+                                body: [
+                                    [{ text: `MONTHLY PURCHASE (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                ]
+                            }
                         },
                         { text: ' ', fontSize: 5 },
                         {
@@ -318,7 +323,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                                 vLineWidth: () => 1,
                             },
                             table: {
-                                widths: [15, '*', 25, 21, 24, 24, 24, 24, 21, 55, 55],
+                                widths: [30, '*', 25, 21, 24, 24, 24, 24, 21, 55],
                                 body: this.getData(items, false)
                             }
                         },
@@ -331,17 +336,17 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
         }
     }
 
-    private getData(data: MonthlySalesRankingReportDto[], showTotal: boolean, totalValues?: any) {
+    private getData(data: MonthlyPurchaseReportDto[], showTotal: boolean, totalValues?: any) {
         const body = [
-            [{ text: '#', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Client', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Revenue', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }] as any,
-            [{ text: '' }, { text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'NO', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '' }, { text: '' }],
-            [{ text: '' }, { text: '' }, { text: '9.80', style: ['particularHeader'] }, { text: '1.36', style: ['particularHeader136'] }, { text: '9.80', style: ['particularHeader'] }, { text: '7.00', style: ['particularHeader'] }, { text: '30kg', style: ['particularHeader'] }, { text: '5kg', style: ['particularHeader'] }, { text: '3kg', style: ['particularHeader'] }, { text: '' }, { text: '' }],
+            [{ text: '#', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Supplier', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }] as any,
+            [{ text: '' }, { text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'NO', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '' }],
+            [{ text: '' }, { text: '' }, { text: '9.80', style: ['particularHeader'] }, { text: '1.36', style: ['particularHeader136'] }, { text: '9.80', style: ['particularHeader'] }, { text: '7.00', style: ['particularHeader'] }, { text: '30kg', style: ['particularHeader'] }, { text: '5kg', style: ['particularHeader'] }, { text: '3kg', style: ['particularHeader'] }, { text: '' }],
         ];
         data.forEach(item => {
             body.push(
                 [
-                    { text: item.rank, style: ['cell_style'] },
-                    { text: item.customerName, fontSize: 9 },
+                    { text: item.serial, style: ['cell_style'] },
+                    { text: item.supplierName, fontSize: 9 },
                     { text: item.medicalOxygen9_8Qty, style: ['cell_style'] },
                     { text: item.medicalOxygen1_36Qty, style: ['cell_style'] },
                     { text: item.medicalAir9_8Qty, style: ['cell_style'] },
@@ -349,8 +354,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                     { text: item.nitros30KgQty, style: ['cell_style'] },
                     { text: item.nitros5KgQty, style: ['cell_style'] },
                     { text: item.nitros3KgQty, style: ['cell_style'] },
-                    { text: !item.amount ? 0 + "/-" : `${Utils.thousandsSeparator(item.amount)}/-`, style: ['cellAmount'] },
-                    { text: !item.revenue ? 0 + "/-" : `${Utils.thousandsSeparator(item.revenue)}/-`, style: ['cellAmount'] }
+                    { text: !item.amount ? 0 + "/-" : `${Utils.thousandsSeparator(item.amount)}/-`, style: ['cellAmount'] }
                 ]
             );
         });
@@ -367,8 +371,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                     { text: totalValues.nitros30KgQty, style: ['footerCell'] },
                     { text: totalValues.nitros5KgQty, style: ['footerCell'] },
                     { text: totalValues.nitros3KgQty, style: ['footerCell'] },
-                    { text: Utils.thousandsSeparator(totalValues.amount) + "/-", style: ['footerAmount'], bold: true },
-                    { text: Utils.thousandsSeparator(totalValues.revenue) + "/-", style: ['footerAmount'], bold: true }
+                    { text: Utils.thousandsSeparator(totalValues.amount) + "/-", style: ['footerAmount'], bold: true }
                 ]
             );
         }
@@ -379,7 +382,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
 
     private getTotal(totalValues?: any) {
         const body = [
-            [{ text: '#', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Client', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Revenue', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }] as any,
+            [{ text: 'Rank', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Supplier', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }, { text: 'Particular', colSpan: 7, style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: '', style: ['headerStyle'] }, { text: 'Amount', rowSpan: 3, style: ['headerStyle'], marginTop: 18 }] as any,
             [{ text: '' }, { text: '' }, { text: 'MO', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'MCA', colSpan: 2, style: ['subHeader'] }, { text: '' }, { text: 'NO', colSpan: 3, style: ['subHeader'] }, { text: '' }, { text: '' }, { text: '' }],
             [{ text: '' }, { text: '' }, { text: '9.80', style: ['particularHeader'] }, { text: '1.36', style: ['particularHeader136'] }, { text: '9.80', style: ['particularHeader'] }, { text: '7.00', style: ['particularHeader'] }, { text: '30kg', style: ['particularHeader'] }, { text: '5kg', style: ['particularHeader'] }, { text: '3kg', style: ['particularHeader'] }, { text: '' }],
         ];
@@ -393,7 +396,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
             { text: totalValues.nitros30KgQty, style: ['footerCell'] },
             { text: totalValues.nitros5KgQty, style: ['footerCell'] },
             { text: totalValues.nitros3KgQty, style: ['footerCell'] },
-            { text: Utils.thousandsSeparator(totalValues.revenue)+ "/-", style: ['footerAmount'], bold: true }
+            { text: Utils.thousandsSeparator(totalValues.amount) + "/-", style: ['footerAmount'], bold: true }
         ]);
         return body;
     }

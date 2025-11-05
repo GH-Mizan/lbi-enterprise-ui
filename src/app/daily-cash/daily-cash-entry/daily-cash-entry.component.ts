@@ -126,7 +126,6 @@ export class DailyCashEntryComponent implements OnInit {
             if (res.prevCashInfo && !res.dailyCashInfo) {
                 const data = JSON.parse(res.prevCashInfo.metadata) as DailyCashSummaryType[];
                 data.forEach(x => {
-                    debugger;
                     this.dailyCashAccounts.push({
                         //actualIncomeHead: x.actualIncomeHead, 
                         //actualIncomeAmount: x.actualIncomeAmount,
@@ -154,7 +153,6 @@ export class DailyCashEntryComponent implements OnInit {
                 this.populateExpectedData(res.dailyCashInfo.metadata);
                 this.id = res.dailyCashInfo.id;
             } else if (!res.prevCashInfo && !res.dailyCashInfo) {
-                debugger;
                 for (let i = 0; i < 20; i++) {
                     //this.dailyCashAccounts = [...this.dailyCashAccounts, {actualIncomeAmount: 400, actualIncomeAmountShow: 400} as DailyCashType];
                     this.dailyCashAccounts.push({} as DailyCashType);
@@ -169,7 +167,6 @@ export class DailyCashEntryComponent implements OnInit {
     populateExpectedData(metadata: string) {
         const data = JSON.parse(metadata) as DailyCashSummaryType[];
         data.forEach(x => {
-            debugger;
             this.dailyCashAccounts.push({
                 actualIncomeHead: x.actualIncomeHead,
                 actualIncomeAmount: x.actualIncomeAmount,

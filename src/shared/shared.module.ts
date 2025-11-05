@@ -35,6 +35,7 @@ import { PurchaseReceiptReport } from './reports/purchase-receipt-report';
 import { OnlyNumberDirective } from './directives/only-numbers.directive';
 import { NgxSpinnerModule } from "ngx-spinner";
 import { ImageModule } from 'primeng/image';
+import { SelectModule } from 'primeng/select';
 
 @NgModule({
     imports: [
@@ -63,7 +64,8 @@ import { ImageModule } from 'primeng/image';
         SelectOnFocusDirective,
         OnlyNumberDirective,
         NgxSpinnerModule,
-        ImageModule
+        ImageModule,
+        SelectModule
     ],
     exports: [
         AbpPaginationControlsComponent,
@@ -87,7 +89,8 @@ import { ImageModule } from 'primeng/image';
         SelectOnFocusDirective,
         OnlyNumberDirective,
         NgxSpinnerModule,
-        ImageModule
+        ImageModule,
+        SelectModule
     ],
 })
 export class SharedModule {

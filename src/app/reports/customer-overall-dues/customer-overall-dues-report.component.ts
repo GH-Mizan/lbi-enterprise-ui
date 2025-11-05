@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { CustomerOverallDueReportDto, SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, CustomerOverallDueReportDto, SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { Table } from 'primeng/table';
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
@@ -26,14 +26,19 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
     @ViewChild('dataTable', { static: true }) dataTable: Table;
 
     pdfMake: any;
-    endDate = new Date();
-    startDate = (moment().subtract(31, 'days')).toDate();
-    maxDate = this.endDate;
+    //endDate = new Date();
+    //startDate = (moment().subtract(31, 'days')).toDate();
+    //maxDate = this.endDate;
 
-    previousDue: number;
+    initialDue: number;
     currentSales: number;
     currentPaymnet: number;
     currentDue: number;
+
+    monthId: number;
+    yearId: number;
+    months: ComboboxItemDto[] = [];
+    years: ComboboxItemDto[] = [];
 
     constructor(
         injector: Injector,
@@ -44,6 +49,12 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
     }
 
     async ngOnInit() {
+        this.months = Utils.getMonths();
+        const currentYear: number = new Date().getFullYear();
+        this.years = Utils.getYears(currentYear);
+        this.monthId = new Date().getMonth() + 1;
+        this.yearId = currentYear;
+        this.cd.detectChanges();
         this.pdfMake = await this.loadAndPrintPDF();
     }
 
@@ -66,7 +77,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
 
     list(event?: LazyLoadEvent): void {
         this.showLoading();
-        this._salesService.getCustomersOverallDueReport(moment(this.startDate), moment(this.endDate))
+        this._salesService.getCustomersOverallDueReport(this.monthId, this.yearId)
             .pipe(
                 finalize(() => {
                     this.hideLoading();
@@ -77,26 +88,19 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                 this.primengTableHelper.totalRecordsCount = result.length;
 
                 const values = result.reduce((accumulator, item) => {
-                    accumulator.previousDue += item.previousDue;
+                    accumulator.initialDue += item.initialDue;
                     accumulator.currentSales += item.currentSales;
                     accumulator.currentPaymnet += item.currentPaymnet;
                     accumulator.currentDue += item.currentDue;
                     return accumulator;
-                }, { previousDue: 0, currentSales: 0, currentPaymnet: 0, currentDue: 0 });
+                }, { initialDue: 0, currentSales: 0, currentPaymnet: 0, currentDue: 0 });
 
-                this.previousDue = values.previousDue;
+                this.initialDue = values.initialDue;
                 this.currentSales = values.currentSales;
                 this.currentPaymnet = values.currentPaymnet;
                 this.currentDue = values.currentDue;
                 this.cd.detectChanges();
             });
-    }
-
-    startDateChanged() {
-        this.endDate = new Date(this.startDate);
-        this.endDate.setDate(this.endDate.getDate() + 31);
-        this.maxDate = this.endDate;
-        this.cd.detectChanges();
     }
 
     delete() {
@@ -105,9 +109,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
 
     async print() {
         this.showLoading();
-        const items = await firstValueFrom(this._salesService.getCustomersOverallDueReport(
-            moment(this.startDate), moment(this.endDate)
-        ));
+        const items = await firstValueFrom(this._salesService.getCustomersOverallDueReport(this.monthId, this.yearId));
         if (!items || items.length == 0) {
             abp.message.info("No record(s) found", "Sorry!");
             this.hideLoading();
@@ -159,12 +161,12 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
     private getContent(data: CustomerOverallDueReportDto[], logo: any) {
         const totalRows = data.length;
         const totalValues = data.reduce((accumulator, item) => {
-            accumulator.previousDue += item.previousDue;
+            accumulator.initialDue += item.initialDue;
             accumulator.currentSales += item.currentSales;
             accumulator.currentPaymnet += item.currentPaymnet;
             accumulator.currentDue += item.currentDue;
             return accumulator;
-        }, { previousDue: 0, currentSales: 0, currentPaymnet: 0, currentDue: 0 });
+        }, { initialDue: 0, currentSales: 0, currentPaymnet: 0, currentDue: 0 });
 
         let hasNextpage = false;
         const metaData: CustomerOverallDueReportDto[][] = [];
@@ -188,7 +190,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                     table: {
                         widths: ['*'], // Two columns, equal width
                         body: [
-                            [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                            [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
@@ -217,7 +219,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -243,7 +245,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -269,7 +271,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -295,7 +297,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance (${moment(this.startDate).format('DD-MMM-YY')} to ${moment(this.endDate).format('DD-MMM-YY')})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -328,7 +330,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
         body.push([
             { text: "Total", style: ['cellTotal', 'cellLightGrey'], colSpan: 2 },
             { text: '' },
-            { text: Utils.thousandsSeparator(totalValues.previousDue), style: ['cellAmount', 'cellLightGrey'], bold: true },
+            { text: Utils.thousandsSeparator(totalValues.initialDue), style: ['cellAmount', 'cellLightGrey'], bold: true },
             { text: Utils.thousandsSeparator(totalValues.currentSales), style: ['cellAmount', 'cellLightGrey'], bold: true },
             { text: Utils.thousandsSeparator(totalValues.currentPaymnet), style: ['cellAmount', 'cellLightGrey'], bold: true },
             { text: Utils.thousandsSeparator(totalValues.currentDue), style: ['cellAmount', 'cellLightGrey'], bold: true }
@@ -345,7 +347,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                 [
                     { text: item.serial, fontSize: 9, alignment: 'center' },
                     { text: item.customerName },
-                    { text: Utils.thousandsSeparator(item.previousDue), style: ['cellAmount'] },
+                    { text: Utils.thousandsSeparator(item.initialDue), style: ['cellAmount'] },
                     { text: Utils.thousandsSeparator(item.currentSales), style: ['cellAmount'] },
                     { text: Utils.thousandsSeparator(item.currentPaymnet), style: ['cellAmount'] },
                     { text: Utils.thousandsSeparator(item.currentDue), style: ['cellAmount'] }
@@ -358,7 +360,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                 [
                     { text: "Total", style: ['cellTotal', 'cellLightGrey'], colSpan: 2 },
                     { text: '' },
-                    { text: Utils.thousandsSeparator(totalValues.previousDue), style: ['cellAmount', 'cellLightGrey'], bold: true },
+                    { text: Utils.thousandsSeparator(totalValues.initialDue), style: ['cellAmount', 'cellLightGrey'], bold: true },
                     { text: Utils.thousandsSeparator(totalValues.currentSales), style: ['cellAmount', 'cellLightGrey'], bold: true },
                     { text: Utils.thousandsSeparator(totalValues.currentPaymnet), style: ['cellAmount', 'cellLightGrey'], bold: true },
                     { text: Utils.thousandsSeparator(totalValues.currentDue), style: ['cellAmount', 'cellLightGrey'], bold: true }

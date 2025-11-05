@@ -50,14 +50,20 @@
                                 <div class="form-group row required">
                                     <label class="col-4 col-form-label" for="customer"> Client </label>
                                     <div class="col-8">
-                                        <select class="form-select form-control" name="customer" id="customer"
-                                            #customerModel="ngModel" #customerEl [(ngModel)]="model.customerId"
-                                            (ngModelChange)="onCustomerChanged()" required>
-                                            <option *ngFor="let s of customers" [value]="s.value">{{s.displayText}}
-                                            </option>
-                                        </select>
-                                        <abp-validation-summary [control]="customerModel"
-                                            [controlEl]="customerEl"></abp-validation-summary>
+                                        <p-select [options]="customers" [(ngModel)]="clientObj" (ngModelChange)="onClientChanged()"
+                                            optionLabel="displayText" name="customer" id="customer" [filter]="true"
+                                            filterBy="displayText" class="w-full w-100">
+                                            <ng-template #selectedItem let-selectedOption>
+                                                <div class="flex items-center gap-2">
+                                                    <div>{{ selectedOption.displayText }}</div>
+                                                </div>
+                                            </ng-template>
+                                            <ng-template let-client #item>
+                                                <div class="flex items-center gap-2">
+                                                    <div>{{ client.displayText }}</div>
+                                                </div>
+                                            </ng-template>
+                                        </p-select>
                                     </div>
                                 </div>
 
@@ -264,13 +270,13 @@
 
                         <div>
                             <button type="submit" form="salesEntryForm" class="btn btn-primary mx-1"
-                                [disabled]="!salesEntryForm.form.valid || invalid || viewMode">
+                                [disabled]="!salesEntryForm.form.valid || invalid || viewMode || !model.customerId">
                                 {{id ? 'Update' : 'Save'}}
                             </button>
 
                             <button type="button" form="salesEntryForm" class="btn btn-success"
                                 (click)="submitAndPrint()"
-                                [disabled]="!salesEntryForm.form.valid || invalid || viewMode">
+                                [disabled]="!salesEntryForm.form.valid || invalid || viewMode || !model.customerId">
                                 {{id ? 'Update & Print' : 'Save & Print'}}
                             </button>
                         </div>

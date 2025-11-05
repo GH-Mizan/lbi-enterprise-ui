@@ -3,7 +3,7 @@ import { BsModalRef } from "ngx-bootstrap/modal";
 import { ComboboxItemDto, CustomerServiceProxy, EmployeeServiceProxy, StockPointServiceProxy, SupplierServiceProxy, VirtualItemServiceProxy, VirtualStockDetailEntryDto, VirtualStockEntryDto, VirtualStockEntryInput, VirtualStocksServiceProxy, VirtualStockType } from "@shared/service-proxies/service-proxies";
 import { Table } from "@node_modules/primeng/table";
 import { PagedListingComponentBase } from "@shared/paged-listing-component-base";
-import { firstValueFrom } from "rxjs";
+import { debounceTime, distinctUntilChanged, firstValueFrom, map, Observable } from "rxjs";
 import { NgxSpinnerService } from "ngx-spinner";
 import moment from "moment";
 
@@ -48,6 +48,7 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
     model: VirtualStockEntryInput;
     stock: VirtualStockEntryDto;
     date = new Date();
+    minDate? = new Date();
 
     customers: ComboboxItemDto[];
     suppliers: ComboboxItemDto[];
@@ -56,6 +57,7 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
     drivers: ComboboxItemDto[];
     reconciliation: boolean = false;
     isClient: boolean;
+    warehouseObj: any;
 
     constructor(
         injector: Injector,
@@ -86,6 +88,13 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
             this.getItems()
         ]).then(() => this.spinner.hide());
     }
+
+    search = (text$: Observable<string>) =>
+        text$.pipe(
+            debounceTime(200),
+            distinctUntilChanged(),
+            map(term => term === '' ? [] : this.customers.filter(v => v.displayText.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10))
+        );
 
     async loadWarehouses() {
         if (this.isClient) {
@@ -165,25 +174,20 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
     }
 
     private isExists() {
+        if (this.isClient)
+            this.stock.clientId = this.warehouseObj?.value;
         if (this.stock.clientId) {
-            this.spinner.show();
-            this._virtualStockService.checkVirtualStockExistence(moment(this.date), this.stock.clientId, this.stock.virtualStockType).subscribe(res => {
-                if (res) {
-                    this.stock.clientId = null;
-                    this.cd.detectChanges();
-                    this.spinner.hide();
-                    abp.message.info("This inventory is already exists.", "Sorry!");
-                } else {
-                    this._virtualStockService.getVirtualInventoryInfo(this.stock.clientId, this.stock.virtualStockType).subscribe(res => {
-                        if (res && res.length > 0) {
-                            this.primengTableHelper.records.forEach(x => {
-                                x.stockQty = x.initialStockQty = res.find(f => f.productId == x.productId)?.stockQty ?? 0;
-                            })
-                            this.cd.detectChanges();
-                        }
-                        this.spinner.hide();
-                    })
+            this._virtualStockService.getVirtualInventoryInfo(this.stock.clientId, this.stock.virtualStockType).subscribe(res => {
+                if (res && res.inventories.length > 0) {
+                    this.primengTableHelper.records.forEach(x => {
+                        x.stockQty = x.initialStockQty = res.inventories.find(f => f.productId == x.productId)?.stockQty ?? 0;
+                    });
                 }
+                if (res.lastDate)
+                    this.minDate = res.lastDate.toDate();
+                else this.minDate = null;
+                this.cd.detectChanges();
+                this.spinner.hide();
             })
         }
     }
@@ -202,14 +206,9 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
         this.cd.detectChanges();
     }
 
+    list(event) { }
 
-    list(event) {
-
-    }
-
-    delete() {
-
-    }
+    delete() { }
 
     updateStock(item: VirtualStockDetailEntryDto) {
         item.stockQty = item.initialStockQty + item.in - item.out;
@@ -218,6 +217,8 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
 
     save() {
         this.saving = true;
+        const now = new Date();
+        this.date.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
         this.stock.date = moment(this.date);
         if (this.reconciliation) this.stock.stockPointId = -1;
         this.model.stock = this.stock;
@@ -230,9 +231,7 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
             this.saving = false;
             this.cd.detectChanges();
         });
-
     }
-
 
     validStock() {
         return this.primengTableHelper.records?.find(f => f.stockQty < 0) == null;

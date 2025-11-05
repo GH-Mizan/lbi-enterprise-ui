@@ -4,8 +4,11 @@ export class Utils {
     /**
      * The URL requested, before initial routing.
      */
-    static thousandsSeparator(num: number): string {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    static thousandsSeparator(num: number, notHasDecimal?:boolean): string {
+        let val = num.toString();
+        if(!notHasDecimal)
+            val = num.toFixed(2);
+        return val.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
     static inWords(num: number) {

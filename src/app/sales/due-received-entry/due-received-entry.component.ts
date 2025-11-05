@@ -100,6 +100,7 @@ export class DueReceivedEntryComponent extends AppComponentBase implements OnIni
         const dueReceived = this.dueReceived;
         dueReceived.dueReceived = {
             salesId: dueReceived.salesId,
+            customerId: dueReceived.customerId,
             creationTime: moment( new Date()),
             invoiceDate: moment(this.invoiceDate),
             receiveDate: moment(this.receiveDate),

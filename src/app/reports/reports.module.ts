@@ -11,6 +11,7 @@ import { CustomerOverallDuesReportComponent } from './customer-overall-dues/cust
 import { MonthlySalesRankingReportComponent } from './monthly-sales-ranking/monthly-sales-ranking.component';
 import { DailyPurchaseReportComponent } from './daily-purchase/daily-purchase-report.component';
 import { MonthlySalesInvoiceReportComponent } from './monthly-sales-invoices/monthly-sales-invoices.component';
+import { MonthlyPurchaseReportComponent } from './monthly-purchases/monthly-purchase-report.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { MonthlySalesInvoiceReportComponent } from './monthly-sales-invoices/mon
     CustomerOverallDuesReportComponent,
     MonthlySalesRankingReportComponent,
     DailyPurchaseReportComponent,
-    MonthlySalesInvoiceReportComponent
+    MonthlySalesInvoiceReportComponent,
+    MonthlyPurchaseReportComponent
   ],
   imports: [
     SharedModule,

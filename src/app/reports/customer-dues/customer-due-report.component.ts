@@ -2,12 +2,12 @@ import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angu
 import { ComboboxItemDto, CustomerDueDetailsDto, CustomerDueReportDto, CustomerServiceProxy, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Utils } from '@shared/helpers/Utils';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
 import { Table } from 'primeng/table';
 import { LazyLoadEvent } from "primeng/api";
-import { finalize } from "rxjs/operators";
+import { debounceTime, distinctUntilChanged, finalize, map } from "rxjs/operators";
 
 @Component({
     selector: 'app-customer-due-report',
@@ -27,13 +27,14 @@ export class CustomerDueReportComponent extends PagedListingComponentBase<Custom
 
     pdfMake: any;
     data: CustomerDueReportDto;
-    endDate = new Date();
-    startDate = (moment().subtract(31, 'days')).toDate();
     loading: boolean = true;
+    yearId: number;
+    years: ComboboxItemDto[] = [];
     customerId: string = "";
     customerName: string = "";
     customers: ComboboxItemDto[] = [];
     invalidParam: boolean = true;
+    customerObj: any;
 
     constructor(
         injector: Injector,
@@ -49,6 +50,11 @@ export class CustomerDueReportComponent extends PagedListingComponentBase<Custom
             this.customers = res;
             this.cd.detectChanges();
         });
+        const currentYear: number = new Date().getFullYear();
+        this.years = Utils.getYears(currentYear);
+        this.years.push({value: "-1", displayText: 'All'} as ComboboxItemDto);
+        this.yearId = currentYear;
+        this.cd.detectChanges();
         this.pdfMake = await this.loadAndPrintPDF();
     }
 
@@ -69,10 +75,17 @@ export class CustomerDueReportComponent extends PagedListingComponentBase<Custom
         return pdfMake;
     }
 
+    search = (text$: Observable<string>) =>
+        text$.pipe(
+          debounceTime(200),
+          distinctUntilChanged(),
+          map(term => term === '' ? [] : this.customers.filter(v => v.displayText.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10))
+        );
+
     list(event?: LazyLoadEvent): void {
         if (this.customerId) {
             this.showLoading();
-            this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate))
+            this._salesService.getCustomerDueReport(parseInt(this.customerId), this.yearId)
                 .pipe(finalize(() => {
                     this.hideLoading();
                 }))
@@ -88,6 +101,7 @@ export class CustomerDueReportComponent extends PagedListingComponentBase<Custom
     delete() { }
 
     onCustomerChanged() {
+        this.customerId = this.customerObj.value;
         if (this.customerId) {
             this.customerName = this.customers.find(f => f.value == this.customerId).displayText;
             this.invalidParam = false;
@@ -99,7 +113,7 @@ export class CustomerDueReportComponent extends PagedListingComponentBase<Custom
 
     async print() {
         this.showLoading();
-        const data = await firstValueFrom(this._salesService.getCustomerDueReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate)));
+        const data = await firstValueFrom(this._salesService.getCustomerDueReport(parseInt(this.customerId), this.yearId));
         if (!data || !data.details || data.details.length == 0) {
             abp.message.info("No record(s) found", "Sorry!");
             this.hideLoading();

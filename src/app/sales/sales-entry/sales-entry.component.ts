@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { NotifyService } from 'abp-ng2-module';
 import { SalesProductDto } from "@shared/service-proxies/service-proxies";
 import { SalesReceiptReport } from "@shared/reports/sales-receipt-report";
-import { firstValueFrom } from "rxjs";
+import { debounceTime, distinctUntilChanged, firstValueFrom, map, Observable } from "rxjs";
 import moment from "moment";
 import { Utils } from "@shared/helpers/Utils";
 import { NgxSpinnerService } from "ngx-spinner";
@@ -84,6 +84,7 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
     invalid: boolean = false;
     viewMode: boolean = false;
     saving: boolean = false;
+    clientObj: any;
 
     constructor(
         injector: Injector,
@@ -118,8 +119,19 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
         })
     }
 
-    list(event?: LazyLoadEvent) {}
-    delete() {}
+    search = (text$: Observable<string>) =>
+        text$.pipe(
+            debounceTime(200),
+            distinctUntilChanged(),
+            map(term => term === '' ? [] : this.customers.filter(v => v.displayText.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10))
+        );
+
+    onClientChanged() {
+        this.model.customerId = this.clientObj.value;
+    }
+
+    list(event?: LazyLoadEvent) { }
+    delete() { }
 
     private async getModel() {
         if (!this.id) {
@@ -132,7 +144,6 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
                 parsedInvoiceNumber = 0;
             }
             this.model.invoiceNumber = nextPrefix + (parsedInvoiceNumber + 1).toString().padStart(5, "0");
-            //this.products = await firstValueFrom(this._salesService.getAllProducts(undefined));
             this.primengTableHelper.records = await firstValueFrom(this._salesService.getAllProducts(undefined));
             this.primengTableHelper.totalRecordsCount = this.primengTableHelper.records.length;
             this.hideLoading();
@@ -141,6 +152,13 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
         }
         else {
             const salesInfo = await firstValueFrom(this._salesService.get(this.id));
+            this.clientObj = {
+                displayText: this.customers.find(f=> f.value == salesInfo.sales.customerId.toString()).displayText,
+                isSelected: false,
+                value: salesInfo.sales.customerId.toString()
+            }
+            this.cd.detectChanges();
+
             this.model = salesInfo.sales;
             this.date = (this.model.date).toDate();
             const products = await firstValueFrom(this._salesService.getAllProducts(this.model.stockPointId));
@@ -248,7 +266,6 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
         this.model.totalAmount = parseFloat(grandTotal.toFixed(2));
         this.model.netAmount = this.model.totalAmount - this.model.discount;
         this.model.dueAmount = this.model.netAmount - this.model.paidAmount;
-
         this.populatePaymentStatus();
     }
 
@@ -283,7 +300,6 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
             this.totalPaidEditMode = false;
         }
         this.populatePaymentStatus();
-
     }
 
     checkedAllChanged() {
@@ -365,6 +381,7 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
 
         input.dueReceived = {
             salesId: model.id,
+            customerId: model.customerId,
             creationTime: moment(new Date()),
             invoiceDate: model.date,
             receiveDate: model.date,

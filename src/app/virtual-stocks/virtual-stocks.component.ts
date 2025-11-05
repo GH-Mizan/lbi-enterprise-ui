@@ -6,8 +6,8 @@ import { VirtualStockEntryComponent } from './virtual-stocks-entry/virtual-stock
 import moment from 'moment';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
 import { LazyLoadEvent } from "primeng/api";
-import { finalize } from "rxjs/operators";
-import { firstValueFrom } from 'rxjs';
+import { debounceTime, distinctUntilChanged, finalize, map } from "rxjs/operators";
+import { firstValueFrom, Observable } from 'rxjs';
 import { Utils } from '@shared/helpers/Utils';
 import { ActivatedRoute } from '@angular/router';
 
@@ -31,6 +31,7 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
   suppliers: ComboboxItemDto[];
   invalidParam: boolean = true;
   isClient: boolean;
+  warehouseObj: any;
 
   constructor(
     injector: Injector,
@@ -59,6 +60,14 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
     }
     this.pdfMake = await this.loadAndPrintPDF();
   }
+
+  search = (text$: Observable<string>) =>
+    text$.pipe(
+      debounceTime(200),
+      distinctUntilChanged(),
+      map(term => term === '' ? [] : this.customers.filter(v => v.displayText.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10))
+    );
+
 
   async loadAndPrintPDF() {
     const { default: pdfMake } = await import('pdfmake/build/pdfmake');
@@ -90,7 +99,7 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
 
       let warehouseId: number;
       let stockType: VirtualStockType;
-      if(this.isClient) {
+      if (this.isClient) {
         warehouseId = parseInt(this.customerId);
         stockType = VirtualStockType._1;
       } else {
@@ -123,9 +132,10 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
         }
       }
     );
-   }
+  }
 
   onCustomerChanged() {
+    this.customerId = this.warehouseObj.value;
     if (this.customerId) {
       this.warehouseName = this.customers.find(f => f.value == this.customerId).displayText;
       this.invalidParam = false;
@@ -154,7 +164,7 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
   }
 
   private showEntryDialog(model: VirtualStockEntryInput): void {
-    if(this.isClient)
+    if (this.isClient)
       model.stock.virtualStockType = VirtualStockType._1;
     else
       model.stock.virtualStockType = VirtualStockType._2;
@@ -177,14 +187,14 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
   async print() {
     this.showLoading();
     let warehouseId: number;
-      let stockType: VirtualStockType;
-      if(this.isClient) {
-        warehouseId = parseInt(this.customerId);
-        stockType = VirtualStockType._1;
-      } else {
-        warehouseId = parseInt(this.supplierId);
-        stockType = VirtualStockType._2;
-      }
+    let stockType: VirtualStockType;
+    if (this.isClient) {
+      warehouseId = parseInt(this.customerId);
+      stockType = VirtualStockType._1;
+    } else {
+      warehouseId = parseInt(this.supplierId);
+      stockType = VirtualStockType._2;
+    }
     const items = await firstValueFrom(this._virtualStocksService.getVirtualStocks(warehouseId, moment(this.startDate), moment(this.endDate), stockType));
     if (!items || items.length == 0) {
       abp.message.info("No record(s) found", "Sorry!");

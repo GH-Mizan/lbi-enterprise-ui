@@ -2,12 +2,12 @@ import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angu
 import { ComboboxItemDto, CustomerLedgerDetailsDto, CustomerLedgerReportDto, CustomerServiceProxy, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import moment from 'moment';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { Utils } from '@shared/helpers/Utils';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
 import { Table } from 'primeng/table';
 import { LazyLoadEvent } from "primeng/api";
-import { finalize } from "rxjs/operators";
+import { debounceTime, distinctUntilChanged, finalize, map } from "rxjs/operators";
 
 @Component({
     selector: 'app-customer-ledger-report',
@@ -19,8 +19,6 @@ import { finalize } from "rxjs/operators";
         :host ::ng-deep .p-inputtext {
             min-width: 110px !important;
         }
-
-        
     `
     ]
 })
@@ -29,14 +27,17 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
 
     pdfMake: any;
     data: CustomerLedgerReportDto;
-    endDate = new Date();
-    startDate = (moment().subtract(31, 'days')).toDate();
-    maxDate = this.endDate;
+
+    monthId: number;
+    yearId: number;
+    months: ComboboxItemDto[] = [];
+    years: ComboboxItemDto[] = [];
 
     customerId: string = "";
     customerName: string = "";
     customers: ComboboxItemDto[] = [];
     invalidParam: boolean = true;
+    customerObj: any;
 
     constructor(
         injector: Injector,
@@ -48,12 +49,27 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
     }
 
     async ngOnInit() {
+        this.months = Utils.getMonths();
+        const currentYear: number = new Date().getFullYear();
+        this.years = Utils.getYears(currentYear);
+        this.monthId = new Date().getMonth() + 1;
+        this.yearId = currentYear;
+        this.cd.detectChanges();
+
         this._customerService.getCustomersSelectList().subscribe(res => {
             this.customers = res;
             this.cd.detectChanges();
         });
+        
         this.pdfMake = await this.loadAndPrintPDF();
     }
+
+    search = (text$: Observable<string>) =>
+        text$.pipe(
+            debounceTime(200),
+            distinctUntilChanged(),
+            map(term => term === '' ? [] : this.customers.filter(v => v.displayText.toLowerCase().indexOf(term.toLowerCase()) > -1).slice(0, 10))
+        );
 
     async loadAndPrintPDF() {
         const { default: pdfMake } = await import('pdfmake/build/pdfmake');
@@ -72,17 +88,10 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
         return pdfMake;
     }
 
-    startDateChanged() {
-        this.endDate = new Date(this.startDate);
-        this.endDate.setDate(this.endDate.getDate() + 31);
-        this.maxDate = this.endDate;
-        this.cd.detectChanges();
-    }
-
     list(event?: LazyLoadEvent): void {
         if (this.customerId) {
             this.showLoading();
-            this._salesService.getCustomerLedgerReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate))
+            this._salesService.getCustomerLedgerReport(parseInt(this.customerId), this.monthId, this.yearId)
                 .pipe(finalize(() => {
                     this.hideLoading();
                 }))
@@ -98,6 +107,7 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
     delete() { }
 
     onCustomerChanged() {
+        this.customerId = this.customerObj.value;
         if (this.customerId) {
             this.customerName = this.customers.find(f => f.value == this.customerId).displayText;
             this.invalidParam = false;
@@ -109,7 +119,7 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
 
     async print() {
         this.showLoading();
-        const data = await firstValueFrom(this._salesService.getCustomerLedgerReport(parseInt(this.customerId), moment(this.startDate), moment(this.endDate)));
+        const data = await firstValueFrom(this._salesService.getCustomerLedgerReport(parseInt(this.customerId), this.monthId, this.yearId));
         if (!data || !data.details || data.details.length == 0) {
             abp.message.info("No record(s) found", "Sorry!");
             this.hideLoading();

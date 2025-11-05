@@ -1,13 +1,14 @@
-import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { Table } from 'primeng/table';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { InventoryOutputDto, InventoryServiceProxy } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, InventoryOutputDto, InventoryServiceProxy } from '@shared/service-proxies/service-proxies';
 import { BsModalService, BsModalRef } from "ngx-bootstrap/modal";
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
 import { ProductTransferComponent } from './product-transfer/product-transfer.component';
 import { ProductTransferHistoriesComponent } from './transfer-histories/product-transfer-history.component';
+import { MakeInventoryDamadgeComponent } from './make-damadge/damadge-inventory.component';
 
 @Component({
   selector: 'app-inventories',
@@ -22,11 +23,13 @@ import { ProductTransferHistoriesComponent } from './transfer-histories/product-
     `
   ]
 })
-export class InventoriesComponent extends PagedListingComponentBase<InventoryOutputDto> {
+export class InventoriesComponent extends PagedListingComponentBase<InventoryOutputDto> implements OnInit {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
 
   searchText: string = "";
   summaryTotal: any = null;
+  damadgedOptions: ComboboxItemDto[] = [];
+  damadge: string = "A";
 
   constructor(
     injector: Injector,
@@ -37,12 +40,19 @@ export class InventoriesComponent extends PagedListingComponentBase<InventoryOut
     super(injector, cd);
   }
 
+  ngOnInit(): void {
+    this.damadgedOptions.push({value: "", displayText: "All"} as ComboboxItemDto);
+    this.damadgedOptions.push({value: "A", displayText: "Actual"} as ComboboxItemDto);
+    this.damadgedOptions.push({value: "Y", displayText: "Damadge"} as ComboboxItemDto);
+    this.cd.detectChanges();
+  }
+
   list(event?: LazyLoadEvent): void {
     this.showLoading();
-    this._inventoryService.getInventories(
-    ).pipe(finalize(() => {
-      this.hideLoading();
-    }))
+    this._inventoryService.getInventories(this.damadge).pipe(
+      finalize(() => {
+        this.hideLoading();
+      }))
       .subscribe((result) => {
         this.primengTableHelper.records = result;
         this.primengTableHelper.totalRecordsCount = result.length;
@@ -64,6 +74,10 @@ export class InventoriesComponent extends PagedListingComponentBase<InventoryOut
 
   openTransferModal() {
     this.showProductTransferDialog();
+  }
+
+  openDamadgeInventoryModal(isEdit?: boolean) {
+    this.showDamadgeInventoryDialog(isEdit);
   }
 
   openTransferHistory() {
@@ -99,6 +113,24 @@ export class InventoriesComponent extends PagedListingComponentBase<InventoryOut
       this.refresh();
     })
   }
+
+  private showDamadgeInventoryDialog(isEdit: boolean): void {
+    let damadgeInventoryDialog: BsModalRef;
+    damadgeInventoryDialog = this._modalService.show(
+      MakeInventoryDamadgeComponent,
+      {
+        class: "modal-lg",
+        initialState: {
+          edit: isEdit
+        }
+      }
+    );
+    damadgeInventoryDialog.content.onSave.subscribe(() => {
+      this.refresh();
+    })
+  }
+
+
 
 
 

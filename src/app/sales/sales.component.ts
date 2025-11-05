@@ -42,6 +42,8 @@ import { SaleDetailsComponent } from './details/sale-details.component';
       .fs {
           font-size: smaller !important;
       }
+
+      
     `
   ]
 })
@@ -51,6 +53,7 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
   @ViewChild('paginator', { static: true }) paginator: Paginator;
 
   searchText: string = "";
+  date = undefined;
 
   constructor(
     injector: Injector,
@@ -77,7 +80,7 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
     }
     this.showLoading();
     this._salesService.getPaginatedSales(
-      moment(new Date()), moment(new Date()),
+      this.date? moment(this.date): undefined,
       this.searchText,
       this.primengTableHelper.getSkipCount(this.paginator, event),
       this.primengTableHelper.getMaxResultCount(this.paginator, event))

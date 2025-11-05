@@ -4,6 +4,7 @@ import { VirtualStocksComponent } from './virtual-stocks.component';
 import { VirtualItemsComponent } from './virtual-items/virtual-items.component';
 import { GeneralStocksComponent } from './general/general-stocks.component';
 import { VirtualInventoriesComponent } from './virtual-inventories/virtual-inventories.component';
+import { InventoriesCrossCheckComponent } from './cross-check/iventories-cross-check.component';
 
 const routes: Routes = [
   
@@ -11,7 +12,8 @@ const routes: Routes = [
   { path: 'client', component: VirtualStocksComponent },
   { path: 'plant', component: VirtualStocksComponent },
   { path: 'items', component: VirtualItemsComponent },
-  { path: 'general', component: GeneralStocksComponent }
+  { path: 'general', component: GeneralStocksComponent },
+  { path: 'differences', component: InventoriesCrossCheckComponent },
 ];
 
 @NgModule({

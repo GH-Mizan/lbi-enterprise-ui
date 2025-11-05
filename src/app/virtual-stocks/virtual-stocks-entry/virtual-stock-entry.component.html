@@ -1,52 +1,65 @@
-<abp-modal-header title="Add {{isClient ? 'Client' : 'Plant'}} Stock" (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
+<abp-modal-header title="Add {{isClient ? 'Client' : 'Plant'}} Stock"
+    (onCloseClick)="bsModalRef.hide()"></abp-modal-header>
 <div class="modal-body">
     <ngx-spinner type="ball-scale-multiple"></ngx-spinner>
     <div class="card">
         <div class="card-body">
             <div class="row">
                 <div class="col-sm-12 col-md-6 col-lg-6">
-                    <form class="form-horizontal" autocomplete="off" #entryForm="ngForm" (ngSubmit)="save()" id="entryForm">
-                        
+                    <form class="form-horizontal" autocomplete="off" #entryForm="ngForm" (ngSubmit)="save()"
+                        id="entryForm">
+
                         <div class="form-group row" *ngIf="!mobileView">
                             <label class="col-md-4" for="reconciliation"> Reconciliation </label>
                             <div class="col-md-8">
-                                 <p-checkbox name="reconciliation" id="reconciliation" [(ngModel)]="reconciliation" [binary]="true" />
+                                <p-checkbox name="reconciliation" id="reconciliation" [(ngModel)]="reconciliation"
+                                    [binary]="true" />
                             </div>
                         </div>
 
                         <div class="form-group row" *ngIf="mobileView">
                             <label class="col-5" for="reconciliation"> Reconciliation </label>
                             <div class="col-7">
-                                 <p-checkbox name="reconciliation" id="reconciliation" [(ngModel)]="reconciliation" [binary]="true" />
+                                <p-checkbox name="reconciliation" id="reconciliation" [(ngModel)]="reconciliation"
+                                    [binary]="true" />
                             </div>
                         </div>
-                        
+
                         <div class="form-group row required">
                             <label class="col-md-4 col-form-label" for="date">Date</label>
                             <div class="col-md-8">
-                                <p-datepicker [(ngModel)]="date" [showIcon]="true" inputId="buttondisplay" (onSelect)="handleDateSelection()"
-                                    [showOnFocus]="false" dateFormat="dd-M-yy" name="date" required/>
+                                <p-datepicker [(ngModel)]="date" [showIcon]="true" inputId="buttondisplay" [minDate]="minDate"
+                                    (onSelect)="handleDateSelection()" [showOnFocus]="false" dateFormat="dd-M-yy"
+                                    name="date" required />
                             </div>
                         </div>
 
                         <div class="form-group row required" *ngIf="isClient">
                             <label class="col-md-4 col-form-label" for="warehouse"> Client </label>
                             <div class="col-md-8">
-                                <select class="form-select form-control" name="warehouse" id="warehouse" #warehouseModel="ngModel" #warehouseEl
-                                     [(ngModel)]="stock.clientId" (ngModelChange)="onWarehouseChanged()" required >
-                                    <option *ngFor="let c of customers" [value]="c.value">{{c.displayText}}
-                                    </option>
-                                </select>
-                                <abp-validation-summary [control]="warehouseModel"
-                                    [controlEl]="warehouseEl"></abp-validation-summary>
+                                <p-select [options]="customers" [(ngModel)]="warehouseObj" optionLabel="displayText"
+                                    name="warehouse" id="warehouse" [filter]="true" filterBy="displayText"
+                                    class="w-full w-100" (ngModelChange)="onWarehouseChanged()">
+                                    <ng-template #selectedItem let-selectedOption>
+                                        <div class="flex items-center gap-2">
+                                            <div>{{ selectedOption.displayText }}</div>
+                                        </div>
+                                    </ng-template>
+                                    <ng-template let-client #item>
+                                        <div class="flex items-center gap-2">
+                                            <div>{{ client.displayText }}</div>
+                                        </div>
+                                    </ng-template>
+                                </p-select>
                             </div>
                         </div>
 
                         <div class="form-group row required" *ngIf="!isClient">
                             <label class="col-md-4 col-form-label" for="warehouse"> Plant </label>
                             <div class="col-md-8">
-                                <select class="form-select form-control" name="warehouse" id="warehouse" #warehouseModel="ngModel" #warehouseEl
-                                     [(ngModel)]="stock.clientId" (ngModelChange)="onWarehouseChanged()" required>
+                                <select class="form-select form-control" name="warehouse" id="warehouse"
+                                    #warehouseModel="ngModel" #warehouseEl [(ngModel)]="stock.clientId"
+                                    (ngModelChange)="onWarehouseChanged()" required>
                                     <option *ngFor="let s of suppliers" [value]="s.value">{{s.displayText}}
                                     </option>
                                 </select>
@@ -71,7 +84,8 @@
                         <div class="form-group row">
                             <label class="col-md-4 col-form-label" for="supervisor"> Supervisor </label>
                             <div class="col-md-8">
-                                <select class="form-select form-control" name="supervisor" id="supervisor" [(ngModel)]="stock.supervisorId">
+                                <select class="form-select form-control" name="supervisor" id="supervisor"
+                                    [(ngModel)]="stock.supervisorId">
                                     <option *ngFor="let s of supervisors" [value]="s.value">{{s.displayText}}
                                     </option>
                                 </select>
@@ -81,7 +95,8 @@
                         <div class="form-group row">
                             <label class="col-md-4 col-form-label" for="driver"> Driver </label>
                             <div class="col-md-8">
-                                <select class="form-select form-control" name="driver" id="driver" [(ngModel)]="stock.driverId">
+                                <select class="form-select form-control" name="driver" id="driver"
+                                    [(ngModel)]="stock.driverId">
                                     <option *ngFor="let d of drivers" [value]="d.value">{{d.displayText}}
                                     </option>
                                 </select>
@@ -96,7 +111,8 @@
                         <div class="primeng-datatable-container">
                             <p-table #dataTable (onLazyLoad)="list($event)" [value]="primengTableHelper.records"
                                 rows="{{ primengTableHelper.defaultRecordsCountPerPage }}" [paginator]="false"
-                                [lazy]="true" [showGridlines]="true" [tableStyle]="{ 'min-width': mobileView ? '19rem':'25rem' }">
+                                [lazy]="true" [showGridlines]="true"
+                                [tableStyle]="{ 'min-width': mobileView ? '19rem':'25rem' }">
                                 <ng-template pTemplate="header">
                                     <tr>
                                         <th style="width: 35px;">
@@ -104,7 +120,8 @@
                                                 (change)="checkedAllChanged()"
                                                 [indeterminate]="checkedAllIndeterminate" />
                                         </th>
-                                        <th [ngStyle]="{'min-width': mobileView ? '78px' : '170px'}" style="min-width: 170px;">Name</th>
+                                        <th [ngStyle]="{'min-width': mobileView ? '78px' : '170px'}"
+                                            style="min-width: 170px;">Name</th>
                                         <th class="text-center">In</th>
                                         <th class="text-center">Out</th>
                                         <th class="text-center d-none">Initial Stock</th>
@@ -120,12 +137,14 @@
                                         </td>
                                         <td>{{ record.productName}}</td>
                                         <td [ngClass]="{'invalid_cell': (record.in < 0) }">
-                                            <input type="number" selectOnFocus class="form-control text-center" [disabled]="!record.selected"
-                                                [(ngModel)]="record.in" (ngModelChange)="updateStock(record)" />
+                                            <input type="number" selectOnFocus class="form-control text-center"
+                                                [disabled]="!record.selected" [(ngModel)]="record.in"
+                                                (ngModelChange)="updateStock(record)" />
                                         </td>
                                         <td [ngClass]="{'invalid_cell': (record.out < 0) }">
-                                            <input type="number" selectOnFocus class="form-control text-center" [disabled]="!record.selected"
-                                                [(ngModel)]="record.out" (ngModelChange)="updateStock(record)" />
+                                            <input type="number" selectOnFocus class="form-control text-center"
+                                                [disabled]="!record.selected" [(ngModel)]="record.out"
+                                                (ngModelChange)="updateStock(record)" />
                                         </td>
                                         <td class="text-center d-none">
                                             {{record.initialStockQty ?? 0 }}
@@ -150,11 +169,11 @@
                 </div>
 
                 <button type="submit" form="entryForm" class="btn btn-primary" *ngIf="!stock.id"
-                    [disabled]="!entryForm.form.valid || saving|| !validStock()">
+                    [disabled]="!entryForm.form.valid || saving|| !validStock() || !stock.clientId">
                     Save
                 </button>
                 <button type="submit" form="entryForm" class="btn bg-green" *ngIf="stock.id"
-                    [disabled]="!entryForm.form.valid || saving || !validStock()">
+                    [disabled]="!entryForm.form.valid || saving || !validStock() || !stock.clientId">
                     Update
                 </button>
             </div>
