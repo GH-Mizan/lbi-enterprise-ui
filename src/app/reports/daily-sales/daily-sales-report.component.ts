@@ -18,7 +18,7 @@ import { finalize } from "rxjs/operators";
     styles: [
         `
      :host ::ng-deep .p-inputtext {
-        min-width: 185px !important;
+        min-width: 110px !important;
       }
     `
     ]
@@ -78,7 +78,7 @@ export class DailySalesReportComponent extends PagedListingComponentBase<DailySa
 
     delete() { }
 
-    async print() {
+    async print(download?: boolean) {
         this.showLoading();
         const data = await firstValueFrom(this._salesService.getDailySalesReport(moment(this.date)));
         if (!data || !data.details) {
@@ -140,9 +140,10 @@ export class DailySalesReportComponent extends PagedListingComponentBase<DailySa
             }
 
         };
-        // pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
+
+        if(download) this.pdfMake.createPdf(dd).download('DailySalesReport.pdf');
+        else this.pdfMake.createPdf(dd).open();
         this.hideLoading();
-        this.pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
 

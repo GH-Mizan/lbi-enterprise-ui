@@ -17,8 +17,8 @@
                         <div class="row">
                             <div class="col-sm-12 col-md-3 col-lg-3">
                                 <div class="form-group row">
-                                    <label class="col-4 col-form-label" for="name">Client</label>
-                                    <div class="col-8">
+                                    <label class="col-3 col-form-label" for="name">Client</label>
+                                    <div class="col-9">
                                         <p-select [options]="customers" [(ngModel)]="customerObj"
                                             optionLabel="displayText" name="customer" id="customer" [filter]="true"
                                             filterBy="displayText" class="w-full w-100"
@@ -42,7 +42,8 @@
                                 <div class="form-group row">
                                     <div class="col-12">
                                         <select class="form-select form-control" name="monthId" id="monthId"
-                                            [(ngModel)]="monthId" style="height: calc(2.25rem + 6px)">
+                                            [(ngModel)]="monthId" style="height: calc(2.25rem + 6px)"
+                                            (ngModelChange)="list()">
                                             <option *ngFor="let m of months" [value]="m.value">{{m.displayText}}
                                             </option>
                                         </select>
@@ -54,7 +55,8 @@
                                 <div class="form-group row">
                                     <div class="col-12">
                                         <select class="form-select form-control" name="yearId" id="yearId"
-                                            [(ngModel)]="yearId" style="height: calc(2.25rem + 6px)">
+                                            [(ngModel)]="yearId" style="height: calc(2.25rem + 6px)"
+                                            (ngModelChange)="list()">
                                             <option *ngFor="let y of years" [value]="y.value">{{y.displayText}}
                                             </option>
                                         </select>
@@ -64,12 +66,10 @@
 
                             <div class="col-md-3 col-lg-3" *ngIf="!mobileView">
                                 <div class="float-right">
-                                    <button type="button" class="btn bg-blue mx-1 " (click)="list()"
-                                        [disabled]="invalidParam">
-                                        Search
+                                    <button type="button" class="btn bg-primary" (click)="print(true)" [disabled]="invalidParam">
+                                        Download
                                     </button>
-                                    <button type="button" class="btn bg-green" (click)="print()"
-                                        [disabled]="invalidParam">
+                                    <button type="button" class="btn bg-green mx-1" (click)="print()" [disabled]="invalidParam">
                                         Print
                                     </button>
                                 </div>
@@ -78,14 +78,12 @@
                             <div class="col-sm-12" *ngIf="mobileView">
                                 <div class="row">
                                     <div class="col-6">
-                                        <button type="button" class="btn bg-blue w-100" (click)="list()"
-                                            [disabled]="invalidParam">
-                                            Search
+                                        <button type="button" class="btn bg-primary w-100" (click)="print(true)" [disabled]="invalidParam">
+                                            Download
                                         </button>
                                     </div>
                                     <div class="col-6">
-                                        <button type="button" class="btn bg-green w-100" (click)="print()"
-                                            [disabled]="invalidParam">
+                                        <button type="button" class="btn bg-green w-100" (click)="print()" [disabled]="invalidParam">
                                             Print
                                         </button>
                                     </div>

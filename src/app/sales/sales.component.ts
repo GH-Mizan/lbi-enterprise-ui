@@ -1,9 +1,9 @@
-import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { Table } from 'primeng/table';
 import { Paginator } from "primeng/paginator";
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { DueReceivedEntryDto, SalesOutputDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, DueReceivedEntryDto, SalesOutputDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
 import moment from 'moment';
@@ -13,6 +13,7 @@ import { DueReceivedHistoryComponent } from './due-received-histories/due-receiv
 import { DueReceivedEntryComponent } from './due-received-entry/due-received-entry.component';
 import { SalesReceiptReport } from '@shared/reports/sales-receipt-report';
 import { SaleDetailsComponent } from './details/sale-details.component';
+import { Utils } from '@shared/helpers/Utils';
 
 @Component({
   selector: 'app-sales',
@@ -48,12 +49,16 @@ import { SaleDetailsComponent } from './details/sale-details.component';
   ]
 })
 
-export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
+export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> implements OnInit {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
   @ViewChild('paginator', { static: true }) paginator: Paginator;
 
   searchText: string = "";
   date = undefined;
+  monthId: number;
+  yearId: number;
+  months: ComboboxItemDto[] = [];
+  years: ComboboxItemDto[] = [];
 
   constructor(
     injector: Injector,
@@ -65,6 +70,17 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
     cd: ChangeDetectorRef
   ) {
     super(injector, cd);
+  }
+
+  ngOnInit(): void {
+    this.months = Utils.getMonths();
+    this.months.push({ value: "-1", displayText: "All" } as ComboboxItemDto);
+    const currentYear: number = new Date().getFullYear();
+    this.years = Utils.getYears(currentYear);
+    this.years.push({ value: "-1", displayText: "All" } as ComboboxItemDto)
+    this.monthId = new Date().getMonth() + 1;
+    this.yearId = currentYear;
+    this.cd.detectChanges();
   }
 
   list(event?: LazyLoadEvent): void {
@@ -80,7 +96,9 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
     }
     this.showLoading();
     this._salesService.getPaginatedSales(
-      this.date? moment(this.date): undefined,
+      this.date ? moment(this.date) : undefined,
+      this.monthId,
+      this.yearId,
       this.searchText,
       this.primengTableHelper.getSkipCount(this.paginator, event),
       this.primengTableHelper.getMaxResultCount(this.paginator, event))
@@ -176,16 +194,16 @@ export class SalesComponent extends PagedListingComponentBase<SalesOutputDto> {
   }
 
   showSaleDetails(sale: SalesOutputDto) {
-      this._modalService.show(
-        SaleDetailsComponent,
-        {
-          class: "modal-md",
-          initialState: {
-            sale: sale,
-          },
-        }
-      );
-    }
+    this._modalService.show(
+      SaleDetailsComponent,
+      {
+        class: "modal-md",
+        initialState: {
+          sale: sale,
+        },
+      }
+    );
+  }
 
   async generateReceipt(id: number) {
     this.showLoading();

@@ -3,7 +3,7 @@ import { finalize } from 'rxjs/operators';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { RoleServiceProxy, RoleDto, RoleDtoPagedResultDto } from '@shared/service-proxies/service-proxies';
+import { RoleServiceProxy, RoleDto, RoleDtoPagedResultDto, Int32EntityDto } from '@shared/service-proxies/service-proxies';
 import { CreateRoleDialogComponent } from './create-role/create-role-dialog.component';
 import { EditRoleDialogComponent } from './edit-role/edit-role-dialog.component';
 import { Table, TableModule } from 'primeng/table';
@@ -73,14 +73,14 @@ export class RolesComponent extends PagedListingComponentBase<RoleDto> {
         abp.message.confirm(this.l('RoleDeleteWarningMessage', role.displayName), undefined, (result: boolean) => {
             if (result) {
                 this._rolesService
-                    .delete(role.id)
+                    .roleRemove({ id: role.id } as Int32EntityDto)
                     .pipe(
                         finalize(() => {
                             abp.notify.success(this.l('SuccessfullyDeleted'));
                             this.refresh();
                         })
                     )
-                    .subscribe(() => {});
+                    .subscribe(() => { });
             }
         });
     }

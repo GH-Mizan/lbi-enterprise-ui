@@ -107,7 +107,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
 
     }
 
-    async print() {
+    async print(download?: boolean) {
         this.showLoading();
         const items = await firstValueFrom(this._salesService.getCustomersOverallDueReport(this.monthId, this.yearId));
         if (!items || items.length == 0) {
@@ -152,10 +152,9 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
             }
 
         };
+        if (download) this.pdfMake.createPdf(dd).download('Client Balance.pdf');
+        else this.pdfMake.createPdf(dd).open();
         this.hideLoading();
-        //pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
-        this.pdfMake.createPdf(dd).open();
-        //pdfMake.createPdf(docDefinition).print();
     }
 
     private getContent(data: CustomerOverallDueReportDto[], logo: any) {
@@ -183,6 +182,9 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
             }
         }
 
+        var monthText = this.months.find(f => f.value === this.monthId.toString()).displayText;
+        var headerText = `Clients' Balance (${monthText}, ${this.yearId})`
+
         if (!hasNextpage) {
             return [
                 Utils.getReportHeaders(logo),
@@ -190,7 +192,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                     table: {
                         widths: ['*'], // Two columns, equal width
                         body: [
-                            [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                            [{ text: headerText, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                         ]
                     }
                 },
@@ -219,7 +221,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: headerText, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -245,7 +247,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: headerText, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -271,7 +273,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: headerText, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },
@@ -297,7 +299,7 @@ export class CustomerOverallDuesReportComponent extends PagedListingComponentBas
                             table: {
                                 widths: ['*'], // Two columns, equal width
                                 body: [
-                                    [{ text: `Clients' Balance`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                    [{ text: headerText, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
                                 ]
                             }
                         },

@@ -186,7 +186,10 @@ export class SalesReceiptReport {
         });
 
         body.push([{ text: 'Total', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalAmount)}/-`, style: ['textRight', 'margin_1'] }]);
-        body.push([{ text: 'Paid', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalPaid)}/-`, style: ['textRight', 'margin_1'] }]);
+        //body.push([{ text: 'Paid', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalPaid)}/-`, style: ['textRight', 'margin_1'] }]);
+        data.receivedBreakdown.forEach(x=> {
+            body.push([{ text: `Paid (${moment(x.receivedDate).format('DD-MMM-YY').toString()})`, style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(x.amount)}/-`, style: ['textRight', 'margin_1'] }]);
+        });
         body.push([{ text: 'Due', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalDue)}/-`, style: ['textRight', 'margin_1'] }]);
 
         return body;

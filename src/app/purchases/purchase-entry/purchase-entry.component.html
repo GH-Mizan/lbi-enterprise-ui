@@ -40,7 +40,7 @@
                                     <label class="col-md-4 col-form-label" for="supplier"> Supplier </label>
                                     <div class="col-md-8">
                                         <select class="form-select form-control" name="supplier" id="supplier"
-                                            #supplierModel="ngModel" #supplierEl [(ngModel)]="model.supplierId">
+                                            #supplierModel="ngModel" #supplierEl [(ngModel)]="model.supplierId" required>
                                             <option *ngFor="let s of suppliers" [value]="s.value">{{s.displayText}}
                                             </option>
                                         </select>
@@ -53,7 +53,7 @@
                                     <label class="col-md-4 col-form-label" for="stockPoint"> Stock Point </label>
                                     <div class="col-md-8">
                                         <select class="form-select form-control" name="stockPoint" id="stockPoint"
-                                            [disabled]="!!id" #stockPointModel="ngModel" #stockPointEl
+                                            [disabled]="!!id" #stockPointModel="ngModel" #stockPointEl required
                                             [(ngModel)]="model.stockPointId" (ngModelChange)="stockPointChanged()">
                                             <option *ngFor="let s of stockPoints" [value]="s.value">{{s.displayText}}
                                             </option>
@@ -65,7 +65,7 @@
                                 <div class="form-group row required">
                                     <label class="col-md-4 col-form-label" for="purchaseBy">Purchase Person</label>
                                     <div class="col-md-8">
-                                        <select class="form-select form-control" name="purchaseBy" id="purchaseBy"
+                                        <select class="form-select form-control" name="purchaseBy" id="purchaseBy" required
                                             #purchaseByModel="ngModel" #purchaseByEl [(ngModel)]="model.purchaseBy">
                                             <option *ngFor="let e of employees" [value]="e.value">
                                                 {{e.displayText}}

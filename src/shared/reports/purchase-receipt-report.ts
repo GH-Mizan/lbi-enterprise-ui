@@ -12,7 +12,7 @@ export class PurchaseReceiptReport {
 
     constructor(
         private readonly _purchaseService: PurchaseServiceProxy
-    ) {}
+    ) { }
 
     async loadAndPrintPDF() {
         const { default: pdfMake } = await import('pdfmake/build/pdfmake');
@@ -32,9 +32,9 @@ export class PurchaseReceiptReport {
     }
 
     async generatePurchaseReceipt(purchaseId: number) {
-        if(!this.pdfMake)
+        if (!this.pdfMake)
             this.pdfMake = await this.loadAndPrintPDF();
-        
+
         const data = await firstValueFrom(this._purchaseService.getPurchaseReceipt(purchaseId));
         const logo = await Utils.getImageDataUrl('assets/img/logo.png');
 
@@ -183,7 +183,10 @@ export class PurchaseReceiptReport {
         });
 
         body.push([{ text: 'Total', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalAmount)}/-`, style: ['textRight', 'margin_1'] }]);
-        body.push([{ text: 'Paid', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalPaid)}/-`, style: ['textRight', 'margin_1'] }]);
+        //body.push([{ text: 'Paid', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalPaid)}/-`, style: ['textRight', 'margin_1'] }]);
+        data.paymentBreakdown.forEach(x => {
+            body.push([{ text: `Paid (${moment(x.paymentDate).format('DD-MMM-YY').toString()})`, style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(x.amount)}/-`, style: ['textRight', 'margin_1'] }]);
+        });
         body.push([{ text: 'Due', style: ['textRight', 'margin_1'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: `${Utils.thousandsSeparator(data.totalDue)}/-`, style: ['textRight', 'margin_1'] }]);
 
         return body;

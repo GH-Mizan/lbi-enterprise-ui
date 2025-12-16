@@ -36,9 +36,9 @@
                                         </p-select>
 
                                         <select class="form-select form-control" name="supplier" id="supplier"
-                                            [(ngModel)]="supplierId" (ngModelChange)="onSupplierChanged()"
+                                            [(ngModel)]="plantWarehouseId" (ngModelChange)="onSupplierChanged()"
                                             style="height: calc(2.25rem + 6px)" *ngIf="!isClient">
-                                            <option *ngFor="let s of suppliers" [value]="s.value">
+                                            <option *ngFor="let s of suppliers" [value]="s.uid">
                                                 {{s.displayText}}
                                             </option>
                                         </select>

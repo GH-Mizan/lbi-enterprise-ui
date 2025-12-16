@@ -86,7 +86,7 @@ export class MonthlyPurchaseReportComponent extends PagedListingComponentBase<Mo
 
     delete() { }
 
-    async print() {
+    async print(download?: boolean) {
         this.showLoading();
         const data = await firstValueFrom(this._purchaseService.getMonthlyPurchaseReport(this.monthId, this.yearId));
         if (!data || data.length == 0) {
@@ -158,9 +158,10 @@ export class MonthlyPurchaseReportComponent extends PagedListingComponentBase<Mo
             }
 
         };
+        
+        if(download) this.pdfMake.createPdf(dd).download('Monthly Purchase Report.pdf');
+        else this.pdfMake.createPdf(dd).open();
         this.hideLoading();
-        // pdfMake.createPdf(dd).download('Monthly Purchase Report.pdf');
-        this.pdfMake.createPdf(dd).open();
         // //pdfMake.createPdf(docDefinition).print();
     }
 

@@ -60,7 +60,7 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
             this.customers = res;
             this.cd.detectChanges();
         });
-        
+
         this.pdfMake = await this.loadAndPrintPDF();
     }
 
@@ -111,13 +111,14 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
         if (this.customerId) {
             this.customerName = this.customers.find(f => f.value == this.customerId).displayText;
             this.invalidParam = false;
+            this.list();
         } else {
             this.invalidParam = true;
             this.customerName = "";
         }
     }
 
-    async print() {
+    async print(download? : boolean) {
         this.showLoading();
         const data = await firstValueFrom(this._salesService.getCustomerLedgerReport(parseInt(this.customerId), this.monthId, this.yearId));
         if (!data || !data.details || data.details.length == 0) {
@@ -164,10 +165,9 @@ export class CustomerLedgerReportComponent extends PagedListingComponentBase<Cus
             }
 
         };
+        if (download) this.pdfMake.createPdf(dd).download('Client Ledger.pdf');
+        else this.pdfMake.createPdf(dd).open();
         this.hideLoading();
-        // pdfMake.createPdf(dd).download('Customerledge.pdf');
-        this.pdfMake.createPdf(dd).open();
-        // //pdfMake.createPdf(docDefinition).print();
     }
 
     private getContent(data: CustomerLedgerReportDto, logo: any) {

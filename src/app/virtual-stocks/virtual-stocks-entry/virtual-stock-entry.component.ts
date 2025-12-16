@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, EventEmitter, Injector, OnInit, Output, ViewChild } from "@angular/core";
 import { BsModalRef } from "ngx-bootstrap/modal";
-import { ComboboxItemDto, CustomerServiceProxy, EmployeeServiceProxy, StockPointServiceProxy, SupplierServiceProxy, VirtualItemServiceProxy, VirtualStockDetailEntryDto, VirtualStockEntryDto, VirtualStockEntryInput, VirtualStocksServiceProxy, VirtualStockType } from "@shared/service-proxies/service-proxies";
+import { ComboboxItemDto, CustomerServiceProxy, EmployeeServiceProxy, PlantWarehouseSelectListDto, StockPointServiceProxy, SupplierServiceProxy, VirtualItemServiceProxy, VirtualStockDetailEntryDto, VirtualStockEntryDto, VirtualStockEntryInput, VirtualStocksServiceProxy, VirtualStockType } from "@shared/service-proxies/service-proxies";
 import { Table } from "@node_modules/primeng/table";
 import { PagedListingComponentBase } from "@shared/paged-listing-component-base";
 import { debounceTime, distinctUntilChanged, firstValueFrom, map, Observable } from "rxjs";
@@ -51,13 +51,14 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
     minDate? = new Date();
 
     customers: ComboboxItemDto[];
-    suppliers: ComboboxItemDto[];
+    suppliers: PlantWarehouseSelectListDto[];
     stockPoints: ComboboxItemDto[];
     supervisors: ComboboxItemDto[];
     drivers: ComboboxItemDto[];
     reconciliation: boolean = false;
     isClient: boolean;
     warehouseObj: any;
+    plantWarehouseId: number;
 
     constructor(
         injector: Injector,
@@ -100,7 +101,7 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
         if (this.isClient) {
             this.customers = await firstValueFrom(this._customerService.getCustomersSelectList());
         } else {
-            this.suppliers = await firstValueFrom(this._supplierService.getSuppliersSelectList());
+            this.suppliers = await firstValueFrom(this._virtualStockService.getPlantWarehouse());
         }
         this.cd.detectChanges();
     }
@@ -166,16 +167,22 @@ export class VirtualStockEntryComponent extends PagedListingComponentBase<Virtua
     }
 
     async handleDateSelection() {
-        this.isExists();
+        this.getVirtualInventoryInfo();
     }
 
     async onWarehouseChanged() {
-        this.isExists();
+        if (!this.isClient) {
+            const plantWarehouse = this.suppliers.find(f=> f.uid == this.plantWarehouseId);
+            this.stock.clientId = plantWarehouse.id;
+            this.stock.virtualStockType = plantWarehouse.virtualStockType;
+        }
+        this.getVirtualInventoryInfo();
     }
 
-    private isExists() {
+    private getVirtualInventoryInfo() {
         if (this.isClient)
             this.stock.clientId = this.warehouseObj?.value;
+
         if (this.stock.clientId) {
             this._virtualStockService.getVirtualInventoryInfo(this.stock.clientId, this.stock.virtualStockType).subscribe(res => {
                 if (res && res.inventories.length > 0) {

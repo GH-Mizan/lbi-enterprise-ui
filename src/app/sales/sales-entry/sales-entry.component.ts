@@ -108,8 +108,8 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
         this.id = snapshot.params['id'];
         this.spinner.show();
         this.viewMode = snapshot.url.map(segment => segment.path)[0] == 'view';
+        await this.populateCustomers();
         await Promise.all([
-            this.populateCustomers(),
             this.populatePaymentStatuses(),
             this.getModel(),
             this.populateStockPoints(),
@@ -202,11 +202,12 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
 
     referenceNumberChanged() {
         if (this.model.referenceNumber) {
+            this.invalid = true;
             this._salesService.checkReferenceNumber(this.model.referenceNumber, this.model.id).subscribe(res => {
                 if (res) {
                     abp.message.error("Duplicate reference number detected", "Invalid");
                     this.model.referenceNumber = "";
-                }
+                } else this.invalid = false;
             });
         }
     }

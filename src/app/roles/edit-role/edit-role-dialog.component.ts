@@ -90,7 +90,7 @@ export class EditRoleDialogComponent extends AppComponentBase implements OnInit 
         role.init(this.role);
         role.grantedPermissions = this.getCheckedPermissions();
 
-        this._roleService.update(role).subscribe(
+        this._roleService.roleUpdate(role).subscribe(
             () => {
                 this.notify.info(this.l('SavedSuccessfully'));
                 this.bsModalRef.hide();

@@ -105,13 +105,14 @@ export class CustomerDueReportComponent extends PagedListingComponentBase<Custom
         if (this.customerId) {
             this.customerName = this.customers.find(f => f.value == this.customerId).displayText;
             this.invalidParam = false;
+            this.list();
         } else {
             this.invalidParam = true;
             this.customerName = "";
         }
     }
 
-    async print() {
+    async print(download?: boolean) {
         this.showLoading();
         const data = await firstValueFrom(this._salesService.getCustomerDueReport(parseInt(this.customerId), this.yearId));
         if (!data || !data.details || data.details.length == 0) {
@@ -157,10 +158,9 @@ export class CustomerDueReportComponent extends PagedListingComponentBase<Custom
                 }
             }
         };
+        if (download) this.pdfMake.createPdf(dd).download('Client Dues.pdf');
+        else this.pdfMake.createPdf(dd).open();
         this.hideLoading();
-        // pdfMake.createPdf(dd).download('Customerledge.pdf');
-        this.pdfMake.createPdf(dd).open();
-        // //pdfMake.createPdf(docDefinition).print();
     }
 
     private getContent(data: CustomerDueReportDto, logo: any) {

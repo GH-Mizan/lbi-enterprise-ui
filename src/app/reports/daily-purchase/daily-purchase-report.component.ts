@@ -18,7 +18,7 @@ import { LazyLoadEvent } from "primeng/api";
     styles: [
         `
      :host ::ng-deep .p-inputtext {
-        min-width: 185px !important;
+        width: 110px !important;
       }
     `
     ]
@@ -98,7 +98,7 @@ export class DailyPurchaseReportComponent extends PagedListingComponentBase<Dail
         };
     }
 
-    async print() {
+    async print(download?: boolean) {
         this.showLoading();
         const data = await firstValueFrom(this._purchaseService.getDailyPurchaseReport(moment(this.date)));
         if (!data || !data.details) {
@@ -171,10 +171,10 @@ export class DailyPurchaseReportComponent extends PagedListingComponentBase<Dail
                 }
             }
         };
-        // pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
+        
+        if(download) this.pdfMake.createPdf(dd).download('DailyPurchase.pdf');
+        else this.pdfMake.createPdf(dd).open();
         this.hideLoading();
-        this.pdfMake.createPdf(dd).open();
-        // //pdfMake.createPdf(docDefinition).print();
     }
 
     private getData(data: any) {

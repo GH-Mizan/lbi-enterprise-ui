@@ -24,7 +24,7 @@
             <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" for="fromPoint">From Stock</label>
             <div class="col-sm-12 col-md-9 col-lg-9">
                 <select class="form-select form-control" name="fromPoint" id="fromPoint" #fromPointModel="ngModel"
-                    #fromPointEl [(ngModel)]="model.fromStockPointId">
+                    #fromPointEl [(ngModel)]="model.fromStockPointId" (ngModelChange)="onFromStockChanged()">
                     <option *ngFor="let sp of fromStockPoints" [value]="sp.value">{{sp.displayText}}</option>
                 </select>
                 <abp-validation-summary [control]="fromPointModel" [controlEl]="fromPointEl"></abp-validation-summary>

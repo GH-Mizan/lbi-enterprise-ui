@@ -352,7 +352,7 @@ export class PurchaseEntryComponent extends PagedListingComponentBase<PurchasePr
     }
 
     populatePaymentStatus() {
-        if (this.model.totalAmount > 0) {
+        if (this.model.netAmount > 0) {
             if (this.model.dueAmount == 0) {
                 this.model.paymentStatus = PaymentStatus._1;
             } else if (this.model.dueAmount == this.model.netAmount) {

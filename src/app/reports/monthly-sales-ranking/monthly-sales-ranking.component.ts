@@ -80,7 +80,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
 
     delete() { }
 
-    async print() {
+    async print(download?: boolean) {
         this.showLoading();
         const data = await firstValueFrom(this._salesService.getMonthlySalesRankingReport(this.monthId, this.yearId));
         if (!data || data.length == 0) {
@@ -152,10 +152,10 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
             }
 
         };
+
+        if (download) this.pdfMake.createPdf(dd).download('Monthly Sales Report.pdf');
+        else this.pdfMake.createPdf(dd).open();
         this.hideLoading();
-        // pdfMake.createPdf(dd).download('Customerledge.pdf');
-        this.pdfMake.createPdf(dd).open();
-        // //pdfMake.createPdf(docDefinition).print();
     }
 
     private getContent(data: MonthlySalesRankingReportDto[], logo: any) {
@@ -303,11 +303,11 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
                         Utils.getReportHeaders(logo),
                         {
                             table: {
-                            widths: ['*'], // Two columns, equal width
-                            body: [
-                                [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
-                            ]
-                        }
+                                widths: ['*'], // Two columns, equal width
+                                body: [
+                                    [{ text: `MONTHLY SALES RANKING (${selectedMonth}-${selectedYear})`, bold: true, fontSize: 13, alignment: 'center', borderColor: ['grey', 'grey', 'grey', 'grey'], fillColor: 'lightgrey' }],
+                                ]
+                            }
                         },
                         { text: ' ', fontSize: 5 },
                         {
@@ -393,7 +393,7 @@ export class MonthlySalesRankingReportComponent extends PagedListingComponentBas
             { text: totalValues.nitros30KgQty, style: ['footerCell'] },
             { text: totalValues.nitros5KgQty, style: ['footerCell'] },
             { text: totalValues.nitros3KgQty, style: ['footerCell'] },
-            { text: Utils.thousandsSeparator(totalValues.revenue)+ "/-", style: ['footerAmount'], bold: true }
+            { text: Utils.thousandsSeparator(totalValues.revenue) + "/-", style: ['footerAmount'], bold: true }
         ]);
         return body;
     }

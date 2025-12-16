@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, Injector, OnInit } from '@angular/core';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
-import { ComboboxItemDto, CustomerServiceProxy, SupplierServiceProxy, VirtualStockEntryDto, VirtualStockEntryInput, VirtualStockOutputDto, VirtualStocksServiceProxy, VirtualStockType } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, CustomerServiceProxy, PlantWarehouseSelectListDto, SupplierServiceProxy, VirtualStockEntryDto, VirtualStockEntryInput, VirtualStockOutputDto, VirtualStocksServiceProxy, VirtualStockType } from '@shared/service-proxies/service-proxies';
 import { VirtualStockEntryComponent } from './virtual-stocks-entry/virtual-stock-entry.component';
 import moment from 'moment';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
@@ -27,8 +27,8 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
   customerId: string = "";
   warehouseName: string = "";
   customers: ComboboxItemDto[];
-  supplierId: string = "";
-  suppliers: ComboboxItemDto[];
+  plantWarehouseId: number;
+  suppliers: PlantWarehouseSelectListDto[];
   invalidParam: boolean = true;
   isClient: boolean;
   warehouseObj: any;
@@ -53,7 +53,7 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
         this.cd.detectChanges();
       });
     } else {
-      this._supplierService.getSuppliersSelectList().subscribe(res => {
+      this._virtualStocksService.getPlantWarehouse().subscribe(res => {
         this.suppliers = res;
         this.cd.detectChanges();
       });
@@ -94,7 +94,7 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
   }
 
   list(event?: LazyLoadEvent): void {
-    if (this.customerId || this.supplierId) {
+    if (this.customerId || this.plantWarehouseId) {
       this.showLoading();
 
       let warehouseId: number;
@@ -103,8 +103,12 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
         warehouseId = parseInt(this.customerId);
         stockType = VirtualStockType._1;
       } else {
-        warehouseId = parseInt(this.supplierId);
-        stockType = VirtualStockType._2;
+        const plantWarehouse = this.suppliers.find(f => f.uid == this.plantWarehouseId);
+        warehouseId = plantWarehouse.id;
+        stockType = plantWarehouse.virtualStockType;
+
+        //warehouseId = parseInt(this.supplierId);
+        //stockType = VirtualStockType._2;
       }
 
       this._virtualStocksService.getVirtualStocks(warehouseId, moment(this.startDate), moment(this.endDate), stockType)
@@ -146,8 +150,9 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
   }
 
   onSupplierChanged() {
-    if (this.supplierId) {
-      this.warehouseName = this.suppliers.find(f => f.value == this.supplierId).displayText;
+    if (this.plantWarehouseId) {
+      const plantWarehouse = this.suppliers.find(f => f.uid == this.plantWarehouseId);
+      this.warehouseName = plantWarehouse.displayText;
       this.invalidParam = false;
     } else {
       this.invalidParam = true;
@@ -192,8 +197,11 @@ export class VirtualStocksComponent extends PagedListingComponentBase<VirtualSto
       warehouseId = parseInt(this.customerId);
       stockType = VirtualStockType._1;
     } else {
-      warehouseId = parseInt(this.supplierId);
-      stockType = VirtualStockType._2;
+      const plantWarehouse = this.suppliers.find(f => f.uid == this.plantWarehouseId);
+      warehouseId = plantWarehouse.id;
+      stockType = plantWarehouse.virtualStockType;
+      // warehouseId = parseInt(this.supplierId);
+      // stockType = VirtualStockType._2;
     }
     const items = await firstValueFrom(this._virtualStocksService.getVirtualStocks(warehouseId, moment(this.startDate), moment(this.endDate), stockType));
     if (!items || items.length == 0) {

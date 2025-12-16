@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { ComboboxItemDto, SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
+import { ComboboxItemDto, SalesCollectionDueDetailsDto, SalesCollectionDueReportDto, SalesServiceProxy } from '@shared/service-proxies/service-proxies';
 import { Table } from 'primeng/table';
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
@@ -25,6 +25,9 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
   yearId: number;
   months: ComboboxItemDto[] = [];
   years: ComboboxItemDto[] = [];
+  dueBalance: number;
+  prevBalance: number;
+  lastDate = null;
 
   constructor(
     injector: Injector,
@@ -70,18 +73,22 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
       })
     )
       .subscribe((result) => {
-        const items = result.filter(f => !f.empty);
+        const items = result.details;
         this.primengTableHelper.records = items;
         this.primengTableHelper.totalRecordsCount = items.length;
+        this.dueBalance = result.dueBalance;
+        this.prevBalance = result.prevBalance;
+        this.lastDate = result.lastDate;
         this.cd.detectChanges();
       });
   }
 
   delete() { }
 
-  async print() {
+  async print(download?: boolean) {
     this.showLoading();
-    const items = await firstValueFrom(this._salesService.getSalesCollectionDueReport(this.monthId, this.yearId));
+    const data = await firstValueFrom(this._salesService.getSalesCollectionDueReport(this.monthId, this.yearId));
+    const items = data.details;
     if (!items || items.length == 0) {
       abp.message.info("No record(s) found", "Sorry!");
       this.hideLoading();
@@ -112,7 +119,7 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
           },
           table: {
             widths: [46, '*', '*', '*', 39, '*', '*', '*', '*', '*'],
-            body: this.getData(items)
+            body: this.getData(data)
           }
         }
       ],
@@ -136,19 +143,19 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
       }
 
     };
-    this.hideLoading();
 
-    //pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
-    this.pdfMake.createPdf(dd).open();
-    //pdfMake.createPdf(docDefinition).print();
+    if (download) this.pdfMake.createPdf(dd).download('SalesCollectionDue.pdf');
+    else this.pdfMake.createPdf(dd).open();
+    this.hideLoading();
   }
 
-  private getData(items: any[]) {
+  private getData(data: SalesCollectionDueReportDto) {
     const body = [
       [{ text: 'Date', style: ['headerStyle'], rowSpan: 2, marginTop: 11 }, { text: "Sale", style: ['headerStyle'], colSpan: 2 }, { text: '' }, { text: 'Collection', style: ['headerStyle'], colSpan: 4 }, { text: '' }, { text: '' }, { text: '' }, { text: 'Due', style: ['headerStyle'], colSpan: 3 }, { text: '' }, { text: '' }] as any,
       [{ text: '' }, { text: 'Today', style: ['subHeader'] }, { text: "Balance", style: ['subHeader'] }, { text: "Cash", style: ['subHeader'] }, { text: 'Due', style: ['subHeader'] }, { text: "Total", style: ['subHeader'] }, { text: "Balance", style: ['subHeader'] }, { text: 'Today', style: ['subHeader'] }, { text: "Collection", style: ['subHeader'] }, { text: "Balance", style: ['subHeader'] }]
     ];
-    items.filter(f => !f.empty).forEach(item => {
+
+    data.details.forEach(item => {
       body.push(
         [{ text: moment(item.date).format('DD-MMM-YY').toString(), style: ['subHeader'] },
         { text: Utils.thousandsSeparator(item.totalSales, true), style: ['cell_style'] },
@@ -162,6 +169,14 @@ export class SalesColllectionDueReportComponent extends PagedListingComponentBas
         { text: Utils.thousandsSeparator(item.dueBalance, true), style: ['cell_style'] }]
       );
     });
+
+    body.push(
+        [{ text: `Previous Due (${moment(data.lastDate).format('DD-MMM-YY').toString()}): ${Utils.thousandsSeparator(data.prevBalance)}`, colSpan: 5, style: ['cell_style'], bold: true },
+        { text: '' }, { text: '' }, { text: '' }, { text: '' }, 
+        { text: `Total Due : ${Utils.thousandsSeparator(data.prevBalance + data.dueBalance)}`, colSpan: 5, style: ['cell_style'], bold: true },
+        { text: '' }, { text: '' }, { text: '' }, { text: '' }]
+      );
+
     return body;
   }
 

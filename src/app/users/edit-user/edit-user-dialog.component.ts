@@ -82,7 +82,7 @@ export class EditUserDialogComponent extends AppComponentBase implements OnInit 
 
         this.user.roleNames = this.getCheckedRoles();
 
-        this._userService.update(this.user).subscribe(
+        this._userService.userUpdate(this.user).subscribe(
             () => {
                 this.notify.info(this.l('SavedSuccessfully'));
                 this.bsModalRef.hide();

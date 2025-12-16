@@ -70,8 +70,8 @@ export class DuePaymentEntryComponent extends AppComponentBase implements OnInit
         } else {
             this.discountEditMode = false;
         }
-        payment.netTotal = payment.grandTotal - payment.prevDiscount - payment.discount;
-        payment.due = payment.netTotal - payment.prevTotalPaid - payment.totalPaid;
+        payment.netTotal = parseFloat((payment.grandTotal - payment.prevDiscount - payment.discount).toFixed(2));
+        payment.due = parseFloat((payment.netTotal - payment.prevTotalPaid - payment.totalPaid).toFixed(2));
     }
 
     totalPaidChanged() {
@@ -87,7 +87,7 @@ export class DuePaymentEntryComponent extends AppComponentBase implements OnInit
         } else {
             this.paidEditMode = false;
         }
-        payment.due = payment.netTotal - payment.prevTotalPaid - payment.totalPaid;
+        payment.due = parseFloat((payment.netTotal - payment.prevTotalPaid - payment.totalPaid).toFixed(2));
 
         setTimeout(() => {
             this.invalid = false;

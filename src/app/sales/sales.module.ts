@@ -8,6 +8,8 @@ import { SalesEntryComponent } from './sales-entry/sales-entry.component';
 import { DueReceivedEntryComponent } from './due-received-entry/due-received-entry.component';
 import { DueReceivedHistoryComponent } from './due-received-histories/due-received-histories.component';
 import { SaleDetailsComponent } from './details/sale-details.component';
+import { SalesOrderComponent } from './orders/sales-order.component';
+import { SalesOrderEntryComponent } from './order-entry/sales-order-entry.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +17,9 @@ import { SaleDetailsComponent } from './details/sale-details.component';
     SalesEntryComponent,
     DueReceivedEntryComponent,
     DueReceivedHistoryComponent,
-    SaleDetailsComponent
+    SaleDetailsComponent,
+    SalesOrderComponent,
+    SalesOrderEntryComponent
   ],
   imports: [
     SharedModule,
@@ -23,4 +27,5 @@ import { SaleDetailsComponent } from './details/sale-details.component';
     SalesRoutingModule
   ]
 })
+
 export class SalesModule { }

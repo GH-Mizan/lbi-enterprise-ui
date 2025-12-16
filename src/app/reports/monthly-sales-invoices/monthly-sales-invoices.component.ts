@@ -86,7 +86,7 @@ export class MonthlySalesInvoiceReportComponent extends PagedListingComponentBas
 
     delete() { }
 
-    async print() {
+    async print(download?: boolean) {
         this.showLoading()
         const data = await firstValueFrom(this._salesService.getMonthlySalesInvoiceReport(this.monthId, this.yearId, parseInt(this.customerId)));
         if (!data || !data.details || data.details.length == 0) {
@@ -193,10 +193,10 @@ export class MonthlySalesInvoiceReportComponent extends PagedListingComponentBas
             }
 
         };
+
+        if (download) this.pdfMake.createPdf(dd).download('Sales Invoice.pdf');
+        else this.pdfMake.createPdf(dd).open();
         this.hideLoading();
-        // pdfMake.createPdf(dd).download('Customerledge.pdf');
-        this.pdfMake.createPdf(dd).open();
-        // //pdfMake.createPdf(docDefinition).print();
     }
 
     private getData(data: MonthlySalesInvoiceReportDto) {

@@ -18,6 +18,7 @@ export class ProductTransferComponent extends AppComponentBase implements OnInit
     products: ComboboxItemDto[] = [];
     fromStockPoints: ComboboxItemDto[] = [];
     toStockPoints: ComboboxItemDto[] = [];
+    allStockPoints: ComboboxItemDto[] = [];
     date = new Date();
     saving = false;
 
@@ -45,7 +46,7 @@ export class ProductTransferComponent extends AppComponentBase implements OnInit
     }
 
     private async loadStockPoints() {
-        this.fromStockPoints = this.toStockPoints = await firstValueFrom(this._stockPointService.getStockPoints(undefined));
+        this.fromStockPoints = this.toStockPoints = this.allStockPoints = await firstValueFrom(this._stockPointService.getStockPoints(undefined));
     }
 
     transfer() {
@@ -58,5 +59,10 @@ export class ProductTransferComponent extends AppComponentBase implements OnInit
             this.saving = false;
             this.cd.detectChanges();
         });
+    }
+
+    onFromStockChanged() {
+        this.model.toStockPointId = null;
+        this.toStockPoints = this.allStockPoints.filter(f=> f.value !== this.model.fromStockPointId.toString());
     }
 }

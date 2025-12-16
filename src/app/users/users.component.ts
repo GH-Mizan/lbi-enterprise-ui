@@ -3,7 +3,7 @@ import { finalize } from 'rxjs/operators';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { PagedListingComponentBase } from 'shared/paged-listing-component-base';
-import { UserServiceProxy, UserDto, UserDtoPagedResultDto } from '@shared/service-proxies/service-proxies';
+import { UserServiceProxy, UserDto, UserDtoPagedResultDto, Int32EntityDto } from '@shared/service-proxies/service-proxies';
 import { CreateUserDialogComponent } from './create-user/create-user-dialog.component';
 import { EditUserDialogComponent } from './edit-user/edit-user-dialog.component';
 import { ResetPasswordDialogComponent } from './reset-password/reset-password.component';
@@ -93,7 +93,7 @@ export class UsersComponent extends PagedListingComponentBase<UserDto> {
     delete(user: UserDto): void {
         abp.message.confirm(this.l('UserDeleteWarningMessage', user.fullName), undefined, (result: boolean) => {
             if (result) {
-                this._userService.delete(user.id).subscribe(() => {
+                this._userService.userRemove({ id: user.id } as Int32EntityDto).subscribe(() => {
                     abp.notify.success(this.l('SuccessfullyDeleted'));
                     this.refresh();
                 });

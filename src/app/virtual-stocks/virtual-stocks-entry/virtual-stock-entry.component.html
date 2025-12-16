@@ -58,9 +58,9 @@
                             <label class="col-md-4 col-form-label" for="warehouse"> Plant </label>
                             <div class="col-md-8">
                                 <select class="form-select form-control" name="warehouse" id="warehouse"
-                                    #warehouseModel="ngModel" #warehouseEl [(ngModel)]="stock.clientId"
+                                    #warehouseModel="ngModel" #warehouseEl [(ngModel)]="plantWarehouseId"
                                     (ngModelChange)="onWarehouseChanged()" required>
-                                    <option *ngFor="let s of suppliers" [value]="s.value">{{s.displayText}}
+                                    <option *ngFor="let s of suppliers" [value]="s.uid">{{s.displayText}}
                                     </option>
                                 </select>
                                 <abp-validation-summary [control]="warehouseModel"

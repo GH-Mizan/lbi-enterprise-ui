@@ -1,6 +1,6 @@
 {
-    "remoteServiceBaseUrl": "http://lbi-dev-api.softduke.com",
-    "appBaseUrl": "http://lbi-dev.softduke.com",
+    "remoteServiceBaseUrl": "https://lbienterprise-api.softduke.com",
+    "appBaseUrl": "https://lbienterprise.softduke.com",
     "localeMappings": [
         {
             "from": "pt-BR",

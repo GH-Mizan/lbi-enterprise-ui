@@ -43,7 +43,7 @@
                                     <div class="col-8">
                                         <input type="text" class="form-control" name="referenceNumber"
                                             id="referenceNumber" [(ngModel)]="model.referenceNumber"
-                                            (ngModelChange)="referenceNumberChanged()" onlyNumber />
+                                            (blur)="referenceNumberChanged()" onlyNumber />
                                     </div>
                                 </div>
 
@@ -270,13 +270,13 @@
 
                         <div>
                             <button type="submit" form="salesEntryForm" class="btn btn-primary mx-1"
-                                [disabled]="!salesEntryForm.form.valid || invalid || viewMode || !model.customerId">
+                                [disabled]="!salesEntryForm.form.valid || invalid || viewMode || saving || !model.customerId">
                                 {{id ? 'Update' : 'Save'}}
                             </button>
 
                             <button type="button" form="salesEntryForm" class="btn btn-success"
                                 (click)="submitAndPrint()"
-                                [disabled]="!salesEntryForm.form.valid || invalid || viewMode || !model.customerId">
+                                [disabled]="!salesEntryForm.form.valid || invalid || viewMode || saving || !model.customerId">
                                 {{id ? 'Update & Print' : 'Save & Print'}}
                             </button>
                         </div>
