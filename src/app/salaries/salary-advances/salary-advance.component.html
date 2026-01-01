@@ -1,0 +1,115 @@
+<div [@routerTransition]>
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <h1>Salary Info</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="content px-2 pb-3">
+        <div class="container-fluid">
+            <div class="card table-wrapper">
+                <div class="card-header">
+
+                </div>
+                <div class="card-body table-responsive table-striped table-bordered">
+                    <!--<Primeng-TurboTable-Start>-->
+                    <div class="primeng-datatable-container">
+                        <p-table #dataTable (onLazyLoad)="list($event)" [value]="primengTableHelper.records"
+                            [scrollable]="true" scrollHeight="700px"
+                            rows="{{ primengTableHelper.defaultRecordsCountPerPage }}" [paginator]="false" [lazy]="true"
+                            [loading]="primengTableHelper.isLoading" [showGridlines]="true"
+                            [tableStyle]="{ 'min-width': '50rem' }">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th style="width:300px"> Name </th>
+                                    <th class="text-center w-160"> Previous </th>
+                                    <th class="text-center w-160"> Current </th>
+                                    <th class="text-center" style="width:180px"> Last Increament Date </th>
+                                    <th class="text-center w-160"> Advance </th>
+                                    <th class="text-center w-160"> Loan </th>
+                                    <th class="text-center w-160"> Borrowing </th>
+                                    <th> Remarks </th>
+                                    <th class="text-center" style="width: 60px;"> Actions </th>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-record="$implicit">
+                                <tr>
+                                    <td>
+                                        <span>{{ record.employeeName }}</span>
+                                    </td>
+                                    <td class="text-center" (dblclick)="record.previousSalaryEditMode = true">
+                                        <span *ngIf="!record.previousSalaryEditMode">{{ record.previousSalary }}</span>
+                                        <input *ngIf="record.previousSalaryEditMode" type="number" class="form-control"
+                                            [(ngModel)]="record.previousSalary"
+                                            [autofocus]="record.previousSalaryEditMode"
+                                            (blur)="record.previousSalaryEditMode = false" />
+                                    </td>
+                                    <td class="text-center" (dblclick)="record.currentSalaryEditMode = true">
+                                        <span *ngIf="!record.currentSalaryEditMode">{{ record.currentSalary }}</span>
+                                        <input *ngIf="record.currentSalaryEditMode" type="number" class="form-control"
+                                            [(ngModel)]="record.currentSalary"
+                                            [autofocus]="record.currentSalaryEditMode"
+                                            (blur)="record.currentSalaryEditMode = false" />
+                                    </td>
+                                    <td class="text-center">
+                                        <span>{{record.incrementDate | date: 'dd-MMM-yy' }}</span>
+                                    </td>
+                                    <td class="text-center" (dblclick)="record.advanceEditMode = true">
+                                        <span *ngIf="!record.advanceEditMode">{{ record.advance }}</span>
+                                        <input *ngIf="record.advanceEditMode" type="number" class="form-control"
+                                            [(ngModel)]="record.advance" [autofocus]="record.advanceEditMode"
+                                            (blur)="record.advanceEditMode = false" />
+                                    </td>
+                                    <td class="text-center" (dblclick)="record.loanFromEditMode = true">
+                                        <span *ngIf="!record.loanFromEditMode">{{ record.loanFromCompany }}</span>
+                                        <input *ngIf="record.loanFromEditMode" type="number" class="form-control"
+                                            [(ngModel)]="record.loanFromCompany" [autofocus]="record.loanFromEditMode"
+                                            (blur)="record.loanFromEditMode = false" />
+                                    </td>
+                                    <td class="text-center" (dblclick)="record.loanToEditMode = true">
+                                        <span *ngIf="!record.loanToEditMode">{{ record.loanToCompany }}</span>
+                                        <input *ngIf="record.loanToEditMode" type="number" class="form-control"
+                                            [(ngModel)]="record.loanToCompany" [autofocus]="record.loantoEditMode"
+                                            (blur)="record.loanToEditMode = false" />
+                                    </td>
+                                    <td class="text-center" (dblclick)="record.remarksEditMode = true">
+                                        <span *ngIf="!record.remarksEditMode">{{ record.remarks }}</span>
+                                        <input *ngIf="record.remarksEditMode" type="text" class="form-control"
+                                            [(ngModel)]="record.remarks" [autofocus]="record.remarksEditMode"
+                                            (blur)="record.remarksEditMode = false" />
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm bg-primary" (click)="save(record)" [disabled]="saving">
+                                            <i class="fas fa-save"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                        <div class="primeng-no-data text-center" *ngIf="primengTableHelper.totalRecordsCount == 0">
+                            <img src="assets/img/no-data.png" alt="Logo" style="margin-top:20px" />
+                        </div>
+                        <div class="ui-table-footer"></div>
+                    </div>
+                    <!--<Primeng-TurboTable-End>-->
+                </div>
+                <div class="card-footer table-card-footer bg-white border-top">
+                    <div class="row">
+                        <div class="col-sm-4 col-12 text-sm-left text-center">
+                            
+                        </div>
+                        <div class="col-sm-8 col-12">
+                            <div class="float-sm-right m-auto">
+                                <button class="btn btn-primary" (click)="bulkSave()" [disabled]="saving">Save All</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>

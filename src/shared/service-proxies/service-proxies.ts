@@ -3776,6 +3776,79 @@ export class PurchaseServiceProxy {
         }
         return _observableOf(null as any);
     }
+
+    /**
+     * @param month (optional) 
+     * @param year (optional) 
+     * @param date (optional) 
+     * @return OK
+     */
+    getBuyAndSalesDifference(month: number | undefined, year: number | undefined, date: moment.Moment | undefined): Observable<BuyAndSalesDifferenceDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/Purchase/GetBuyAndSalesDifference?";
+        if (month === null)
+            throw new Error("The parameter 'month' cannot be null.");
+        else if (month !== undefined)
+            url_ += "month=" + encodeURIComponent("" + month) + "&";
+        if (year === null)
+            throw new Error("The parameter 'year' cannot be null.");
+        else if (year !== undefined)
+            url_ += "year=" + encodeURIComponent("" + year) + "&";
+        if (date === null)
+            throw new Error("The parameter 'date' cannot be null.");
+        else if (date !== undefined)
+            url_ += "date=" + encodeURIComponent(date ? "" + date.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetBuyAndSalesDifference(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetBuyAndSalesDifference(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BuyAndSalesDifferenceDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BuyAndSalesDifferenceDto[]>;
+        }));
+    }
+
+    protected processGetBuyAndSalesDifference(response: HttpResponseBase): Observable<BuyAndSalesDifferenceDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(BuyAndSalesDifferenceDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 @Injectable()
@@ -4333,6 +4406,413 @@ export class RoleServiceProxy {
     }
 
     protected processDelete(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class SalaryServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getSalaryAdvanceList(): Observable<SalaryAdvanceDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/Salary/GetSalaryAdvanceList";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetSalaryAdvanceList(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetSalaryAdvanceList(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<SalaryAdvanceDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<SalaryAdvanceDto[]>;
+        }));
+    }
+
+    protected processGetSalaryAdvanceList(response: HttpResponseBase): Observable<SalaryAdvanceDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(SalaryAdvanceDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param employeeId (optional) 
+     * @param searchText (optional) 
+     * @param skip (optional) 
+     * @param take (optional) 
+     * @return OK
+     */
+    getPaginatedSalaryList(employeeId: number | undefined, searchText: string | undefined, skip: number | undefined, take: number | undefined): Observable<SalaryOutputDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/Salary/GetPaginatedSalaryList?";
+        if (employeeId === null)
+            throw new Error("The parameter 'employeeId' cannot be null.");
+        else if (employeeId !== undefined)
+            url_ += "EmployeeId=" + encodeURIComponent("" + employeeId) + "&";
+        if (searchText === null)
+            throw new Error("The parameter 'searchText' cannot be null.");
+        else if (searchText !== undefined)
+            url_ += "SearchText=" + encodeURIComponent("" + searchText) + "&";
+        if (skip === null)
+            throw new Error("The parameter 'skip' cannot be null.");
+        else if (skip !== undefined)
+            url_ += "Skip=" + encodeURIComponent("" + skip) + "&";
+        if (take === null)
+            throw new Error("The parameter 'take' cannot be null.");
+        else if (take !== undefined)
+            url_ += "Take=" + encodeURIComponent("" + take) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetPaginatedSalaryList(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetPaginatedSalaryList(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<SalaryOutputDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<SalaryOutputDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetPaginatedSalaryList(response: HttpResponseBase): Observable<SalaryOutputDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = SalaryOutputDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getSalaryEntryInfo(): Observable<SalaryEntryOutputDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/Salary/GetSalaryEntryInfo";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetSalaryEntryInfo(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetSalaryEntryInfo(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<SalaryEntryOutputDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<SalaryEntryOutputDto[]>;
+        }));
+    }
+
+    protected processGetSalaryEntryInfo(response: HttpResponseBase): Observable<SalaryEntryOutputDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(SalaryEntryOutputDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrUpdateBulkSalary(body: SalaryEntryInputDto[] | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/Salary/CreateOrUpdateBulkSalary";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrUpdateBulkSalary(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrUpdateBulkSalary(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrUpdateBulkSalary(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrUpdateSalary(body: SalaryEntryInputDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/Salary/CreateOrUpdateSalary";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrUpdateSalary(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrUpdateSalary(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrUpdateSalary(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrUpdateBulkSalaryAdvance(body: SalaryAdvanceDto[] | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/Salary/CreateOrUpdateBulkSalaryAdvance";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrUpdateBulkSalaryAdvance(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrUpdateBulkSalaryAdvance(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrUpdateBulkSalaryAdvance(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrUpdateSalaryAdvance(body: SalaryAdvanceDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/Salary/CreateOrUpdateSalaryAdvance";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrUpdateSalaryAdvance(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrUpdateSalaryAdvance(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrUpdateSalaryAdvance(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -8447,6 +8927,65 @@ export interface IAuthenticateResultModel {
     encryptedAccessToken: string | undefined;
     expireInSeconds: number;
     userId: number;
+}
+
+export class BuyAndSalesDifferenceDto implements IBuyAndSalesDifferenceDto {
+    productId: number;
+    productName: string | undefined;
+    purchase: number;
+    sales: number;
+    difference: number;
+
+    constructor(data?: IBuyAndSalesDifferenceDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.productId = _data["productId"];
+            this.productName = _data["productName"];
+            this.purchase = _data["purchase"];
+            this.sales = _data["sales"];
+            this.difference = _data["difference"];
+        }
+    }
+
+    static fromJS(data: any): BuyAndSalesDifferenceDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BuyAndSalesDifferenceDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["productId"] = this.productId;
+        data["productName"] = this.productName;
+        data["purchase"] = this.purchase;
+        data["sales"] = this.sales;
+        data["difference"] = this.difference;
+        return data;
+    }
+
+    clone(): BuyAndSalesDifferenceDto {
+        const json = this.toJSON();
+        let result = new BuyAndSalesDifferenceDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBuyAndSalesDifferenceDto {
+    productId: number;
+    productName: string | undefined;
+    purchase: number;
+    sales: number;
+    difference: number;
 }
 
 export class ChangePasswordDto implements IChangePasswordDto {
@@ -14237,6 +14776,461 @@ export class RoleListDtoListResultDto implements IRoleListDtoListResultDto {
 
 export interface IRoleListDtoListResultDto {
     items: RoleListDto[] | undefined;
+}
+
+export class SalaryAdvanceDto implements ISalaryAdvanceDto {
+    id: number | undefined;
+    employeeId: number;
+    employeeName: string | undefined;
+    previousSalary: number;
+    previousSalaryEditMode: boolean;
+    currentSalary: number;
+    currentSalaryEditMode: boolean;
+    incrementDate: moment.Moment | undefined;
+    advance: number;
+    advanceEditMode: boolean;
+    loanToCompany: number;
+    loanToEditMode: boolean;
+    loanFromCompany: number;
+    loanFromEditMode: boolean;
+    remarks: string | undefined;
+    remarksEditMode: boolean;
+    fromUi: boolean;
+
+    constructor(data?: ISalaryAdvanceDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.employeeId = _data["employeeId"];
+            this.employeeName = _data["employeeName"];
+            this.previousSalary = _data["previousSalary"];
+            this.previousSalaryEditMode = _data["previousSalaryEditMode"];
+            this.currentSalary = _data["currentSalary"];
+            this.currentSalaryEditMode = _data["currentSalaryEditMode"];
+            this.incrementDate = _data["incrementDate"] ? moment(_data["incrementDate"].toString()) : <any>undefined;
+            this.advance = _data["advance"];
+            this.advanceEditMode = _data["advanceEditMode"];
+            this.loanToCompany = _data["loanToCompany"];
+            this.loanToEditMode = _data["loanToEditMode"];
+            this.loanFromCompany = _data["loanFromCompany"];
+            this.loanFromEditMode = _data["loanFromEditMode"];
+            this.remarks = _data["remarks"];
+            this.remarksEditMode = _data["remarksEditMode"];
+            this.fromUi = _data["fromUi"];
+        }
+    }
+
+    static fromJS(data: any): SalaryAdvanceDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SalaryAdvanceDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["employeeId"] = this.employeeId;
+        data["employeeName"] = this.employeeName;
+        data["previousSalary"] = this.previousSalary;
+        data["previousSalaryEditMode"] = this.previousSalaryEditMode;
+        data["currentSalary"] = this.currentSalary;
+        data["currentSalaryEditMode"] = this.currentSalaryEditMode;
+        data["incrementDate"] = this.incrementDate ? this.incrementDate.toISOString() : <any>undefined;
+        data["advance"] = this.advance;
+        data["advanceEditMode"] = this.advanceEditMode;
+        data["loanToCompany"] = this.loanToCompany;
+        data["loanToEditMode"] = this.loanToEditMode;
+        data["loanFromCompany"] = this.loanFromCompany;
+        data["loanFromEditMode"] = this.loanFromEditMode;
+        data["remarks"] = this.remarks;
+        data["remarksEditMode"] = this.remarksEditMode;
+        data["fromUi"] = this.fromUi;
+        return data;
+    }
+
+    clone(): SalaryAdvanceDto {
+        const json = this.toJSON();
+        let result = new SalaryAdvanceDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISalaryAdvanceDto {
+    id: number | undefined;
+    employeeId: number;
+    employeeName: string | undefined;
+    previousSalary: number;
+    previousSalaryEditMode: boolean;
+    currentSalary: number;
+    currentSalaryEditMode: boolean;
+    incrementDate: moment.Moment | undefined;
+    advance: number;
+    advanceEditMode: boolean;
+    loanToCompany: number;
+    loanToEditMode: boolean;
+    loanFromCompany: number;
+    loanFromEditMode: boolean;
+    remarks: string | undefined;
+    remarksEditMode: boolean;
+    fromUi: boolean;
+}
+
+export class SalaryEntryInputDto implements ISalaryEntryInputDto {
+    id: number | undefined;
+    employeeId: number;
+    date: moment.Moment;
+    year: number;
+    month: number;
+    amount: number;
+    workingDays: number;
+    payable: number;
+    fullPaid: boolean;
+    remarks: string | undefined;
+
+    constructor(data?: ISalaryEntryInputDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.employeeId = _data["employeeId"];
+            this.date = _data["date"] ? moment(_data["date"].toString()) : <any>undefined;
+            this.year = _data["year"];
+            this.month = _data["month"];
+            this.amount = _data["amount"];
+            this.workingDays = _data["workingDays"];
+            this.payable = _data["payable"];
+            this.fullPaid = _data["fullPaid"];
+            this.remarks = _data["remarks"];
+        }
+    }
+
+    static fromJS(data: any): SalaryEntryInputDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SalaryEntryInputDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["employeeId"] = this.employeeId;
+        data["date"] = this.date ? this.date.toISOString() : <any>undefined;
+        data["year"] = this.year;
+        data["month"] = this.month;
+        data["amount"] = this.amount;
+        data["workingDays"] = this.workingDays;
+        data["payable"] = this.payable;
+        data["fullPaid"] = this.fullPaid;
+        data["remarks"] = this.remarks;
+        return data;
+    }
+
+    clone(): SalaryEntryInputDto {
+        const json = this.toJSON();
+        let result = new SalaryEntryInputDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISalaryEntryInputDto {
+    id: number | undefined;
+    employeeId: number;
+    date: moment.Moment;
+    year: number;
+    month: number;
+    amount: number;
+    workingDays: number;
+    payable: number;
+    fullPaid: boolean;
+    remarks: string | undefined;
+}
+
+export class SalaryEntryOutputDto implements ISalaryEntryOutputDto {
+    id: number | undefined;
+    employeeId: number;
+    employeeName: string | undefined;
+    salaryDate: moment.Moment | undefined;
+    dateEditMode: boolean;
+    currentSalary: number;
+    advance: number;
+    lastSalaryMonth: string | undefined;
+    lastSalaryAmount: number;
+    year: number;
+    month: number | undefined;
+    amount: number;
+    amountEditMode: boolean;
+    paid: number;
+    due: number;
+    remarks: string | undefined;
+    remarksEditMode: boolean;
+    workingDays: number;
+    totalDays: number;
+    payable: number;
+    fullPaid: boolean;
+
+    constructor(data?: ISalaryEntryOutputDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.employeeId = _data["employeeId"];
+            this.employeeName = _data["employeeName"];
+            this.salaryDate = _data["salaryDate"] ? moment(_data["salaryDate"].toString()) : <any>undefined;
+            this.dateEditMode = _data["dateEditMode"];
+            this.currentSalary = _data["currentSalary"];
+            this.advance = _data["advance"];
+            this.lastSalaryMonth = _data["lastSalaryMonth"];
+            this.lastSalaryAmount = _data["lastSalaryAmount"];
+            this.year = _data["year"];
+            this.month = _data["month"];
+            this.amount = _data["amount"];
+            this.amountEditMode = _data["amountEditMode"];
+            this.paid = _data["paid"];
+            this.due = _data["due"];
+            this.remarks = _data["remarks"];
+            this.remarksEditMode = _data["remarksEditMode"];
+            this.workingDays = _data["workingDays"];
+            this.totalDays = _data["totalDays"];
+            this.payable = _data["payable"];
+            this.fullPaid = _data["fullPaid"];
+        }
+    }
+
+    static fromJS(data: any): SalaryEntryOutputDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SalaryEntryOutputDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["employeeId"] = this.employeeId;
+        data["employeeName"] = this.employeeName;
+        data["salaryDate"] = this.salaryDate ? this.salaryDate.toISOString() : <any>undefined;
+        data["dateEditMode"] = this.dateEditMode;
+        data["currentSalary"] = this.currentSalary;
+        data["advance"] = this.advance;
+        data["lastSalaryMonth"] = this.lastSalaryMonth;
+        data["lastSalaryAmount"] = this.lastSalaryAmount;
+        data["year"] = this.year;
+        data["month"] = this.month;
+        data["amount"] = this.amount;
+        data["amountEditMode"] = this.amountEditMode;
+        data["paid"] = this.paid;
+        data["due"] = this.due;
+        data["remarks"] = this.remarks;
+        data["remarksEditMode"] = this.remarksEditMode;
+        data["workingDays"] = this.workingDays;
+        data["totalDays"] = this.totalDays;
+        data["payable"] = this.payable;
+        data["fullPaid"] = this.fullPaid;
+        return data;
+    }
+
+    clone(): SalaryEntryOutputDto {
+        const json = this.toJSON();
+        let result = new SalaryEntryOutputDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISalaryEntryOutputDto {
+    id: number | undefined;
+    employeeId: number;
+    employeeName: string | undefined;
+    salaryDate: moment.Moment | undefined;
+    dateEditMode: boolean;
+    currentSalary: number;
+    advance: number;
+    lastSalaryMonth: string | undefined;
+    lastSalaryAmount: number;
+    year: number;
+    month: number | undefined;
+    amount: number;
+    amountEditMode: boolean;
+    paid: number;
+    due: number;
+    remarks: string | undefined;
+    remarksEditMode: boolean;
+    workingDays: number;
+    totalDays: number;
+    payable: number;
+    fullPaid: boolean;
+}
+
+export class SalaryOutputDto implements ISalaryOutputDto {
+    id: number;
+    employeeId: number;
+    employeeName: string | undefined;
+    date: moment.Moment;
+    year: number;
+    month: number;
+    monthName: string | undefined;
+    amount: number;
+    workingDays: number;
+    payable: number;
+    fullPaid: boolean;
+    currentSalary: number;
+    oneTimePay: boolean;
+
+    constructor(data?: ISalaryOutputDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.employeeId = _data["employeeId"];
+            this.employeeName = _data["employeeName"];
+            this.date = _data["date"] ? moment(_data["date"].toString()) : <any>undefined;
+            this.year = _data["year"];
+            this.month = _data["month"];
+            this.monthName = _data["monthName"];
+            this.amount = _data["amount"];
+            this.workingDays = _data["workingDays"];
+            this.payable = _data["payable"];
+            this.fullPaid = _data["fullPaid"];
+            this.currentSalary = _data["currentSalary"];
+            this.oneTimePay = _data["oneTimePay"];
+        }
+    }
+
+    static fromJS(data: any): SalaryOutputDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SalaryOutputDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["employeeId"] = this.employeeId;
+        data["employeeName"] = this.employeeName;
+        data["date"] = this.date ? this.date.toISOString() : <any>undefined;
+        data["year"] = this.year;
+        data["month"] = this.month;
+        data["monthName"] = this.monthName;
+        data["amount"] = this.amount;
+        data["workingDays"] = this.workingDays;
+        data["payable"] = this.payable;
+        data["fullPaid"] = this.fullPaid;
+        data["currentSalary"] = this.currentSalary;
+        data["oneTimePay"] = this.oneTimePay;
+        return data;
+    }
+
+    clone(): SalaryOutputDto {
+        const json = this.toJSON();
+        let result = new SalaryOutputDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISalaryOutputDto {
+    id: number;
+    employeeId: number;
+    employeeName: string | undefined;
+    date: moment.Moment;
+    year: number;
+    month: number;
+    monthName: string | undefined;
+    amount: number;
+    workingDays: number;
+    payable: number;
+    fullPaid: boolean;
+    currentSalary: number;
+    oneTimePay: boolean;
+}
+
+export class SalaryOutputDtoPagedResultDto implements ISalaryOutputDtoPagedResultDto {
+    items: SalaryOutputDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: ISalaryOutputDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(SalaryOutputDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): SalaryOutputDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SalaryOutputDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): SalaryOutputDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new SalaryOutputDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISalaryOutputDtoPagedResultDto {
+    items: SalaryOutputDto[] | undefined;
+    totalCount: number;
 }
 
 export class SalesCollectionDueDetailsDto implements ISalesCollectionDueDetailsDto {

@@ -13,7 +13,6 @@ import {
 import { AppSessionService } from '@shared/session/app-session.service';
 import { PrimengTableHelper } from 'shared/helpers/PrimengTableHelper';
 import { LayoutStoreService } from './layout/layout-store.service';
-import { firstValueFrom } from 'rxjs';
 
 export abstract class AppComponentBase {
     localizationSourceName = AppConsts.localization.defaultLocalizationSourceName;

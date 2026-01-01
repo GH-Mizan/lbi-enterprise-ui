@@ -36,6 +36,7 @@ import { OnlyNumberDirective } from './directives/only-numbers.directive';
 import { NgxSpinnerModule } from "ngx-spinner";
 import { ImageModule } from 'primeng/image';
 import { SelectModule } from 'primeng/select';
+import { AutoFocusModule } from 'primeng/autofocus';
 
 @NgModule({
     imports: [
@@ -65,7 +66,8 @@ import { SelectModule } from 'primeng/select';
         OnlyNumberDirective,
         NgxSpinnerModule,
         ImageModule,
-        SelectModule
+        SelectModule,
+        AutoFocusModule
     ],
     exports: [
         AbpPaginationControlsComponent,
@@ -90,7 +92,8 @@ import { SelectModule } from 'primeng/select';
         OnlyNumberDirective,
         NgxSpinnerModule,
         ImageModule,
-        SelectModule
+        SelectModule,
+        AutoFocusModule
     ],
 })
 export class SharedModule {

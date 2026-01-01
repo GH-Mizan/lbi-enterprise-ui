@@ -47,10 +47,10 @@ import { AppComponent } from './app.component';
                     { path: 'inventories', loadChildren: () => import('./inventories/inventories.module').then(m => m.InventoriesModule) },
                     { path: 'reports', loadChildren: () => import('./reports/reports.module').then(m => m.ReportsModule) },
                     { path: 'lbi-settings', loadChildren: () => import('./lbi-settings/lbi-settings.module').then(m => m.LbiSettingsModule) },
-                    { path: 'virtual-stocks', loadChildren: () => import('./virtual-stocks/virtual-stocks.module').then(m => m.VirtualStocksModule) }
+                    { path: 'virtual-stocks', loadChildren: () => import('./virtual-stocks/virtual-stocks.module').then(m => m.VirtualStocksModule) },
+                    { path: 'salaries', loadChildren: () => import('./salaries/salaries.module').then(m => m.SalariesModule) },
                 ],
             },
-            { path: 'virtual-stocks', loadChildren: () => import('./virtual-stocks/virtual-stocks.module').then(m => m.VirtualStocksModule) },
             
             
             

@@ -69,6 +69,10 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                 new MenuItem('General Stoccks', '/app/virtual-stocks/general', 'fas fa-warehouse', '', false),
                 new MenuItem('Inventory Cross Check', '/app/virtual-stocks/differences', 'fas fa-check-double', '', false),
             ]),
+            new MenuItem('Salary', '', 'far fa-file-alt', '', true, [
+                new MenuItem('Salary', '/app/salaries/salary', 'fas fa-toilet-paper', 'Pages.Salary', false),
+                new MenuItem('Salary Advance', '/app/salaries/salary-advance', 'fas fa-toilet-paper', 'Pages.SalaryAdvance', false),
+            ]),
             new MenuItem('Reports', '', 'far fa-file-alt', '', true, [
                 new MenuItem('Daily Purchase', '/app/reports/daily-purchase', 'fas fa-toilet-paper', 'Reports.DailyPurchase', false),
                 new MenuItem('Daily Sales', '/app/reports/daily-sales', 'fas fa-toilet-paper', 'Reports.DailySales', false),
@@ -79,6 +83,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                 new MenuItem("Client's Dues", '/app/reports/customer-dues', 'fas fa-toilet-paper', 'Reports.ClientsDue', false),
                 new MenuItem("Clients' Balance", '/app/reports/customer-overall-dues', 'fas fa-toilet-paper', 'Reports.ClientsBalance', false),
                 new MenuItem('Sales Invoice (Monthly)', '/app/reports/monthly-sales-invoices', 'fas fa-toilet-paper', 'Reports.SalesInvoice', false),
+                new MenuItem('Trade Difference', '/app/reports/purchase-sale-diff', 'fas fa-toilet-paper', 'Reports.BuySaleDiff', false),
             ]),
             new MenuItem('Administrations', '', 'fas fa-user-shield', '', true, [
                 new MenuItem(this.l('Roles'), '/app/roles', 'fas fa-theater-masks', 'Pages.Roles', false),
