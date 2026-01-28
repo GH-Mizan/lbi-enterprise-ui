@@ -15,6 +15,7 @@ import { DesignationEntryComponent } from './designation-entry/designation-entry
   templateUrl: './designations.component.html',
   animations: [appModuleAnimation()],
 })
+
 export class DesignationsComponent extends PagedListingComponentBase<DesignationOutputDto> {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
   @ViewChild('paginator', { static: true }) paginator: Paginator;

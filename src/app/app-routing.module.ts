@@ -49,8 +49,10 @@ import { AppComponent } from './app.component';
                     { path: 'lbi-settings', loadChildren: () => import('./lbi-settings/lbi-settings.module').then(m => m.LbiSettingsModule) },
                     { path: 'virtual-stocks', loadChildren: () => import('./virtual-stocks/virtual-stocks.module').then(m => m.VirtualStocksModule) },
                     { path: 'salaries', loadChildren: () => import('./salaries/salaries.module').then(m => m.SalariesModule) },
+                    { path: 'account-heads', loadChildren: () => import('./account-heads/account-heads.module').then(m => m.AccountHeadsModule) },
                 ],
             },
+            
             
             
             

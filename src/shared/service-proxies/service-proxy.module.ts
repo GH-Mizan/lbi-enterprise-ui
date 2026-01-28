@@ -29,6 +29,7 @@ import * as ApiServiceProxies from './service-proxies';
         ApiServiceProxies.VirtualStocksServiceProxy,
         ApiServiceProxies.SalesOrderServiceProxy,
         ApiServiceProxies.SalaryServiceProxy,
+        ApiServiceProxies.AccountHeadServiceProxy,
         { provide: HTTP_INTERCEPTORS, useClass: AbpHttpInterceptor, multi: true },
     ],
 })

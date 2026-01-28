@@ -50,7 +50,12 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
             new MenuItem('Sales Orders', '/app/sales/order', 'fas fa-clipboard-list', '', false),
             new MenuItem('Inventories', '/app/inventories', 'fas fa-store', '', false),
 
-            new MenuItem('Daily Cash', '/app/daily-cash', 'fas fa-dollar-sign', 'Pages.DailyCash', false),
+            //new MenuItem('Daily Cash', '/app/daily-cash', 'fas fa-dollar-sign', 'Pages.DailyCash', false),
+
+            new MenuItem('Daily Cash', '', 'fas fa-dollar-sign', '', true, [
+                new MenuItem('Daily Cash', '/app/daily-cash', 'fas fa-dollar-sign', 'Pages.DailyCash', false),
+                new MenuItem('Voucher Entry', '/app/daily-cash/voucher-entry', 'fas fa-dollar-sign', 'Pages.DailyCash', false),
+            ]),
             new MenuItem('Organization', '', 'fas fa-building', '', true, [
                 new MenuItem('Items', '/app/items', 'fa-brands fa-product-hunt', '', false),
                 new MenuItem('Clients', '/app/clients', 'fa-solid fa-user', '', false),
@@ -73,6 +78,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                 new MenuItem('Salary', '/app/salaries/salary', 'fas fa-toilet-paper', 'Pages.Salary', false),
                 new MenuItem('Salary Advance', '/app/salaries/salary-advance', 'fas fa-toilet-paper', 'Pages.SalaryAdvance', false),
             ]),
+            new MenuItem('Account Head', '/app/account-heads', 'fas fa-toilet-paper', '', false),
             new MenuItem('Reports', '', 'far fa-file-alt', '', true, [
                 new MenuItem('Daily Purchase', '/app/reports/daily-purchase', 'fas fa-toilet-paper', 'Reports.DailyPurchase', false),
                 new MenuItem('Daily Sales', '/app/reports/daily-sales', 'fas fa-toilet-paper', 'Reports.DailySales', false),

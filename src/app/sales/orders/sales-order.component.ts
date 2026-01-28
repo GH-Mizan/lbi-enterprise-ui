@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Injector, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, Injector, OnInit, ElementRef, ViewChild } from "@angular/core";
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { PagedListingComponentBase } from "@shared/paged-listing-component-base";
 import { SalesOrderCreateUpdateDto, SalesOrderOutputDto, SalesOrderServiceProxy } from "@shared/service-proxies/service-proxies";
@@ -9,6 +9,7 @@ import { debounceTime, distinctUntilChanged, finalize, map } from "rxjs/operator
 import { firstValueFrom, Observable } from 'rxjs';
 import { SalesOrderEntryComponent } from "../order-entry/sales-order-entry.component";
 import { Utils } from "@shared/helpers/Utils";
+import html2canvas from 'html2canvas';
 
 
 @Component({
@@ -16,12 +17,30 @@ import { Utils } from "@shared/helpers/Utils";
     standalone: false,
     templateUrl: './sales-order.component.html',
     animations: [appModuleAnimation()],
+    styles: [
+        `
+            .offscreen {
+                position: absolute;
+                left: -10000px;
+                top: auto;
+                width: 1px;
+                height: 1px;
+                overflow: hidden;
+            }
+
+        `
+    ]
 })
 
 export class SalesOrderComponent extends PagedListingComponentBase<SalesOrderOutputDto> implements OnInit {
     pdfMake: any;
     date = new Date();
     totalValues: any;
+    processImage: boolean = false;
+
+    @ViewChild("screen") screen!: ElementRef;
+    @ViewChild("canvas") canvas!: ElementRef; // For preview (optional)
+    @ViewChild("downloadLink") downloadLink!: ElementRef; // For download trigger
 
     constructor(
         injector: Injector,
@@ -116,6 +135,31 @@ export class SalesOrderComponent extends PagedListingComponentBase<SalesOrderOut
         });
     }
 
+    grtTitle() {
+        return `SALES ORDERS (${moment(this.date).format('D-MMM-YY').toString()})`;
+    }
+
+    downloadImage() {
+        this.processImage = true;
+        this.cd.detectChanges();
+
+        html2canvas(this.screen.nativeElement).then(canvas => {
+            this.canvas.nativeElement.src = canvas.toDataURL(); // Display preview
+
+            const imageData = canvas.toDataURL("image/jpeg"); // Convert to JPEG
+
+            this.downloadLink.nativeElement.href = imageData;
+            this.downloadLink.nativeElement.download = `Sales Order(${moment(this.date).format('D-MMM-YY').toString()}).jpeg`;
+            this.downloadLink.nativeElement.click(); // Trigger download
+            setTimeout(() => {
+                this.processImage = false;
+                this.cd.detectChanges();
+            }, 100);
+
+        });
+
+    }
+
     async print(download: boolean) {
         this.showLoading();
         const data = await firstValueFrom(this._salesOrderService.getOrders(moment(this.date)));
@@ -159,7 +203,7 @@ export class SalesOrderComponent extends PagedListingComponentBase<SalesOrderOut
                                 fc = '#EEEEEE'; // Light gray for even rows
                             }
 
-                            if(data.length + 3 == rowIndex || data.length + 2 == rowIndex) {
+                            if (data.length + 3 == rowIndex || data.length + 2 == rowIndex) {
                                 fc = 'white'
                             }
 
@@ -212,7 +256,7 @@ export class SalesOrderComponent extends PagedListingComponentBase<SalesOrderOut
     private getData(data: SalesOrderOutputDto[]) {
         const body = [
             [{ text: '#', rowSpan: 2, style: ['headerStyle'], marginTop: 11 }, { text: 'Client', rowSpan: 2, style: ['headerStyle'], marginTop: 11 }, { text: 'Products', colSpan: 4, style: ['headerStyle'] }, { text: '' }, { text: '', }, { text: '' }] as any,
-            [{ text: '' }, { text: '' }, { text: '9.80', style: ['subHeader'] }, { text: 'MCA', style: ['subHeader'] }, { text: '1.36', style: ['subHeader'] }, { text: 'NO', style: ['subHeader'] } ],
+            [{ text: '' }, { text: '' }, { text: '9.80', style: ['subHeader'] }, { text: 'MCA', style: ['subHeader'] }, { text: '1.36', style: ['subHeader'] }, { text: 'NO', style: ['subHeader'] }],
         ];
         data.forEach((item, index) => {
             body.push(
