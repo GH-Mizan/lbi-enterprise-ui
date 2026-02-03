@@ -50,6 +50,9 @@ export class DailyCashReconciliationComponent implements OnInit {
     expenseRecords: ExpenseType[] = [];
     advanceRecords: AdvanceType[] = [];
     dayEndCashRecords: DayEndCashType[] = [];
+    totalIncome: number = 0;
+    totalExpense: number = 0;
+    totalAdvance: number = 0;
 
     vouchers: DailyCashType[] = [];
 
@@ -124,6 +127,15 @@ export class DailyCashReconciliationComponent implements OnInit {
                     this.expenseRecords.push(expenseRecord);
                 }
             })
+            this.totalIncome = this.incomeRecords.reduce((accumulator, currentItem) => {
+                return accumulator + currentItem.amount;
+            }, 0);
+            this.totalExpense = this.expenseRecords.reduce((accumulator, currentItem) => {
+                return accumulator + currentItem.amount;
+            }, 0);
+            this.totalAdvance = this.advanceRecords.reduce((accumulator, currentItem) => {
+                return accumulator + currentItem.amount;
+            }, 0);
             this.cd.detectChanges();
         });
         this._salaryService.getSalaryAdvanceList().subscribe(res => {

@@ -6,9 +6,14 @@
                     <h1>Voucher Entry</h1>
                 </div>
                 <div class="col-6 text-right">
-                    <button class="btn btn-primary" (click)="addToList()"
+                    <button class="btn btn-primary" (click)="addToList()" *ngIf="!voucherEditMode"
                         [disabled]="!voucherNo || !creator || totalIncome === 0 || totalIncome !== totalExpense">Add to
                         List</button>
+
+                    <button class="btn btn-primary" (click)="updateList()" *ngIf="voucherEditMode"
+                        [disabled]="!voucherNo || !creator || totalIncome === 0 || totalIncome !== totalExpense">Update
+                        List</button>
+                    <button class="btn btn-danger mx-1" (click)="clearVoucher()" *ngIf="voucherEditMode">Clear</button>
                 </div>
             </div>
         </div>
@@ -264,6 +269,7 @@
                                             <th> Creator </th>
                                             <th> Car Number </th>
                                             <th> Total </th>
+                                            <th class="text-center"> Action </th>
                                         </tr>
                                     </ng-template>
 
@@ -280,6 +286,12 @@
                                             </td>
                                             <td>
                                                 <span>{{ record.totalAmount }}</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm bg-primary"
+                                                    (click)="editVoucher(record)" [disabled]="voucherEditMode">
+                                                    <i class="fas fa-pencil"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                     </ng-template>

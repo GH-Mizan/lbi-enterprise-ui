@@ -116,6 +116,8 @@ export class VoucherEntryComponent extends PagedListingComponentBase<VoucherType
     disabled: boolean;
     busy: boolean;
     saved: boolean = false;
+    voucherEditMode: boolean = false;
+    voucherUid: string;
 
     constructor(
         injector: Injector,
@@ -206,12 +208,14 @@ export class VoucherEntryComponent extends PagedListingComponentBase<VoucherType
                     totalAmount: v.totalAmount,
                     remarks: "",
                     incomeRecords: JSON.parse(v.incomeRecords),
-                    expenseRecords: JSON.parse(v.expenseRecords)
+                    expenseRecords: JSON.parse(v.expenseRecords),
+                    uid: uuidv4()
                 } as VoucherType;
                 records.push(voucher);
             });
             this.primengTableHelper.records = records;
             this.primengTableHelper.totalRecordsCount = records.length;
+            this.sortVouchers();
             this.busy = false;
             this.disabled = true;
             this.cd.detectChanges();
@@ -282,6 +286,8 @@ export class VoucherEntryComponent extends PagedListingComponentBase<VoucherType
         this.cd.detectChanges();
     }
 
+
+
     deleteRecord(type: string, record: IncomeAccountType | ExpenseAccountType) {
         if (type === "INCOME") {
             this.incomeRecords = this.incomeRecords.filter(f => f.uid !== record.uid);
@@ -343,8 +349,50 @@ export class VoucherEntryComponent extends PagedListingComponentBase<VoucherType
             expenseRecords: this.expenseRecords,
             uid: uuidv4()
         } as VoucherType;
+        debugger;
         this.primengTableHelper.records.push(voucher);
         this.primengTableHelper.totalRecordsCount = this.primengTableHelper.records.length;
+        this.voucherNo = "";
+        this.creator = "";
+        this.carNumber = "";
+        this.incomeRecords = [];
+        this.expenseRecords = [];
+        this.totalIncome = 0;
+        this.totalExpense = 0;
+        this.accountType = "INCOME";
+        this.onAccountTypeChanged();
+        this.saved = false;
+        this.disabled = false;
+        this.sortVouchers();
+        this.cd.detectChanges();
+    }
+
+    updateList() {
+        debugger;
+        this.primengTableHelper.records = this.primengTableHelper.records.filter(f => f.uid != this.voucherUid);
+        this.addToList();
+        this.voucherUid = undefined;
+        this.voucherEditMode = false;
+        this.cd.detectChanges();
+    }
+
+    editVoucher(record: VoucherType) {
+        this.voucherEditMode = true;
+        this.voucherNo = record.voucherNo;
+        this.creator = record.creator;
+        this.carNumber = record.carNumber;
+        this.incomeRecords = record.incomeRecords;
+        this.expenseRecords = record.expenseRecords;
+        this.voucherUid = record.uid;
+        this.totalIncome = this.getTotalIncome();
+        this.totalExpense = this.getTotalExpense();
+        this.cd.detectChanges();
+    }
+
+    clearVoucher() {
+        this.voucherUid = undefined;
+        this.voucherEditMode = false;
+
         this.voucherNo = "";
         this.creator = "";
         this.carNumber = "";
@@ -422,5 +470,9 @@ export class VoucherEntryComponent extends PagedListingComponentBase<VoucherType
             }
         );
 
+    }
+
+    sortVouchers() {
+        this.primengTableHelper.records.sort((a, b) => a.voucherNo.localeCompare(b.voucherNo));
     }
 }
