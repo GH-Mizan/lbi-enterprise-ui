@@ -37,6 +37,7 @@ import { NgxSpinnerModule } from "ngx-spinner";
 import { ImageModule } from 'primeng/image';
 import { SelectModule } from 'primeng/select';
 import { AutoFocusModule } from 'primeng/autofocus';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @NgModule({
     imports: [
@@ -67,7 +68,8 @@ import { AutoFocusModule } from 'primeng/autofocus';
         NgxSpinnerModule,
         ImageModule,
         SelectModule,
-        AutoFocusModule
+        AutoFocusModule,
+        ProgressSpinnerModule
     ],
     exports: [
         AbpPaginationControlsComponent,
@@ -93,7 +95,8 @@ import { AutoFocusModule } from 'primeng/autofocus';
         NgxSpinnerModule,
         ImageModule,
         SelectModule,
-        AutoFocusModule
+        AutoFocusModule,
+        ProgressSpinnerModule
     ],
 })
 export class SharedModule {

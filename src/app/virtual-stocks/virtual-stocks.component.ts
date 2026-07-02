@@ -19,7 +19,6 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class VirtualStocksComponent extends PagedListingComponentBase<VirtualStockOutputDto> implements OnInit {
   pdfMake: any;
-  //data: CustomerLedgerReportDto;
   endDate = new Date();
   startDate = (moment().subtract(31, 'days')).toDate();
   maxDate = this.endDate;

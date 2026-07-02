@@ -1,25 +1,25 @@
 import { ChangeDetectorRef, Component, EventEmitter, Injector, Output } from "@angular/core";
 import { BsModalRef } from 'ngx-bootstrap/modal';
 import { AppComponentBase } from "@shared/app-component-base";
-import { DepartmentCreateOrUpdateDto, DepartmentServiceProxy } from "@shared/service-proxies/service-proxies";
+import { AdditionalPartiesServiceProxy, AdditionalPartyEntryDto } from "@shared/service-proxies/service-proxies";
 
 @Component({
-    selector: 'app-department-entry',
+    selector: 'app-additional-party-entry',
     standalone: false,
-    templateUrl: './department-entry.component.html'
+    templateUrl: './additional-party-entry.component.html'
 })
 
-export class DepartmentEntryComponent extends AppComponentBase {
+export class AdditionalPartyEntryComponent extends AppComponentBase {
 
     @Output() onSave = new EventEmitter<any>();
 
-    department: DepartmentCreateOrUpdateDto;
+    model: AdditionalPartyEntryDto;
     saving = false;
 
     constructor(
         injector: Injector,
         public bsModalRef: BsModalRef,
-        private readonly _departmentrService: DepartmentServiceProxy,
+        private readonly _additionalPartiesService: AdditionalPartiesServiceProxy,
         private cd: ChangeDetectorRef
     ) {
         super(injector);
@@ -27,8 +27,8 @@ export class DepartmentEntryComponent extends AppComponentBase {
    
     save() {
         this.saving = true;
-        this._departmentrService.createOrUpdate(this.department).subscribe(() => {
-            this.notify.info(this.department.id ? "Successfully Updated" : "Successfully Saved");
+        this._additionalPartiesService.createOrUpdate(this.model).subscribe(() => {
+            this.notify.info(this.model.id ? "Successfully Updated" : "Successfully Saved");
             this.bsModalRef.hide();
             this.onSave.emit();
             this.saving = false;

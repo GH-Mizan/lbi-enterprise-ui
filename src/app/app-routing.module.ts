@@ -50,8 +50,10 @@ import { AppComponent } from './app.component';
                     { path: 'virtual-stocks', loadChildren: () => import('./virtual-stocks/virtual-stocks.module').then(m => m.VirtualStocksModule) },
                     { path: 'salaries', loadChildren: () => import('./salaries/salaries.module').then(m => m.SalariesModule) },
                     { path: 'account-heads', loadChildren: () => import('./account-heads/account-heads.module').then(m => m.AccountHeadsModule) },
+                    { path: 'additional-parties', loadChildren: () => import('./additional-parties/additional-parties.module').then(m => m.AdditionalPartiesModule) },
                 ],
             },
+            
             
             
             

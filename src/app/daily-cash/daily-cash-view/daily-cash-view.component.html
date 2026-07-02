@@ -3,10 +3,10 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-6">
-                    <h1>Daily Cash Reconciliation</h1>
+                    <h1>Cash Book [{{this.date | date: 'dd-MM-yyyy'}} ({{this.date | date: 'EEEE'}})]</h1>
                 </div>
                 <div class="col-6 text-right">
-                    <h3>{{this.date | date: 'dd-MM-yyyy'}} ({{this.date | date: 'EEEE'}})</h3>
+
                 </div>
             </div>
         </div>
@@ -21,12 +21,57 @@
 
                 </div>
                 <div class="card-body">
+                    <div class="row" style="margin-bottom: 10px;">
+                        <div class="col-12">
+                            <div class="table-responsive table-striped table-bordered">
+                                <div class="primeng-datatable-container">
+                                    <p-table #dataTable [value]="dailyCashRecordsSummary" rows="10" [paginator]="false"
+                                        [lazy]="true" [tableStyle]="{ 'min-width': '50rem' }">
+                                        <ng-template pTemplate="body" let-record="$implicit">
+                                            <tr>
+                                                <td style="background-color: rgb(178, 114, 238);"><span
+                                                        style="font-weight: bold;">Summary</span></td>
+                                                <td class="income">Total Income</td>
+                                                <td class="income">{{record.totalIncome}}</td>
+                                                <td class="income">Total Expense</td>
+                                                <td class="income">{{record.totalExpense}}</td>
+                                                <td>Temp Balance</td>
+                                                <td>{{record.tempBalance}}</td>
+
+                                                <td class="expense">Cash (B/D)</td>
+                                                <td class="expense">{{record.cashBD}}</td>
+                                                <td class="expense">Advance (B/D)</td>
+                                                <td class="expense">{{record.advanceBD}}</td>
+                                                <td>Actual Balance</td>
+                                                <td>{{record.actualBalance}}</td>
+
+                                                <td class="difference">Difference</td>
+                                                <td class="difference">{{record.difference}}</td>
+                                                <td class="difference">Starting CD</td>
+                                                <td class="difference">{{startingBalanceCD}}</td>
+                                                <td class="difference">Current CD</td>
+                                                <td class="difference">{{record.balanceCD}}</td>
+                                                <td
+                                                    [ngClass]="{'ac-diff-red': record.actualDifference != 0, 'ac-diff-green': record.actualDifference == 0}">
+                                                    Actual Difference</td>
+                                                <td
+                                                    [ngClass]="{'ac-diff-red': record.actualDifference != 0, 'ac-diff-green': record.actualDifference == 0}">
+                                                    {{record.actualDifference}}</td>
+                                            </tr>
+                                        </ng-template>
+                                    </p-table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-3">
                             <div class="table-responsive table-striped table-bordered">
                                 <div class="primeng-datatable-container">
-                                    <p-table #dataTable [value]="incomeRecords" rows="10" [paginator]="false"
-                                        [lazy]="true" [tableStyle]="{ 'min-width': '25rem' }">
+                                    <p-table #dataTable [value]="dailyCashIncomeRecords" rows="10" [paginator]="false"
+                                        [lazy]="true" [tableStyle]="{ 'min-width': '25rem' }" [scrollable]="true"
+                                        scrollHeight="600px">
                                         <ng-template pTemplate="header">
                                             <tr>
                                                 <th colspan="2" class="text-center"> Income </th>
@@ -34,7 +79,8 @@
                                         </ng-template>
 
                                         <ng-template pTemplate="body" let-record="$implicit">
-                                            <tr>
+                                            <tr
+                                                [ngClass]="{'loan': record.key === 'LOAN', 'mtm': record.key === 'MTM' }">
                                                 <td>
                                                     <span>{{ record.head }}</span>
                                                 </td>
@@ -50,12 +96,12 @@
                                                     <span>Total</span>
                                                 </td>
                                                 <td class="text-right text-bold">
-                                                    <span>{{ totalIncome | number: '1.2-2' }}/-</span>
+                                                    <span>{{ dailyCashTotalIncome | number: '1.2-2' }}/-</span>
                                                 </td>
                                             </tr>
                                         </ng-template>
                                     </p-table>
-                                    <div class="primeng-no-data text-center" *ngIf="incomeRecords.length == 0">
+                                    <div class="primeng-no-data text-center" *ngIf="dailyCashIncomeRecords.length == 0">
                                         <img src="assets/img/no-data.png" alt="Logo" style="margin-top:20px" />
                                     </div>
                                 </div>
@@ -64,8 +110,9 @@
                         <div class="col-3">
                             <div class="table-responsive table-striped table-bordered">
                                 <div class="primeng-datatable-container">
-                                    <p-table #dataTable [value]="expenseRecords" rows="10" [paginator]="false"
-                                        [lazy]="true" [tableStyle]="{ 'min-width': '25rem' }">
+                                    <p-table #dataTable [value]="dailyCashExpenseRecords" rows="10" [paginator]="false"
+                                        [lazy]="true" [tableStyle]="{ 'min-width': '25rem' }" [scrollable]="true"
+                                        scrollHeight="600px">
                                         <ng-template pTemplate="header">
                                             <tr>
                                                 <th colspan="2" class="text-center"> Expense </th>
@@ -89,12 +136,13 @@
                                                     <span>Total</span>
                                                 </td>
                                                 <td class="text-right text-bold">
-                                                    <span>{{ totalExpense | number: '1.2-2' }}/-</span>
+                                                    <span>{{ dailyCashTotalExpense | number: '1.2-2' }}/-</span>
                                                 </td>
                                             </tr>
                                         </ng-template>
                                     </p-table>
-                                    <div class="primeng-no-data text-center" *ngIf="expenseRecords.length == 0">
+                                    <div class="primeng-no-data text-center"
+                                        *ngIf="dailyCashExpenseRecords.length == 0">
                                         <img src="assets/img/no-data.png" alt="Logo" style="margin-top:20px" />
                                     </div>
                                 </div>
@@ -103,8 +151,9 @@
                         <div class="col-3">
                             <div class="table-responsive table-striped table-bordered">
                                 <div class="primeng-datatable-container">
-                                    <p-table #dataTable [value]="advanceRecords" rows="10" [paginator]="false"
-                                        [lazy]="true" [tableStyle]="{ 'min-width': '25rem' }">
+                                    <p-table #dataTable [value]="dailyCashAdvanceRecords" rows="10" [paginator]="false"
+                                        [lazy]="true" [tableStyle]="{ 'min-width': '25rem' }" [scrollable]="true"
+                                        scrollHeight="600px">
                                         <ng-template pTemplate="header">
                                             <tr>
                                                 <th colspan="2" class="text-center"> Advance </th>
@@ -128,12 +177,13 @@
                                                     <span>Total</span>
                                                 </td>
                                                 <td class="text-right text-bold">
-                                                    <span>{{ totalAdvance | number: '1.2-2' }}/-</span>
+                                                    <span>{{ dailyCashTotalAdvance | number: '1.2-2' }}/-</span>
                                                 </td>
                                             </tr>
                                         </ng-template>
                                     </p-table>
-                                    <div class="primeng-no-data text-center" *ngIf="advanceRecords.length == 0">
+                                    <div class="primeng-no-data text-center"
+                                        *ngIf="dailyCashAdvanceRecords.length == 0">
                                         <img src="assets/img/no-data.png" alt="Logo" style="margin-top:20px" />
                                     </div>
                                 </div>
@@ -142,8 +192,9 @@
                         <div class="col-3">
                             <div class="table-responsive table-striped table-bordered">
                                 <div class="primeng-datatable-container">
-                                    <p-table #dataTable [value]="dayEndCashRecords" rows="10" [paginator]="false"
-                                        [lazy]="true" [tableStyle]="{ 'min-width': '25rem' }">
+                                    <p-table #dataTable [value]="dailyCashDayEndCashRecords" rows="10"
+                                        [paginator]="false" [lazy]="true" [tableStyle]="{ 'min-width': '25rem' }"
+                                        [scrollable]="true" scrollHeight="600px">
                                         <ng-template pTemplate="header">
                                             <tr>
                                                 <th colspan="2" class="text-center"> Day End Cash </th>
@@ -151,7 +202,7 @@
                                         </ng-template>
 
                                         <ng-template pTemplate="body" let-record="$implicit">
-                                            <tr>
+                                            <tr [ngClass]="{'mtm': record.type === 'MTM'}">
                                                 <td>
                                                     <span>{{ record.head }}</span>
                                                 </td>
@@ -167,55 +218,22 @@
                                                     <span>Total</span>
                                                 </td>
                                                 <td class="text-right text-bold">
-                                                    <span>{{totalDayEndCash | number: '1.2-2'}}/-</span>
+                                                    <span>{{dailyCashTotalDayEndCash | number: '1.2-2'}}/-</span>
                                                 </td>
                                             </tr>
                                         </ng-template>
                                     </p-table>
-                                    <div class="primeng-no-data text-center" *ngIf="dayEndCashRecords.length == 0">
+                                    <div class="primeng-no-data text-center"
+                                        *ngIf="dailyCashDayEndCashRecords.length == 0">
                                         <img src="assets/img/no-data.png" alt="Logo" style="margin-top:20px" />
                                     </div>
                                 </div>
                             </div>
 
-                            <br />
-                            <br />
-                            <br />
-                            <br />
 
-                            <div class="table-responsive table-striped table-bordered">
-                                <div class="primeng-datatable-container">
-                                    <p-table #dataTable [value]="recordsSummary" rows="10" [paginator]="false"
-                                        [lazy]="true" [tableStyle]="{ 'min-width': '25rem' }">
-                                        <ng-template pTemplate="header">
-                                            <tr>
-                                                <th colspan="2" class="text-center"> Summary </th>
-                                            </tr>
-                                        </ng-template>
 
-                                        <ng-template pTemplate="body" let-record="$implicit">
-                                            <tr [ngClass]="{'green': record.type === 'DIFFERENCE' && record.amount == 0, 'red': record.type === 'DIFFERENCE' && record.amount != 0}">
-                                                <td>
-                                                    <span>{{ record.head }}</span>
-                                                </td>
-                                                <td class="text-right">
-                                                    <span *ngIf="record.amount">{{ record.amount | number: '1.2-2' }}/-</span>
-                                                    <span *ngIf="!record.amount"> {{record.amount}}</span>
-                                                </td>
-                                            </tr>
-                                        </ng-template>
-
-                                    </p-table>
-                                    <div class="primeng-no-data text-center" *ngIf="dayEndCashRecords.length == 0">
-                                        <img src="assets/img/no-data.png" alt="Logo" style="margin-top:20px" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <br />
-                            <br />
-
-                            <button type="button" class="btn btn-primary" (click)="save()" [disabled]="difference != 0">Save</button>
+                            <!-- <button type="button" class="btn btn-primary" (click)="saveDailyCash()"
+                                [disabled]="dailyCashActualDifference != 0 || listPending">Save</button> -->
 
                         </div>
                     </div>

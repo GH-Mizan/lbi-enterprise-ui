@@ -153,7 +153,7 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
         else {
             const salesInfo = await firstValueFrom(this._salesService.get(this.id));
             this.clientObj = {
-                displayText: this.customers.find(f=> f.value == salesInfo.sales.customerId.toString()).displayText,
+                displayText: this.customers.find(f => f.value == salesInfo.sales.customerId.toString()).displayText,
                 isSelected: false,
                 value: salesInfo.sales.customerId.toString()
             }
@@ -317,7 +317,12 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
                 x.qtyDisabled = true;
                 x.totalPrice = 0;
                 x.quantity = 0;
-            })
+            });
+            this.model.paidAmount = 0;
+            this.model.totalAmount = 0;
+            this.model.netAmount = 0;
+            this.model.dueAmount = 0;
+            this.populatePaymentStatus();
         }
     }
 
@@ -330,6 +335,11 @@ export class SalesEntryComponent extends PagedListingComponentBase<SalesProductD
             product.qtyDisabled = true;
             product.totalPrice = 0;
             product.quantity = 0;
+
+            this.model.paidAmount = 0;
+            this.totalPaidChanged();
+
+            this.updateTotalPrice(product);
         }
 
         const products = this.primengTableHelper.records;

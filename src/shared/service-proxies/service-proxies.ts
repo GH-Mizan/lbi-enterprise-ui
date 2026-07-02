@@ -554,6 +554,302 @@ export class AccountHeadServiceProxy {
 }
 
 @Injectable()
+export class AdditionalPartiesServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param searchText (optional) 
+     * @param skip (optional) 
+     * @param take (optional) 
+     * @return OK
+     */
+    getPaginatedAdditionalPartiesAdvances(searchText: string | undefined, skip: number | undefined, take: number | undefined): Observable<AdditionalPartyOutputDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/AdditionalParties/GetPaginatedAdditionalPartiesAdvances?";
+        if (searchText === null)
+            throw new Error("The parameter 'searchText' cannot be null.");
+        else if (searchText !== undefined)
+            url_ += "SearchText=" + encodeURIComponent("" + searchText) + "&";
+        if (skip === null)
+            throw new Error("The parameter 'skip' cannot be null.");
+        else if (skip !== undefined)
+            url_ += "Skip=" + encodeURIComponent("" + skip) + "&";
+        if (take === null)
+            throw new Error("The parameter 'take' cannot be null.");
+        else if (take !== undefined)
+            url_ += "Take=" + encodeURIComponent("" + take) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetPaginatedAdditionalPartiesAdvances(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetPaginatedAdditionalPartiesAdvances(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<AdditionalPartyOutputDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<AdditionalPartyOutputDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetPaginatedAdditionalPartiesAdvances(response: HttpResponseBase): Observable<AdditionalPartyOutputDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AdditionalPartyOutputDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    get(id: number | undefined): Observable<AdditionalPartyEntryDto> {
+        let url_ = this.baseUrl + "/api/services/app/AdditionalParties/Get?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<AdditionalPartyEntryDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<AdditionalPartyEntryDto>;
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<AdditionalPartyEntryDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AdditionalPartyEntryDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrUpdate(body: AdditionalPartyEntryDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/AdditionalParties/CreateOrUpdate";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrUpdate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrUpdate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processCreateOrUpdate(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    additionalPartyRemove(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/AdditionalParties/AdditionalPartyRemove?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processAdditionalPartyRemove(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processAdditionalPartyRemove(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processAdditionalPartyRemove(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getAdditionalPartiesSelectlist(): Observable<ComboboxItemDto[]> {
+        let url_ = this.baseUrl + "/api/services/app/AdditionalParties/GetAdditionalPartiesSelectlist";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAdditionalPartiesSelectlist(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAdditionalPartiesSelectlist(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ComboboxItemDto[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ComboboxItemDto[]>;
+        }));
+    }
+
+    protected processGetAdditionalPartiesSelectlist(response: HttpResponseBase): Observable<ComboboxItemDto[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(ComboboxItemDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
 export class ConfigurationServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -1337,6 +1633,58 @@ export class DailyCashServiceProxy {
     }
 
     /**
+     * @param id (optional) 
+     * @return OK
+     */
+    dailyCashRemove(id: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/DailyCash/DailyCashRemove?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDailyCashRemove(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDailyCashRemove(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDailyCashRemove(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
      * @param body (optional) 
      * @return OK
      */
@@ -1394,16 +1742,73 @@ export class DailyCashServiceProxy {
     }
 
     /**
-     * @param date (optional) 
      * @param body (optional) 
      * @return OK
      */
-    createOrUpdateVoucher(date: moment.Moment | undefined, body: VoucherEntryDto[] | undefined): Observable<void> {
-        let url_ = this.baseUrl + "/api/services/app/DailyCash/CreateOrUpdateVoucher?";
-        if (date === null)
-            throw new Error("The parameter 'date' cannot be null.");
-        else if (date !== undefined)
-            url_ += "date=" + encodeURIComponent(date ? "" + date.toISOString() : "") + "&";
+    createOrUpdateVouchersAndDailyCash(body: VouchersAndDailyCashCreateUpdateDto | undefined): Observable<number> {
+        let url_ = this.baseUrl + "/api/services/app/DailyCash/CreateOrUpdateVouchersAndDailyCash";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateOrUpdateVouchersAndDailyCash(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateOrUpdateVouchersAndDailyCash(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<number>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<number>;
+        }));
+    }
+
+    protected processCreateOrUpdateVouchersAndDailyCash(response: HttpResponseBase): Observable<number> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param dailyCashId (optional) 
+     * @param body (optional) 
+     * @return OK
+     */
+    createOrUpdateVouchers(dailyCashId: number | undefined, body: VoucherEntryDto[] | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/DailyCash/CreateOrUpdateVouchers?";
+        if (dailyCashId === null)
+            throw new Error("The parameter 'dailyCashId' cannot be null.");
+        else if (dailyCashId !== undefined)
+            url_ += "dailyCashId=" + encodeURIComponent("" + dailyCashId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         const content_ = JSON.stringify(body);
@@ -1418,11 +1823,11 @@ export class DailyCashServiceProxy {
         };
 
         return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processCreateOrUpdateVoucher(response_);
+            return this.processCreateOrUpdateVouchers(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processCreateOrUpdateVoucher(response_ as any);
+                    return this.processCreateOrUpdateVouchers(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<void>;
                 }
@@ -1431,7 +1836,7 @@ export class DailyCashServiceProxy {
         }));
     }
 
-    protected processCreateOrUpdateVoucher(response: HttpResponseBase): Observable<void> {
+    protected processCreateOrUpdateVouchers(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1451,15 +1856,15 @@ export class DailyCashServiceProxy {
     }
 
     /**
-     * @param date (optional) 
+     * @param dailyCashId (optional) 
      * @return OK
      */
-    getVouchers(date: moment.Moment | undefined): Observable<VouchersOutputDto> {
+    getVouchers(dailyCashId: number | undefined): Observable<VoucherOutputDto[]> {
         let url_ = this.baseUrl + "/api/services/app/DailyCash/GetVouchers?";
-        if (date === null)
-            throw new Error("The parameter 'date' cannot be null.");
-        else if (date !== undefined)
-            url_ += "date=" + encodeURIComponent(date ? "" + date.toISOString() : "") + "&";
+        if (dailyCashId === null)
+            throw new Error("The parameter 'dailyCashId' cannot be null.");
+        else if (dailyCashId !== undefined)
+            url_ += "dailyCashId=" + encodeURIComponent("" + dailyCashId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -1477,14 +1882,14 @@ export class DailyCashServiceProxy {
                 try {
                     return this.processGetVouchers(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<VouchersOutputDto>;
+                    return _observableThrow(e) as any as Observable<VoucherOutputDto[]>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<VouchersOutputDto>;
+                return _observableThrow(response_) as any as Observable<VoucherOutputDto[]>;
         }));
     }
 
-    protected processGetVouchers(response: HttpResponseBase): Observable<VouchersOutputDto> {
+    protected processGetVouchers(response: HttpResponseBase): Observable<VoucherOutputDto[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1495,7 +1900,66 @@ export class DailyCashServiceProxy {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = VouchersOutputDto.fromJS(resultData200);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200.push(VoucherOutputDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    getStartDate(): Observable<moment.Moment> {
+        let url_ = this.baseUrl + "/api/services/app/DailyCash/GetStartDate";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetStartDate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetStartDate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<moment.Moment>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<moment.Moment>;
+        }));
+    }
+
+    protected processGetStartDate(response: HttpResponseBase): Observable<moment.Moment> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 ? moment(resultData200.toString()) : <any>null;
+    
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -1558,15 +2022,15 @@ export class DailyCashServiceProxy {
     }
 
     /**
-     * @param date (optional) 
+     * @param dailyCashIId (optional) 
      * @return OK
      */
-    vouchersRemoveByDate(date: moment.Moment | undefined): Observable<void> {
-        let url_ = this.baseUrl + "/api/services/app/DailyCash/VouchersRemoveByDate?";
-        if (date === null)
-            throw new Error("The parameter 'date' cannot be null.");
-        else if (date !== undefined)
-            url_ += "date=" + encodeURIComponent(date ? "" + date.toISOString() : "") + "&";
+    vouchersRemove(dailyCashIId: number | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/DailyCash/VouchersRemove?";
+        if (dailyCashIId === null)
+            throw new Error("The parameter 'dailyCashIId' cannot be null.");
+        else if (dailyCashIId !== undefined)
+            url_ += "dailyCashIId=" + encodeURIComponent("" + dailyCashIId) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -1577,11 +2041,11 @@ export class DailyCashServiceProxy {
         };
 
         return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processVouchersRemoveByDate(response_);
+            return this.processVouchersRemove(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processVouchersRemoveByDate(response_ as any);
+                    return this.processVouchersRemove(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<void>;
                 }
@@ -1590,7 +2054,7 @@ export class DailyCashServiceProxy {
         }));
     }
 
-    protected processVouchersRemoveByDate(response: HttpResponseBase): Observable<void> {
+    protected processVouchersRemove(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1600,6 +2064,62 @@ export class DailyCashServiceProxy {
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param currentDate (optional) 
+     * @return OK
+     */
+    getPreviousDailyCash(currentDate: moment.Moment | undefined): Observable<DailyCashOutputDto> {
+        let url_ = this.baseUrl + "/api/services/app/DailyCash/GetPreviousDailyCash?";
+        if (currentDate === null)
+            throw new Error("The parameter 'currentDate' cannot be null.");
+        else if (currentDate !== undefined)
+            url_ += "currentDate=" + encodeURIComponent(currentDate ? "" + currentDate.toISOString() : "") + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetPreviousDailyCash(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetPreviousDailyCash(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<DailyCashOutputDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<DailyCashOutputDto>;
+        }));
+    }
+
+    protected processGetPreviousDailyCash(response: HttpResponseBase): Observable<DailyCashOutputDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DailyCashOutputDto.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5067,7 +5587,7 @@ export class SalaryServiceProxy {
     /**
      * @return OK
      */
-    getSalaryAdvanceList(): Observable<SalaryAdvanceDto[]> {
+    getSalaryAdvanceList(): Observable<SalaryAdvanceOutputDto> {
         let url_ = this.baseUrl + "/api/services/app/Salary/GetSalaryAdvanceList";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -5086,14 +5606,14 @@ export class SalaryServiceProxy {
                 try {
                     return this.processGetSalaryAdvanceList(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<SalaryAdvanceDto[]>;
+                    return _observableThrow(e) as any as Observable<SalaryAdvanceOutputDto>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<SalaryAdvanceDto[]>;
+                return _observableThrow(response_) as any as Observable<SalaryAdvanceOutputDto>;
         }));
     }
 
-    protected processGetSalaryAdvanceList(response: HttpResponseBase): Observable<SalaryAdvanceDto[]> {
+    protected processGetSalaryAdvanceList(response: HttpResponseBase): Observable<SalaryAdvanceOutputDto> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5104,14 +5624,7 @@ export class SalaryServiceProxy {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            if (Array.isArray(resultData200)) {
-                result200 = [] as any;
-                for (let item of resultData200)
-                    result200.push(SalaryAdvanceDto.fromJS(item));
-            }
-            else {
-                result200 = <any>null;
-            }
+            result200 = SalaryAdvanceOutputDto.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -9445,6 +9958,7 @@ export interface IAccountHeadEntryDto {
 
 export class AccountHeadOutputDto implements IAccountHeadOutputDto {
     id: number;
+    parentHead: ParentAccountHead;
     parentName: string | undefined;
     name: string | undefined;
     type: AccountHeadType;
@@ -9462,6 +9976,7 @@ export class AccountHeadOutputDto implements IAccountHeadOutputDto {
     init(_data?: any) {
         if (_data) {
             this.id = _data["id"];
+            this.parentHead = _data["parentHead"];
             this.parentName = _data["parentName"];
             this.name = _data["name"];
             this.type = _data["type"];
@@ -9479,6 +9994,7 @@ export class AccountHeadOutputDto implements IAccountHeadOutputDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
+        data["parentHead"] = this.parentHead;
         data["parentName"] = this.parentName;
         data["name"] = this.name;
         data["type"] = this.type;
@@ -9496,6 +10012,7 @@ export class AccountHeadOutputDto implements IAccountHeadOutputDto {
 
 export interface IAccountHeadOutputDto {
     id: number;
+    parentHead: ParentAccountHead;
     parentName: string | undefined;
     name: string | undefined;
     type: AccountHeadType;
@@ -9510,6 +10027,207 @@ export enum AccountHeadType {
 export enum AccountHeadTypeNullable {
     _1 = 1,
     _2 = 2,
+}
+
+export class AdditionalPartyEntryDto implements IAdditionalPartyEntryDto {
+    id: number | undefined;
+    partyName: string | undefined;
+    contactNumber: string | undefined;
+    email: string | undefined;
+    address: string | undefined;
+    relation: string | undefined;
+    advance: number;
+    notes: string | undefined;
+
+    constructor(data?: IAdditionalPartyEntryDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.partyName = _data["partyName"];
+            this.contactNumber = _data["contactNumber"];
+            this.email = _data["email"];
+            this.address = _data["address"];
+            this.relation = _data["relation"];
+            this.advance = _data["advance"];
+            this.notes = _data["notes"];
+        }
+    }
+
+    static fromJS(data: any): AdditionalPartyEntryDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AdditionalPartyEntryDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["partyName"] = this.partyName;
+        data["contactNumber"] = this.contactNumber;
+        data["email"] = this.email;
+        data["address"] = this.address;
+        data["relation"] = this.relation;
+        data["advance"] = this.advance;
+        data["notes"] = this.notes;
+        return data;
+    }
+
+    clone(): AdditionalPartyEntryDto {
+        const json = this.toJSON();
+        let result = new AdditionalPartyEntryDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAdditionalPartyEntryDto {
+    id: number | undefined;
+    partyName: string | undefined;
+    contactNumber: string | undefined;
+    email: string | undefined;
+    address: string | undefined;
+    relation: string | undefined;
+    advance: number;
+    notes: string | undefined;
+}
+
+export class AdditionalPartyOutputDto implements IAdditionalPartyOutputDto {
+    id: number;
+    partyName: string | undefined;
+    contactNumber: string | undefined;
+    email: string | undefined;
+    address: string | undefined;
+    relation: string | undefined;
+    advance: number;
+    notes: string | undefined;
+    tenantId: number;
+
+    constructor(data?: IAdditionalPartyOutputDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.partyName = _data["partyName"];
+            this.contactNumber = _data["contactNumber"];
+            this.email = _data["email"];
+            this.address = _data["address"];
+            this.relation = _data["relation"];
+            this.advance = _data["advance"];
+            this.notes = _data["notes"];
+            this.tenantId = _data["tenantId"];
+        }
+    }
+
+    static fromJS(data: any): AdditionalPartyOutputDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AdditionalPartyOutputDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["partyName"] = this.partyName;
+        data["contactNumber"] = this.contactNumber;
+        data["email"] = this.email;
+        data["address"] = this.address;
+        data["relation"] = this.relation;
+        data["advance"] = this.advance;
+        data["notes"] = this.notes;
+        data["tenantId"] = this.tenantId;
+        return data;
+    }
+
+    clone(): AdditionalPartyOutputDto {
+        const json = this.toJSON();
+        let result = new AdditionalPartyOutputDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAdditionalPartyOutputDto {
+    id: number;
+    partyName: string | undefined;
+    contactNumber: string | undefined;
+    email: string | undefined;
+    address: string | undefined;
+    relation: string | undefined;
+    advance: number;
+    notes: string | undefined;
+    tenantId: number;
+}
+
+export class AdditionalPartyOutputDtoPagedResultDto implements IAdditionalPartyOutputDtoPagedResultDto {
+    items: AdditionalPartyOutputDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: IAdditionalPartyOutputDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(AdditionalPartyOutputDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): AdditionalPartyOutputDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AdditionalPartyOutputDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): AdditionalPartyOutputDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new AdditionalPartyOutputDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IAdditionalPartyOutputDtoPagedResultDto {
+    items: AdditionalPartyOutputDto[] | undefined;
+    totalCount: number;
 }
 
 export class ApplicationInfoDto implements IApplicationInfoDto {
@@ -9925,8 +10643,11 @@ export interface IComboboxItemDto {
 }
 
 export class CreateOrUpdateDailyCashInput implements ICreateOrUpdateDailyCashInput {
-    dailyCashInfo: DailyCashEntryDto;
-    prevCashInfo: DailyCashEntryDto;
+    dailyCash: DailyCashEntryDto;
+    incomes: DailyCashIncomeDetailDto[] | undefined;
+    expenses: DailyCashExpenseDetailDto[] | undefined;
+    advances: DailyCashAdvanceDetailDto[] | undefined;
+    dayEndCashes: DailyCashDayEndDetailDto[] | undefined;
 
     constructor(data?: ICreateOrUpdateDailyCashInput) {
         if (data) {
@@ -9939,8 +10660,27 @@ export class CreateOrUpdateDailyCashInput implements ICreateOrUpdateDailyCashInp
 
     init(_data?: any) {
         if (_data) {
-            this.dailyCashInfo = _data["dailyCashInfo"] ? DailyCashEntryDto.fromJS(_data["dailyCashInfo"]) : <any>undefined;
-            this.prevCashInfo = _data["prevCashInfo"] ? DailyCashEntryDto.fromJS(_data["prevCashInfo"]) : <any>undefined;
+            this.dailyCash = _data["dailyCash"] ? DailyCashEntryDto.fromJS(_data["dailyCash"]) : <any>undefined;
+            if (Array.isArray(_data["incomes"])) {
+                this.incomes = [] as any;
+                for (let item of _data["incomes"])
+                    this.incomes.push(DailyCashIncomeDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["expenses"])) {
+                this.expenses = [] as any;
+                for (let item of _data["expenses"])
+                    this.expenses.push(DailyCashExpenseDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["advances"])) {
+                this.advances = [] as any;
+                for (let item of _data["advances"])
+                    this.advances.push(DailyCashAdvanceDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["dayEndCashes"])) {
+                this.dayEndCashes = [] as any;
+                for (let item of _data["dayEndCashes"])
+                    this.dayEndCashes.push(DailyCashDayEndDetailDto.fromJS(item));
+            }
         }
     }
 
@@ -9953,8 +10693,27 @@ export class CreateOrUpdateDailyCashInput implements ICreateOrUpdateDailyCashInp
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["dailyCashInfo"] = this.dailyCashInfo ? this.dailyCashInfo.toJSON() : <any>undefined;
-        data["prevCashInfo"] = this.prevCashInfo ? this.prevCashInfo.toJSON() : <any>undefined;
+        data["dailyCash"] = this.dailyCash ? this.dailyCash.toJSON() : <any>undefined;
+        if (Array.isArray(this.incomes)) {
+            data["incomes"] = [];
+            for (let item of this.incomes)
+                data["incomes"].push(item.toJSON());
+        }
+        if (Array.isArray(this.expenses)) {
+            data["expenses"] = [];
+            for (let item of this.expenses)
+                data["expenses"].push(item.toJSON());
+        }
+        if (Array.isArray(this.advances)) {
+            data["advances"] = [];
+            for (let item of this.advances)
+                data["advances"].push(item.toJSON());
+        }
+        if (Array.isArray(this.dayEndCashes)) {
+            data["dayEndCashes"] = [];
+            for (let item of this.dayEndCashes)
+                data["dayEndCashes"].push(item.toJSON());
+        }
         return data;
     }
 
@@ -9967,8 +10726,11 @@ export class CreateOrUpdateDailyCashInput implements ICreateOrUpdateDailyCashInp
 }
 
 export interface ICreateOrUpdateDailyCashInput {
-    dailyCashInfo: DailyCashEntryDto;
-    prevCashInfo: DailyCashEntryDto;
+    dailyCash: DailyCashEntryDto;
+    incomes: DailyCashIncomeDetailDto[] | undefined;
+    expenses: DailyCashExpenseDetailDto[] | undefined;
+    advances: DailyCashAdvanceDetailDto[] | undefined;
+    dayEndCashes: DailyCashDayEndDetailDto[] | undefined;
 }
 
 export class CreateRoleDto implements ICreateRoleDto {
@@ -10883,18 +11645,160 @@ export interface ICustomerPriceDto {
     price: number;
 }
 
+export class DailyCashAdvanceDetailDto implements IDailyCashAdvanceDetailDto {
+    id: number;
+    dailyCashId: number;
+    employeeId: number;
+    type: string | undefined;
+    head: string | undefined;
+    amount: number;
+    uid: string | undefined;
+
+    constructor(data?: IDailyCashAdvanceDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.dailyCashId = _data["dailyCashId"];
+            this.employeeId = _data["employeeId"];
+            this.type = _data["type"];
+            this.head = _data["head"];
+            this.amount = _data["amount"];
+            this.uid = _data["uid"];
+        }
+    }
+
+    static fromJS(data: any): DailyCashAdvanceDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DailyCashAdvanceDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["dailyCashId"] = this.dailyCashId;
+        data["employeeId"] = this.employeeId;
+        data["type"] = this.type;
+        data["head"] = this.head;
+        data["amount"] = this.amount;
+        data["uid"] = this.uid;
+        return data;
+    }
+
+    clone(): DailyCashAdvanceDetailDto {
+        const json = this.toJSON();
+        let result = new DailyCashAdvanceDetailDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IDailyCashAdvanceDetailDto {
+    id: number;
+    dailyCashId: number;
+    employeeId: number;
+    type: string | undefined;
+    head: string | undefined;
+    amount: number;
+    uid: string | undefined;
+}
+
+export class DailyCashDayEndDetailDto implements IDailyCashDayEndDetailDto {
+    id: number;
+    dailyCashId: number;
+    employeeId: number;
+    type: string | undefined;
+    head: string | undefined;
+    amount: number;
+    mtmKey: string | undefined;
+    uid: string | undefined;
+
+    constructor(data?: IDailyCashDayEndDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.dailyCashId = _data["dailyCashId"];
+            this.employeeId = _data["employeeId"];
+            this.type = _data["type"];
+            this.head = _data["head"];
+            this.amount = _data["amount"];
+            this.mtmKey = _data["mtmKey"];
+            this.uid = _data["uid"];
+        }
+    }
+
+    static fromJS(data: any): DailyCashDayEndDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DailyCashDayEndDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["dailyCashId"] = this.dailyCashId;
+        data["employeeId"] = this.employeeId;
+        data["type"] = this.type;
+        data["head"] = this.head;
+        data["amount"] = this.amount;
+        data["mtmKey"] = this.mtmKey;
+        data["uid"] = this.uid;
+        return data;
+    }
+
+    clone(): DailyCashDayEndDetailDto {
+        const json = this.toJSON();
+        let result = new DailyCashDayEndDetailDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IDailyCashDayEndDetailDto {
+    id: number;
+    dailyCashId: number;
+    employeeId: number;
+    type: string | undefined;
+    head: string | undefined;
+    amount: number;
+    mtmKey: string | undefined;
+    uid: string | undefined;
+}
+
 export class DailyCashEntryDto implements IDailyCashEntryDto {
     id: number | undefined;
     date: moment.Moment;
-    totalActualIncome: number;
-    totalVirtualTransaction: number;
+    totalIncome: number;
     totalExpense: number;
-    dayStartCashBalance: number;
-    dayStartAdvanceBalance: number;
-    dayEndCashBalance: number;
-    dayEndAdvanceBalance: number;
+    totalAdvance: number;
+    totalDayEndCash: number;
+    paperBalance: number;
+    actualBalance: number;
     difference: number;
-    metadata: string | undefined;
+    totalDue: number;
+    balanceCD: number;
+    actualDifference: number;
+    completed: boolean;
+    remarks: string | undefined;
+    tenantId: number;
 
     constructor(data?: IDailyCashEntryDto) {
         if (data) {
@@ -10909,15 +11813,19 @@ export class DailyCashEntryDto implements IDailyCashEntryDto {
         if (_data) {
             this.id = _data["id"];
             this.date = _data["date"] ? moment(_data["date"].toString()) : <any>undefined;
-            this.totalActualIncome = _data["totalActualIncome"];
-            this.totalVirtualTransaction = _data["totalVirtualTransaction"];
+            this.totalIncome = _data["totalIncome"];
             this.totalExpense = _data["totalExpense"];
-            this.dayStartCashBalance = _data["dayStartCashBalance"];
-            this.dayStartAdvanceBalance = _data["dayStartAdvanceBalance"];
-            this.dayEndCashBalance = _data["dayEndCashBalance"];
-            this.dayEndAdvanceBalance = _data["dayEndAdvanceBalance"];
+            this.totalAdvance = _data["totalAdvance"];
+            this.totalDayEndCash = _data["totalDayEndCash"];
+            this.paperBalance = _data["paperBalance"];
+            this.actualBalance = _data["actualBalance"];
             this.difference = _data["difference"];
-            this.metadata = _data["metadata"];
+            this.totalDue = _data["totalDue"];
+            this.balanceCD = _data["balanceCD"];
+            this.actualDifference = _data["actualDifference"];
+            this.completed = _data["completed"];
+            this.remarks = _data["remarks"];
+            this.tenantId = _data["tenantId"];
         }
     }
 
@@ -10932,15 +11840,19 @@ export class DailyCashEntryDto implements IDailyCashEntryDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["date"] = this.date ? this.date.toISOString() : <any>undefined;
-        data["totalActualIncome"] = this.totalActualIncome;
-        data["totalVirtualTransaction"] = this.totalVirtualTransaction;
+        data["totalIncome"] = this.totalIncome;
         data["totalExpense"] = this.totalExpense;
-        data["dayStartCashBalance"] = this.dayStartCashBalance;
-        data["dayStartAdvanceBalance"] = this.dayStartAdvanceBalance;
-        data["dayEndCashBalance"] = this.dayEndCashBalance;
-        data["dayEndAdvanceBalance"] = this.dayEndAdvanceBalance;
+        data["totalAdvance"] = this.totalAdvance;
+        data["totalDayEndCash"] = this.totalDayEndCash;
+        data["paperBalance"] = this.paperBalance;
+        data["actualBalance"] = this.actualBalance;
         data["difference"] = this.difference;
-        data["metadata"] = this.metadata;
+        data["totalDue"] = this.totalDue;
+        data["balanceCD"] = this.balanceCD;
+        data["actualDifference"] = this.actualDifference;
+        data["completed"] = this.completed;
+        data["remarks"] = this.remarks;
+        data["tenantId"] = this.tenantId;
         return data;
     }
 
@@ -10955,28 +11867,181 @@ export class DailyCashEntryDto implements IDailyCashEntryDto {
 export interface IDailyCashEntryDto {
     id: number | undefined;
     date: moment.Moment;
-    totalActualIncome: number;
-    totalVirtualTransaction: number;
+    totalIncome: number;
     totalExpense: number;
-    dayStartCashBalance: number;
-    dayStartAdvanceBalance: number;
-    dayEndCashBalance: number;
-    dayEndAdvanceBalance: number;
+    totalAdvance: number;
+    totalDayEndCash: number;
+    paperBalance: number;
+    actualBalance: number;
     difference: number;
-    metadata: string | undefined;
+    totalDue: number;
+    balanceCD: number;
+    actualDifference: number;
+    completed: boolean;
+    remarks: string | undefined;
+    tenantId: number;
+}
+
+export class DailyCashExpenseDetailDto implements IDailyCashExpenseDetailDto {
+    id: number | undefined;
+    dailyCashId: number;
+    expenseId: number;
+    key: string | undefined;
+    head: string | undefined;
+    amount: number;
+    uid: string | undefined;
+
+    constructor(data?: IDailyCashExpenseDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.dailyCashId = _data["dailyCashId"];
+            this.expenseId = _data["expenseId"];
+            this.key = _data["key"];
+            this.head = _data["head"];
+            this.amount = _data["amount"];
+            this.uid = _data["uid"];
+        }
+    }
+
+    static fromJS(data: any): DailyCashExpenseDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DailyCashExpenseDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["dailyCashId"] = this.dailyCashId;
+        data["expenseId"] = this.expenseId;
+        data["key"] = this.key;
+        data["head"] = this.head;
+        data["amount"] = this.amount;
+        data["uid"] = this.uid;
+        return data;
+    }
+
+    clone(): DailyCashExpenseDetailDto {
+        const json = this.toJSON();
+        let result = new DailyCashExpenseDetailDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IDailyCashExpenseDetailDto {
+    id: number | undefined;
+    dailyCashId: number;
+    expenseId: number;
+    key: string | undefined;
+    head: string | undefined;
+    amount: number;
+    uid: string | undefined;
+}
+
+export class DailyCashIncomeDetailDto implements IDailyCashIncomeDetailDto {
+    id: number | undefined;
+    dailyCashId: number;
+    incomeId: number;
+    key: string | undefined;
+    head: string | undefined;
+    amount: number;
+    mtmKey: string | undefined;
+    uid: string | undefined;
+
+    constructor(data?: IDailyCashIncomeDetailDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.dailyCashId = _data["dailyCashId"];
+            this.incomeId = _data["incomeId"];
+            this.key = _data["key"];
+            this.head = _data["head"];
+            this.amount = _data["amount"];
+            this.mtmKey = _data["mtmKey"];
+            this.uid = _data["uid"];
+        }
+    }
+
+    static fromJS(data: any): DailyCashIncomeDetailDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DailyCashIncomeDetailDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["dailyCashId"] = this.dailyCashId;
+        data["incomeId"] = this.incomeId;
+        data["key"] = this.key;
+        data["head"] = this.head;
+        data["amount"] = this.amount;
+        data["mtmKey"] = this.mtmKey;
+        data["uid"] = this.uid;
+        return data;
+    }
+
+    clone(): DailyCashIncomeDetailDto {
+        const json = this.toJSON();
+        let result = new DailyCashIncomeDetailDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IDailyCashIncomeDetailDto {
+    id: number | undefined;
+    dailyCashId: number;
+    incomeId: number;
+    key: string | undefined;
+    head: string | undefined;
+    amount: number;
+    mtmKey: string | undefined;
+    uid: string | undefined;
 }
 
 export class DailyCashOutputDto implements IDailyCashOutputDto {
-    id: number;
+    id: number | undefined;
     date: moment.Moment;
-    totalActualIncome: number;
-    totalVirtualTransaction: number;
+    totalIncome: number;
     totalExpense: number;
-    dayStartCashBalance: number;
-    dayStartAdvanceBalance: number;
-    dayEndCashBalance: number;
-    dayEndAdvanceBalance: number;
+    totalAdvance: number;
+    totalDayEndCash: number;
+    paperBalance: number;
+    actualBalance: number;
     difference: number;
+    totalDue: number;
+    balanceCD: number;
+    actualDifference: number;
+    completed: boolean;
+    remarks: string | undefined;
+    isLast: boolean;
+    isNew: boolean;
+    incomes: DailyCashIncomeDetailDto[] | undefined;
+    expenses: DailyCashExpenseDetailDto[] | undefined;
+    advances: DailyCashAdvanceDetailDto[] | undefined;
+    dayEndCashes: DailyCashDayEndDetailDto[] | undefined;
+    vouchers: VoucherOutputDto[] | undefined;
 
     constructor(data?: IDailyCashOutputDto) {
         if (data) {
@@ -10991,14 +12056,45 @@ export class DailyCashOutputDto implements IDailyCashOutputDto {
         if (_data) {
             this.id = _data["id"];
             this.date = _data["date"] ? moment(_data["date"].toString()) : <any>undefined;
-            this.totalActualIncome = _data["totalActualIncome"];
-            this.totalVirtualTransaction = _data["totalVirtualTransaction"];
+            this.totalIncome = _data["totalIncome"];
             this.totalExpense = _data["totalExpense"];
-            this.dayStartCashBalance = _data["dayStartCashBalance"];
-            this.dayStartAdvanceBalance = _data["dayStartAdvanceBalance"];
-            this.dayEndCashBalance = _data["dayEndCashBalance"];
-            this.dayEndAdvanceBalance = _data["dayEndAdvanceBalance"];
+            this.totalAdvance = _data["totalAdvance"];
+            this.totalDayEndCash = _data["totalDayEndCash"];
+            this.paperBalance = _data["paperBalance"];
+            this.actualBalance = _data["actualBalance"];
             this.difference = _data["difference"];
+            this.totalDue = _data["totalDue"];
+            this.balanceCD = _data["balanceCD"];
+            this.actualDifference = _data["actualDifference"];
+            this.completed = _data["completed"];
+            this.remarks = _data["remarks"];
+            this.isLast = _data["isLast"];
+            this.isNew = _data["isNew"];
+            if (Array.isArray(_data["incomes"])) {
+                this.incomes = [] as any;
+                for (let item of _data["incomes"])
+                    this.incomes.push(DailyCashIncomeDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["expenses"])) {
+                this.expenses = [] as any;
+                for (let item of _data["expenses"])
+                    this.expenses.push(DailyCashExpenseDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["advances"])) {
+                this.advances = [] as any;
+                for (let item of _data["advances"])
+                    this.advances.push(DailyCashAdvanceDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["dayEndCashes"])) {
+                this.dayEndCashes = [] as any;
+                for (let item of _data["dayEndCashes"])
+                    this.dayEndCashes.push(DailyCashDayEndDetailDto.fromJS(item));
+            }
+            if (Array.isArray(_data["vouchers"])) {
+                this.vouchers = [] as any;
+                for (let item of _data["vouchers"])
+                    this.vouchers.push(VoucherOutputDto.fromJS(item));
+            }
         }
     }
 
@@ -11013,14 +12109,45 @@ export class DailyCashOutputDto implements IDailyCashOutputDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["date"] = this.date ? this.date.toISOString() : <any>undefined;
-        data["totalActualIncome"] = this.totalActualIncome;
-        data["totalVirtualTransaction"] = this.totalVirtualTransaction;
+        data["totalIncome"] = this.totalIncome;
         data["totalExpense"] = this.totalExpense;
-        data["dayStartCashBalance"] = this.dayStartCashBalance;
-        data["dayStartAdvanceBalance"] = this.dayStartAdvanceBalance;
-        data["dayEndCashBalance"] = this.dayEndCashBalance;
-        data["dayEndAdvanceBalance"] = this.dayEndAdvanceBalance;
+        data["totalAdvance"] = this.totalAdvance;
+        data["totalDayEndCash"] = this.totalDayEndCash;
+        data["paperBalance"] = this.paperBalance;
+        data["actualBalance"] = this.actualBalance;
         data["difference"] = this.difference;
+        data["totalDue"] = this.totalDue;
+        data["balanceCD"] = this.balanceCD;
+        data["actualDifference"] = this.actualDifference;
+        data["completed"] = this.completed;
+        data["remarks"] = this.remarks;
+        data["isLast"] = this.isLast;
+        data["isNew"] = this.isNew;
+        if (Array.isArray(this.incomes)) {
+            data["incomes"] = [];
+            for (let item of this.incomes)
+                data["incomes"].push(item.toJSON());
+        }
+        if (Array.isArray(this.expenses)) {
+            data["expenses"] = [];
+            for (let item of this.expenses)
+                data["expenses"].push(item.toJSON());
+        }
+        if (Array.isArray(this.advances)) {
+            data["advances"] = [];
+            for (let item of this.advances)
+                data["advances"].push(item.toJSON());
+        }
+        if (Array.isArray(this.dayEndCashes)) {
+            data["dayEndCashes"] = [];
+            for (let item of this.dayEndCashes)
+                data["dayEndCashes"].push(item.toJSON());
+        }
+        if (Array.isArray(this.vouchers)) {
+            data["vouchers"] = [];
+            for (let item of this.vouchers)
+                data["vouchers"].push(item.toJSON());
+        }
         return data;
     }
 
@@ -11033,16 +12160,27 @@ export class DailyCashOutputDto implements IDailyCashOutputDto {
 }
 
 export interface IDailyCashOutputDto {
-    id: number;
+    id: number | undefined;
     date: moment.Moment;
-    totalActualIncome: number;
-    totalVirtualTransaction: number;
+    totalIncome: number;
     totalExpense: number;
-    dayStartCashBalance: number;
-    dayStartAdvanceBalance: number;
-    dayEndCashBalance: number;
-    dayEndAdvanceBalance: number;
+    totalAdvance: number;
+    totalDayEndCash: number;
+    paperBalance: number;
+    actualBalance: number;
     difference: number;
+    totalDue: number;
+    balanceCD: number;
+    actualDifference: number;
+    completed: boolean;
+    remarks: string | undefined;
+    isLast: boolean;
+    isNew: boolean;
+    incomes: DailyCashIncomeDetailDto[] | undefined;
+    expenses: DailyCashExpenseDetailDto[] | undefined;
+    advances: DailyCashAdvanceDetailDto[] | undefined;
+    dayEndCashes: DailyCashDayEndDetailDto[] | undefined;
+    vouchers: VoucherOutputDto[] | undefined;
 }
 
 export class DailyCashOutputDtoPagedResultDto implements IDailyCashOutputDtoPagedResultDto {
@@ -12161,8 +13299,8 @@ export class DueReceivedEntryDto implements IDueReceivedEntryDto {
     invoiceNumber: string | undefined;
     paymentStatus: PaymentStatus;
     paymentStatusText: string | undefined;
-    customerId: number;
-    customerName: string | undefined;
+    clientId: number;
+    clientName: string | undefined;
     salesBy: string | undefined;
     grandTotal: number;
     prevDiscount: number;
@@ -12191,8 +13329,8 @@ export class DueReceivedEntryDto implements IDueReceivedEntryDto {
             this.invoiceNumber = _data["invoiceNumber"];
             this.paymentStatus = _data["paymentStatus"];
             this.paymentStatusText = _data["paymentStatusText"];
-            this.customerId = _data["customerId"];
-            this.customerName = _data["customerName"];
+            this.clientId = _data["clientId"];
+            this.clientName = _data["clientName"];
             this.salesBy = _data["salesBy"];
             this.grandTotal = _data["grandTotal"];
             this.prevDiscount = _data["prevDiscount"];
@@ -12221,8 +13359,8 @@ export class DueReceivedEntryDto implements IDueReceivedEntryDto {
         data["invoiceNumber"] = this.invoiceNumber;
         data["paymentStatus"] = this.paymentStatus;
         data["paymentStatusText"] = this.paymentStatusText;
-        data["customerId"] = this.customerId;
-        data["customerName"] = this.customerName;
+        data["clientId"] = this.clientId;
+        data["clientName"] = this.clientName;
         data["salesBy"] = this.salesBy;
         data["grandTotal"] = this.grandTotal;
         data["prevDiscount"] = this.prevDiscount;
@@ -12251,8 +13389,8 @@ export interface IDueReceivedEntryDto {
     invoiceNumber: string | undefined;
     paymentStatus: PaymentStatus;
     paymentStatusText: string | undefined;
-    customerId: number;
-    customerName: string | undefined;
+    clientId: number;
+    clientName: string | undefined;
     salesBy: string | undefined;
     grandTotal: number;
     prevDiscount: number;
@@ -13817,6 +14955,13 @@ export interface IOverallVirtualInventoriesOutput {
 export enum ParentAccountHead {
     _1 = 1,
     _2 = 2,
+    _3 = 3,
+    _4 = 4,
+    _5 = 5,
+    _6 = 6,
+    _7 = 7,
+    _8 = 8,
+    _9 = 9,
 }
 
 export enum PaymentStatus {
@@ -15640,6 +16785,85 @@ export interface ISalaryAdvanceDto {
     remarks: string | undefined;
     remarksEditMode: boolean;
     fromUi: boolean;
+}
+
+export class SalaryAdvanceOutputDto implements ISalaryAdvanceOutputDto {
+    advances: SalaryAdvanceDto[] | undefined;
+    additionalParitesAdvances: AdditionalPartyOutputDto[] | undefined;
+    totalAdvance: number;
+    totalLoan: number;
+    totalBorrowing: number;
+    totalAdditionalPartiesAdvance: number;
+
+    constructor(data?: ISalaryAdvanceOutputDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["advances"])) {
+                this.advances = [] as any;
+                for (let item of _data["advances"])
+                    this.advances.push(SalaryAdvanceDto.fromJS(item));
+            }
+            if (Array.isArray(_data["additionalParitesAdvances"])) {
+                this.additionalParitesAdvances = [] as any;
+                for (let item of _data["additionalParitesAdvances"])
+                    this.additionalParitesAdvances.push(AdditionalPartyOutputDto.fromJS(item));
+            }
+            this.totalAdvance = _data["totalAdvance"];
+            this.totalLoan = _data["totalLoan"];
+            this.totalBorrowing = _data["totalBorrowing"];
+            this.totalAdditionalPartiesAdvance = _data["totalAdditionalPartiesAdvance"];
+        }
+    }
+
+    static fromJS(data: any): SalaryAdvanceOutputDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SalaryAdvanceOutputDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.advances)) {
+            data["advances"] = [];
+            for (let item of this.advances)
+                data["advances"].push(item.toJSON());
+        }
+        if (Array.isArray(this.additionalParitesAdvances)) {
+            data["additionalParitesAdvances"] = [];
+            for (let item of this.additionalParitesAdvances)
+                data["additionalParitesAdvances"].push(item.toJSON());
+        }
+        data["totalAdvance"] = this.totalAdvance;
+        data["totalLoan"] = this.totalLoan;
+        data["totalBorrowing"] = this.totalBorrowing;
+        data["totalAdditionalPartiesAdvance"] = this.totalAdditionalPartiesAdvance;
+        return data;
+    }
+
+    clone(): SalaryAdvanceOutputDto {
+        const json = this.toJSON();
+        let result = new SalaryAdvanceOutputDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISalaryAdvanceOutputDto {
+    advances: SalaryAdvanceDto[] | undefined;
+    additionalParitesAdvances: AdditionalPartyOutputDto[] | undefined;
+    totalAdvance: number;
+    totalLoan: number;
+    totalBorrowing: number;
+    totalAdditionalPartiesAdvance: number;
 }
 
 export class SalaryEntryInputDto implements ISalaryEntryInputDto {
@@ -18287,12 +19511,14 @@ export enum VirtualStockTypeNullable {
 
 export class VoucherEntryDto implements IVoucherEntryDto {
     date: moment.Moment;
+    dailyCashId: number;
     voucherNumber: string | undefined;
-    creator: string | undefined;
+    creatorId: number;
     carNumber: string | undefined;
     totalAmount: number;
     incomeRecords: string | undefined;
     expenseRecords: string | undefined;
+    dayEndCash: number;
 
     constructor(data?: IVoucherEntryDto) {
         if (data) {
@@ -18306,12 +19532,14 @@ export class VoucherEntryDto implements IVoucherEntryDto {
     init(_data?: any) {
         if (_data) {
             this.date = _data["date"] ? moment(_data["date"].toString()) : <any>undefined;
+            this.dailyCashId = _data["dailyCashId"];
             this.voucherNumber = _data["voucherNumber"];
-            this.creator = _data["creator"];
+            this.creatorId = _data["creatorId"];
             this.carNumber = _data["carNumber"];
             this.totalAmount = _data["totalAmount"];
             this.incomeRecords = _data["incomeRecords"];
             this.expenseRecords = _data["expenseRecords"];
+            this.dayEndCash = _data["dayEndCash"];
         }
     }
 
@@ -18325,12 +19553,14 @@ export class VoucherEntryDto implements IVoucherEntryDto {
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
         data["date"] = this.date ? this.date.toISOString() : <any>undefined;
+        data["dailyCashId"] = this.dailyCashId;
         data["voucherNumber"] = this.voucherNumber;
-        data["creator"] = this.creator;
+        data["creatorId"] = this.creatorId;
         data["carNumber"] = this.carNumber;
         data["totalAmount"] = this.totalAmount;
         data["incomeRecords"] = this.incomeRecords;
         data["expenseRecords"] = this.expenseRecords;
+        data["dayEndCash"] = this.dayEndCash;
         return data;
     }
 
@@ -18344,12 +19574,14 @@ export class VoucherEntryDto implements IVoucherEntryDto {
 
 export interface IVoucherEntryDto {
     date: moment.Moment;
+    dailyCashId: number;
     voucherNumber: string | undefined;
-    creator: string | undefined;
+    creatorId: number;
     carNumber: string | undefined;
     totalAmount: number;
     incomeRecords: string | undefined;
     expenseRecords: string | undefined;
+    dayEndCash: number;
 }
 
 export class VoucherFirstLastDateDto implements IVoucherFirstLastDateDto {
@@ -18402,12 +19634,14 @@ export interface IVoucherFirstLastDateDto {
 export class VoucherOutputDto implements IVoucherOutputDto {
     id: number;
     date: moment.Moment;
+    dailyCashId: number;
     voucherNumber: string | undefined;
-    creator: string | undefined;
+    creatorId: number;
     carNumber: string | undefined;
     totalAmount: number;
     incomeRecords: string | undefined;
     expenseRecords: string | undefined;
+    dayEndCash: number;
 
     constructor(data?: IVoucherOutputDto) {
         if (data) {
@@ -18422,12 +19656,14 @@ export class VoucherOutputDto implements IVoucherOutputDto {
         if (_data) {
             this.id = _data["id"];
             this.date = _data["date"] ? moment(_data["date"].toString()) : <any>undefined;
+            this.dailyCashId = _data["dailyCashId"];
             this.voucherNumber = _data["voucherNumber"];
-            this.creator = _data["creator"];
+            this.creatorId = _data["creatorId"];
             this.carNumber = _data["carNumber"];
             this.totalAmount = _data["totalAmount"];
             this.incomeRecords = _data["incomeRecords"];
             this.expenseRecords = _data["expenseRecords"];
+            this.dayEndCash = _data["dayEndCash"];
         }
     }
 
@@ -18442,12 +19678,14 @@ export class VoucherOutputDto implements IVoucherOutputDto {
         data = typeof data === 'object' ? data : {};
         data["id"] = this.id;
         data["date"] = this.date ? this.date.toISOString() : <any>undefined;
+        data["dailyCashId"] = this.dailyCashId;
         data["voucherNumber"] = this.voucherNumber;
-        data["creator"] = this.creator;
+        data["creatorId"] = this.creatorId;
         data["carNumber"] = this.carNumber;
         data["totalAmount"] = this.totalAmount;
         data["incomeRecords"] = this.incomeRecords;
         data["expenseRecords"] = this.expenseRecords;
+        data["dayEndCash"] = this.dayEndCash;
         return data;
     }
 
@@ -18462,20 +19700,22 @@ export class VoucherOutputDto implements IVoucherOutputDto {
 export interface IVoucherOutputDto {
     id: number;
     date: moment.Moment;
+    dailyCashId: number;
     voucherNumber: string | undefined;
-    creator: string | undefined;
+    creatorId: number;
     carNumber: string | undefined;
     totalAmount: number;
     incomeRecords: string | undefined;
     expenseRecords: string | undefined;
+    dayEndCash: number;
 }
 
-export class VouchersOutputDto implements IVouchersOutputDto {
-    isAny: boolean;
-    mostRecennt: boolean;
-    vouchers: VoucherOutputDto[] | undefined;
+export class VouchersAndDailyCashCreateUpdateDto implements IVouchersAndDailyCashCreateUpdateDto {
+    date: moment.Moment;
+    vouchers: VoucherEntryDto[] | undefined;
+    dailyCash: CreateOrUpdateDailyCashInput;
 
-    constructor(data?: IVouchersOutputDto) {
+    constructor(data?: IVouchersAndDailyCashCreateUpdateDto) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -18486,47 +19726,47 @@ export class VouchersOutputDto implements IVouchersOutputDto {
 
     init(_data?: any) {
         if (_data) {
-            this.isAny = _data["isAny"];
-            this.mostRecennt = _data["mostRecennt"];
+            this.date = _data["date"] ? moment(_data["date"].toString()) : <any>undefined;
             if (Array.isArray(_data["vouchers"])) {
                 this.vouchers = [] as any;
                 for (let item of _data["vouchers"])
-                    this.vouchers.push(VoucherOutputDto.fromJS(item));
+                    this.vouchers.push(VoucherEntryDto.fromJS(item));
             }
+            this.dailyCash = _data["dailyCash"] ? CreateOrUpdateDailyCashInput.fromJS(_data["dailyCash"]) : <any>undefined;
         }
     }
 
-    static fromJS(data: any): VouchersOutputDto {
+    static fromJS(data: any): VouchersAndDailyCashCreateUpdateDto {
         data = typeof data === 'object' ? data : {};
-        let result = new VouchersOutputDto();
+        let result = new VouchersAndDailyCashCreateUpdateDto();
         result.init(data);
         return result;
     }
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
-        data["isAny"] = this.isAny;
-        data["mostRecennt"] = this.mostRecennt;
+        data["date"] = this.date ? this.date.toISOString() : <any>undefined;
         if (Array.isArray(this.vouchers)) {
             data["vouchers"] = [];
             for (let item of this.vouchers)
                 data["vouchers"].push(item.toJSON());
         }
+        data["dailyCash"] = this.dailyCash ? this.dailyCash.toJSON() : <any>undefined;
         return data;
     }
 
-    clone(): VouchersOutputDto {
+    clone(): VouchersAndDailyCashCreateUpdateDto {
         const json = this.toJSON();
-        let result = new VouchersOutputDto();
+        let result = new VouchersAndDailyCashCreateUpdateDto();
         result.init(json);
         return result;
     }
 }
 
-export interface IVouchersOutputDto {
-    isAny: boolean;
-    mostRecennt: boolean;
-    vouchers: VoucherOutputDto[] | undefined;
+export interface IVouchersAndDailyCashCreateUpdateDto {
+    date: moment.Moment;
+    vouchers: VoucherEntryDto[] | undefined;
+    dailyCash: CreateOrUpdateDailyCashInput;
 }
 
 export class ApiException extends Error {

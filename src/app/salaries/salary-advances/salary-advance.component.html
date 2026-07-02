@@ -44,14 +44,14 @@
                                     <td class="text-center" (dblclick)="record.previousSalaryEditMode = true">
                                         <span *ngIf="!record.previousSalaryEditMode">{{ record.previousSalary }}</span>
                                         <input *ngIf="record.previousSalaryEditMode" type="number" class="form-control"
-                                            [(ngModel)]="record.previousSalary"
+                                            [(ngModel)]="record.previousSalary" (wheel)="$event.preventDefault()"
                                             [autofocus]="record.previousSalaryEditMode"
                                             (blur)="record.previousSalaryEditMode = false" />
                                     </td>
                                     <td class="text-center" (dblclick)="record.currentSalaryEditMode = true">
                                         <span *ngIf="!record.currentSalaryEditMode">{{ record.currentSalary }}</span>
                                         <input *ngIf="record.currentSalaryEditMode" type="number" class="form-control"
-                                            [(ngModel)]="record.currentSalary"
+                                            [(ngModel)]="record.currentSalary" (wheel)="$event.preventDefault()"
                                             [autofocus]="record.currentSalaryEditMode"
                                             (blur)="record.currentSalaryEditMode = false" />
                                     </td>
@@ -62,19 +62,19 @@
                                         <span *ngIf="!record.advanceEditMode">{{ record.advance }}</span>
                                         <input *ngIf="record.advanceEditMode" type="number" class="form-control"
                                             [(ngModel)]="record.advance" [autofocus]="record.advanceEditMode"
-                                            (blur)="record.advanceEditMode = false" />
+                                            (blur)="record.advanceEditMode = false" (wheel)="$event.preventDefault()" />
                                     </td>
                                     <td class="text-center" (dblclick)="record.loanFromEditMode = true">
                                         <span *ngIf="!record.loanFromEditMode">{{ record.loanFromCompany }}</span>
                                         <input *ngIf="record.loanFromEditMode" type="number" class="form-control"
                                             [(ngModel)]="record.loanFromCompany" [autofocus]="record.loanFromEditMode"
-                                            (blur)="record.loanFromEditMode = false" />
+                                            (blur)="record.loanFromEditMode = false" (wheel)="$event.preventDefault()"/>
                                     </td>
                                     <td class="text-center" (dblclick)="record.loanToEditMode = true">
                                         <span *ngIf="!record.loanToEditMode">{{ record.loanToCompany }}</span>
                                         <input *ngIf="record.loanToEditMode" type="number" class="form-control"
                                             [(ngModel)]="record.loanToCompany" [autofocus]="record.loantoEditMode"
-                                            (blur)="record.loanToEditMode = false" />
+                                            (blur)="record.loanToEditMode = false" (wheel)="$event.preventDefault()"/>
                                     </td>
                                     <td class="text-center" (dblclick)="record.remarksEditMode = true">
                                         <span *ngIf="!record.remarksEditMode">{{ record.remarks }}</span>
@@ -87,6 +87,19 @@
                                             <i class="fas fa-save"></i>
                                         </button>
                                     </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="footer">
+                                <tr>
+                                    <th> Total </th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th class="text-center w-160"> {{totalAdvance}} </th>
+                                    <th class="text-center w-160"> {{totalLoan}} </th>
+                                    <th class="text-center w-160"> {{totalBorrowing}} </th>
+                                    <th> Remarks </th>
+                                    <th class="text-center" style="width: 60px;"> Actions </th>
                                 </tr>
                             </ng-template>
                         </p-table>

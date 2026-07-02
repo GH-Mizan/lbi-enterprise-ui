@@ -25,6 +25,10 @@ export class SalaryAdvanceComponent extends PagedListingComponentBase<SalaryAdva
     @ViewChild('dataTable', { static: true }) dataTable: Table;
     saving: boolean = false;
 
+    totalAdvance: number;
+    totalLoan: number;
+    totalBorrowing: number;
+
     constructor(
         injector: Injector,
         cd: ChangeDetectorRef,
@@ -42,8 +46,11 @@ export class SalaryAdvanceComponent extends PagedListingComponentBase<SalaryAdva
                 })
             )
             .subscribe((result) => {
-                this.primengTableHelper.records = result;
-                this.primengTableHelper.totalRecordsCount = result.length;
+                this.primengTableHelper.records = result.advances;
+                this.primengTableHelper.totalRecordsCount = result.advances.length;
+                this.totalAdvance = result.totalAdvance;
+                this.totalLoan = result.totalLoan;
+                this.totalBorrowing = result.totalBorrowing;
                 this.cd.detectChanges();
             });
     }

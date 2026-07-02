@@ -112,55 +112,55 @@ export class DailyCashEntryComponent implements OnInit {
     }
 
     loadDataById() {
-        this._dailyCashService.get(this.id).subscribe(res => {
-            this.populateExpectedData(res.dailyCashInfo.metadata);
-            this.isLoading = false;
-            this.calculateBalance();
-            this.cd.detectChanges();
-        });
+        // this._dailyCashService.get(this.id).subscribe(res => {
+        //     this.populateExpectedData(res.dailyCashInfo.metadata);
+        //     this.isLoading = false;
+        //     this.calculateBalance();
+        //     this.cd.detectChanges();
+        // });
     }
 
     loadDataByDate() {
         this.dailyCashAccounts = [];
         this._dailyCashService.getByDate(moment(this.date)).subscribe(res => {
-            if (res.prevCashInfo && !res.dailyCashInfo) {
-                const data = JSON.parse(res.prevCashInfo.metadata) as DailyCashSummaryType[];
-                data.forEach(x => {
-                    this.dailyCashAccounts.push({
-                        //actualIncomeHead: x.actualIncomeHead, 
-                        //actualIncomeAmount: x.actualIncomeAmount,
-                        //actualIncomeAmountShow: x.actualIncomeAmount,
-                        //virtualIncomeHead: x.virtualIncomeHead,
-                        //virtualIncomeAmount: x.virtualIncomeAmount,
-                        //virtualIncomeAmountShow: x.virtualIncomeAmount,
-                        advanceHead: x.advanceHead,
-                        advanceAmount: x.advanceAmount,
-                        advanceAmountShow: x.advanceAmount,
-                        dayEndCashHead: x.dayEndCashHead,
-                        dayEndCashAmount: x.dayEndCashAmount,
-                        dayEndCashAmountShow: x.dayEndCashAmount,
-                        //expenseHead: x.expenseHead,
-                        //expenseAmount: x.expenseAmount,
-                        //expenseAmountShow: x.expenseAmount
-                    } as DailyCashType);
-                });
-                this.dailyCashAccounts[0].actualIncomeHead = "Balance B/D (Cash)";
-                this.dailyCashAccounts[0].actualIncomeAmount = this.dailyCashAccounts[0].actualIncomeAmountShow = res.prevCashInfo.dayEndCashBalance;
+            // if (res.prevCashInfo && !res.dailyCashInfo) {
+            //     const data = JSON.parse(res.prevCashInfo.metadata) as DailyCashSummaryType[];
+            //     data.forEach(x => {
+            //         this.dailyCashAccounts.push({
+            //             //actualIncomeHead: x.actualIncomeHead, 
+            //             //actualIncomeAmount: x.actualIncomeAmount,
+            //             //actualIncomeAmountShow: x.actualIncomeAmount,
+            //             //virtualIncomeHead: x.virtualIncomeHead,
+            //             //virtualIncomeAmount: x.virtualIncomeAmount,
+            //             //virtualIncomeAmountShow: x.virtualIncomeAmount,
+            //             advanceHead: x.advanceHead,
+            //             advanceAmount: x.advanceAmount,
+            //             advanceAmountShow: x.advanceAmount,
+            //             dayEndCashHead: x.dayEndCashHead,
+            //             dayEndCashAmount: x.dayEndCashAmount,
+            //             dayEndCashAmountShow: x.dayEndCashAmount,
+            //             //expenseHead: x.expenseHead,
+            //             //expenseAmount: x.expenseAmount,
+            //             //expenseAmountShow: x.expenseAmount
+            //         } as DailyCashType);
+            //     });
+            //     this.dailyCashAccounts[0].actualIncomeHead = "Balance B/D (Cash)";
+            //     this.dailyCashAccounts[0].actualIncomeAmount = this.dailyCashAccounts[0].actualIncomeAmountShow = res.prevCashInfo.dayEndCashBalance;
 
-                this.dailyCashAccounts[1].actualIncomeHead = "Balance B/D (Advance)";
-                this.dailyCashAccounts[1].actualIncomeAmount = this.dailyCashAccounts[1].actualIncomeAmountShow = res.prevCashInfo.dayEndAdvanceBalance;
-            } else if (!res.prevCashInfo && res.dailyCashInfo) {
-                this.populateExpectedData(res.dailyCashInfo.metadata);
-                this.id = res.dailyCashInfo.id;
-            } else if (!res.prevCashInfo && !res.dailyCashInfo) {
-                for (let i = 0; i < 20; i++) {
-                    //this.dailyCashAccounts = [...this.dailyCashAccounts, {actualIncomeAmount: 400, actualIncomeAmountShow: 400} as DailyCashType];
-                    this.dailyCashAccounts.push({} as DailyCashType);
-                }
-            }
-            this.isLoading = false;
-            this.calculateBalance();
-            this.cd.detectChanges();
+            //     this.dailyCashAccounts[1].actualIncomeHead = "Balance B/D (Advance)";
+            //     this.dailyCashAccounts[1].actualIncomeAmount = this.dailyCashAccounts[1].actualIncomeAmountShow = res.prevCashInfo.dayEndAdvanceBalance;
+            // } else if (!res.prevCashInfo && res.dailyCashInfo) {
+            //     this.populateExpectedData(res.dailyCashInfo.metadata);
+            //     this.id = res.dailyCashInfo.id;
+            // } else if (!res.prevCashInfo && !res.dailyCashInfo) {
+            //     for (let i = 0; i < 20; i++) {
+            //         //this.dailyCashAccounts = [...this.dailyCashAccounts, {actualIncomeAmount: 400, actualIncomeAmountShow: 400} as DailyCashType];
+            //         this.dailyCashAccounts.push({} as DailyCashType);
+            //     }
+            // }
+            // this.isLoading = false;
+            // this.calculateBalance();
+            // this.cd.detectChanges();
         })
     }
 
@@ -209,25 +209,25 @@ export class DailyCashEntryComponent implements OnInit {
                 expenseAmount: x.expenseAmount
             } as DailyCashSummaryType)
         });
-        const input = {
-            id: id,
-            date: moment(this.date),
-            totalActualIncome: this.totalActualIncome,
-            totalVirtualTransaction: this.totalVirtualTransaction,
-            totalExpense: this.totalExpense,
-            //dayStartCashBalance: this.
-            //dayStartAdvanceBalance
-            dayEndCashBalance: this.cashBalance,
-            dayEndAdvanceBalance: this.advanceBalance,
-            difference: this.difference,
-            metadata: JSON.stringify(data)
-        } as DailyCashEntryDto;
-        this._dailyCashService.createOrUpdateDailyCash({ dailyCashInfo: input, prevCashInfo: null } as CreateOrUpdateDailyCashInput).subscribe(id => {
-            this.id = id;
-            this.saving = false;
-            this.cd.detectChanges();
-            this._notifyService.success("Successfully " + id ? 'Saved' : 'Updated' + "");
-        });
+        // const input = {
+        //     id: id,
+        //     date: moment(this.date),
+        //     totalActualIncome: this.totalActualIncome,
+        //     totalVirtualTransaction: this.totalVirtualTransaction,
+        //     totalExpense: this.totalExpense,
+        //     //dayStartCashBalance: this.
+        //     //dayStartAdvanceBalance
+        //     dayEndCashBalance: this.cashBalance,
+        //     dayEndAdvanceBalance: this.advanceBalance,
+        //     difference: this.difference,
+        //     metadata: JSON.stringify(data)
+        // } as DailyCashEntryDto;
+        // this._dailyCashService.createOrUpdateDailyCash({ dailyCashInfo: input, prevCashInfo: null } as CreateOrUpdateDailyCashInput).subscribe(id => {
+        //     this.id = id;
+        //     this.saving = false;
+        //     this.cd.detectChanges();
+        //     this._notifyService.success("Successfully " + id ? 'Saved' : 'Updated' + "");
+        // });
     }
 
     calculateBalance() {

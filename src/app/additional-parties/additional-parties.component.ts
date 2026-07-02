@@ -1,38 +1,35 @@
-import { ChangeDetectorRef, Component, Injector, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Injector, ViewChild } from '@angular/core';
 import { appModuleAnimation } from '@shared/animations/routerTransition';
 import { Table } from 'primeng/table';
 import { Paginator } from "primeng/paginator";
 import { PagedListingComponentBase } from '@shared/paged-listing-component-base';
-import { DailyCashOutputDto, DailyCashServiceProxy } from '@shared/service-proxies/service-proxies';
+import { AdditionalPartiesServiceProxy, AdditionalPartyEntryDto, AdditionalPartyOutputDto } from '@shared/service-proxies/service-proxies';
+import { BsModalService, BsModalRef } from "ngx-bootstrap/modal";
 import { LazyLoadEvent } from "primeng/api";
 import { finalize } from "rxjs/operators";
-import moment from 'moment';
-import { Router } from '@angular/router';
-
+import { AdditionalPartyEntryComponent } from './additional-party-entry/additional-party-entry.component';
 @Component({
-  selector: 'app-customers',
+  selector: 'app-additional-parties',
   standalone: false,
-  templateUrl: './daily-cash.component.html',
+  templateUrl: './additional-parties.component.html',
   animations: [appModuleAnimation()],
 })
-export class DailyCashComponent extends PagedListingComponentBase<DailyCashOutputDto> {
+
+
+export class AdditionalPartiesComponent extends PagedListingComponentBase<AdditionalPartyOutputDto> {
   @ViewChild('dataTable', { static: true }) dataTable: Table;
   @ViewChild('paginator', { static: true }) paginator: Paginator;
 
   searchText: string = "";
-  startDate = new Date();
-  endDate = new Date();
 
   constructor(
     injector: Injector,
-    private readonly _dailyCashService: DailyCashServiceProxy,
-    private readonly _router: Router,
+    private readonly _additionalPartiesService: AdditionalPartiesServiceProxy,
+    private readonly _modalService: BsModalService,
     cd: ChangeDetectorRef
   ) {
     super(injector, cd);
   }
-
-  
 
   list(event?: LazyLoadEvent): void {
     if (this.primengTableHelper.shouldResetPaging(event)) {
@@ -47,8 +44,8 @@ export class DailyCashComponent extends PagedListingComponentBase<DailyCashOutpu
     }
 
     this.primengTableHelper.showLoadingIndicator();
-    this._dailyCashService.getPaginatedDailyCash(
-      moment(this.startDate), moment(this.endDate), '',
+    this._additionalPartiesService.getPaginatedAdditionalPartiesAdvances(
+      this.searchText,
       this.primengTableHelper.getSkipCount(this.paginator, event),
       this.primengTableHelper.getMaxResultCount(this.paginator, event)
     ).pipe(
@@ -67,19 +64,22 @@ export class DailyCashComponent extends PagedListingComponentBase<DailyCashOutpu
   }
 
   create() {
-    this._router.navigateByUrl('app/daily-cash/create');
+    const ap = new AdditionalPartyEntryDto();
+    this.showEntryDialog(ap);
   }
 
   edit(id: number) {
-    this._router.navigateByUrl(`app/daily-cash/edit/${id}`);
+    this._additionalPartiesService.get(id).subscribe(res => {
+      this.showEntryDialog(res);
+    });
   }
 
-  delete(item: DailyCashOutputDto): void {
-    abp.message.confirm(`This daily cash will be deleted`,
-      'Are you sure?',
+  delete(ap: AdditionalPartyOutputDto): void {
+    abp.message.confirm(`${ap.partyName} will be deleted`,
+      undefined,
       (result: boolean) => {
         if (result) {
-          this._dailyCashService.dailyCashRemove(item.id).subscribe(() => {
+          this._additionalPartiesService.additionalPartyRemove(ap.id).subscribe(() => {
             abp.notify.success(this.l("SuccessfullyDeleted"));
             this.refresh();
           });
@@ -88,8 +88,20 @@ export class DailyCashComponent extends PagedListingComponentBase<DailyCashOutpu
     );
   }
 
-  view(id: number) {
-    this._router.navigateByUrl(`app/daily-cash/view/${id}`);
+  private showEntryDialog(ap: AdditionalPartyEntryDto): void {
+    let entryDialog: BsModalRef;
+    entryDialog = this._modalService.show(
+      AdditionalPartyEntryComponent,
+      {
+        class: "modal-lg",
+        initialState: {
+          model: ap,
+        },
+      }
+    );
+    entryDialog.content.onSave.subscribe(() => {
+      this.refresh();
+    });
   }
 
 }

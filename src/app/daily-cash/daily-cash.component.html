@@ -3,7 +3,7 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-6">
-          <h1>Daily Cash</h1>
+          <h1>Cash Books</h1>
         </div>
         <div class="col-6 text-right">
           <a href="javascript:;" class="btn bg-blue" (click)="create()">
@@ -42,53 +42,55 @@
               [tableStyle]="{ 'min-width': '50rem' }">
               <ng-template pTemplate="header">
                 <tr>
-                  <th>
-                    Date
-                  </th>
-                  <th> Actual Income </th>
-                  <th>
-                    Virtual Transaction
-                  </th>
-                  <th>
-                    Expense
-                  </th>
-                  <th> Balance B/D (Cash) </th>
-                  <th> Balance B/D (Advance) </th>
-                  <th>Difference</th>
+                  <th> Date </th>
+                  <th class="text-center"> Total Income </th>
+                  <th class="text-center"> Total Expense </th>
+                  <th class="text-center"> Total Advance </th>
+                  <th class="text-center"> Total Day End Cash </th>
+                  <th class="text-center"> Paper Balance </th>
+                  <th class="text-center"> Actual Balance </th>
+                  <th class="text-center">Difference</th>
+                  <th>Remarks</th>
                   <th style="width: 120px; min-width: 120px" class="text-center">
                     {{ "Actions" }}
                   </th>
                 </tr>
               </ng-template>
 
-              <ng-template pTemplate="body" let-record="$implicit">
+              <ng-template pTemplate="body" let-record="$implicit" let-ri="rowIndex">
                 <tr>
                   <td>
                     <span>{{ record.date | date: 'dd-MMM-yy' }}</span>
                   </td>
-                  <td>
-                    <span>{{ record.totalActualIncome }}</span>
-                  </td>
-                  <td>
-                    <span>{{record.totalVirtualTransaction}}</span>
-                  </td>
-                  <td>
-                    <span> {{record.totalExpense}} </span>
-                  </td>
-                   <td>
-                    <span>{{ record.dayEndCashBalance }}</span>
-                  </td>
-                  <td>
-                    <span>{{ record.dayEndAdvanceBalance }}</span>
-                  </td>
-                   <td>
-                    <span>{{ record.difference }}</span>
+                  <td class="text-center">
+                    <span>{{ record.totalIncome }}</span>
                   </td>
                   <td class="text-center">
-                    <button type="button" class="btn btn-sm bg-secondary" (click)="edit(record.id)">
-                      <i class="fas fa-pencil-alt"></i>
+                    <span>{{record.totalExpense}}</span>
+                  </td>
+                  <td class="text-center">
+                    <span> {{record.totalAdvance}} </span>
+                  </td>
+                   <td class="text-center">
+                    <span>{{ record.totalDayEndCash }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span>{{ record.paperBalance }}</span>
+                  </td>
+                   <td class="text-center">
+                    <span>{{ record.actualBalance }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span>{{ record.difference }}</span>
+                  </td>
+                   <td>
+                    <span>{{ record.remarks }}</span>
+                  </td>
+                  <td class="text-center">
+                    <button type="button" class="btn btn-sm bg-success" (click)="view(record.id)">
+                      <i class="fas fa-eye"></i>
                     </button>
-                    <button type="button" class="btn btn-sm bg-danger mx-2" (click)="delete(record)">
+                    <button type="button" class="btn btn-sm bg-danger mx-2" (click)="delete(record)" *ngIf="ri===0">
                       <i class="fas fa-trash"></i>
                     </button>
                   </td>
